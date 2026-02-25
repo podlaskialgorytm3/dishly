@@ -1,71 +1,143 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
+import { MainHeader } from "@/components/layout/MainHeader";
+import { HeroSection } from "@/components/layout/HeroSection";
+import { StoriesSection } from "@/components/layout/StoriesSection";
+import { TrendingSection } from "@/components/layout/TrendingSection";
+import { RestaurantCard } from "@/components/shared/RestaurantCard";
+import { Footer } from "@/components/layout/Footer";
 
 export default async function Home() {
   const session = await auth();
 
-  // Jeśli użytkownik jest zalogowany, przekieruj do dashboardu
-  if (session) {
-    redirect("/dashboard");
-  }
+  // Fetch restaurants with their locations
+  const restaurants = await db.restaurant.findMany({
+    where: {
+      isActive: true,
+    },
+    include: {
+      locations: {
+        where: {
+          isActive: true,
+        },
+        take: 1,
+      },
+    },
+    take: 12,
+  });
+
+  // Transform restaurants to stories format
+  const stories = restaurants.slice(0, 8).map((restaurant) => ({
+    id: restaurant.id,
+    name: restaurant.name,
+    imageUrl: restaurant.logoUrl || "",
+    hasPromo: Math.random() > 0.5, // For demo purposes
+  }));
+
+  // Mock trending items (to be replaced with real data)
+  const trendingItems = [
+    {
+      id: "1",
+      name: "Margherita Pizza",
+      restaurantName: "Pizza Palace",
+      imageUrl: "",
+      price: 29.99,
+      badge: "Hit" as const,
+    },
+    {
+      id: "2",
+      name: "Burger Klasyczny",
+      restaurantName: "Burger House",
+      imageUrl: "",
+      price: 24.99,
+      badge: "Nowość" as const,
+    },
+    {
+      id: "3",
+      name: "Sushi Set",
+      restaurantName: "Sushi Master",
+      imageUrl: "",
+      price: 49.99,
+      badge: "Promocja" as const,
+    },
+    {
+      id: "4",
+      name: "Pad Thai",
+      restaurantName: "Thai Food",
+      imageUrl: "",
+      price: 32.99,
+    },
+    {
+      id: "5",
+      name: "Tiramisu",
+      restaurantName: "Dolce Vita",
+      imageUrl: "",
+      price: 18.99,
+      badge: "Hit" as const,
+    },
+  ];
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-linear-to-b from-gray-50 to-gray-100">
-      <main className="container mx-auto px-4 py-16 text-center">
-        <h1 className="mb-4 text-5xl font-bold text-gray-900">
-          Witaj w <span className="text-blue-600">DISHLY</span>
-        </h1>
-        <p className="mb-8 text-xl text-gray-600">
-          Platforma do zamawiania jedzenia online dla restauracji i klientów
-        </p>
+    <div className="min-h-screen bg-[var(--dishly-background)]">
+      {/* Sticky Header */}
+      <MainHeader user={session?.user} />
 
-        <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:justify-center">
-          <Link href="/login">
-            <Button size="lg" className="w-full sm:w-auto">
-              Zaloguj się
-            </Button>
-          </Link>
-          <Link href="/register">
-            <Button size="lg" variant="outline" className="w-full sm:w-auto">
-              Zarejestruj się jako klient
-            </Button>
-          </Link>
+      {/* Hero Section */}
+      <HeroSection />
+
+      {/* Stories Section */}
+      <StoriesSection stories={stories} />
+
+      {/* Main Feed */}
+      <main className="mx-auto max-w-7xl px-4 py-8">
+        <h2 className="mb-6 text-2xl font-bold text-[var(--dishly-text)]">
+          Restauracje w Twojej okolicy
+        </h2>
+
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {restaurants.map((restaurant) => (
+            <RestaurantCard
+              key={restaurant.id}
+              id={restaurant.id}
+              name={restaurant.name}
+              imageUrl={restaurant.logoUrl || ""}
+              rating={4.5 + Math.random() * 0.5} // Mock rating
+              reviewCount={Math.floor(Math.random() * 500) + 50} // Mock review count
+              deliveryTime="30-45 min"
+              minOrder={
+                restaurant.locations[0]?.minOrderValue
+                  ? Number(restaurant.locations[0].minOrderValue)
+                  : 30
+              }
+              deliveryFee={
+                restaurant.locations[0]?.deliveryFee
+                  ? Number(restaurant.locations[0].deliveryFee)
+                  : 5
+              }
+              categories={["Kuchnia włoska", "Pizza", "Pasta"]} // Mock categories
+            />
+          ))}
         </div>
 
-        <div className="mx-auto max-w-4xl">
-          <div className="grid gap-8 md:grid-cols-2">
-            <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h2 className="mb-3 text-2xl font-bold text-gray-900">
-                Dla Klientów
-              </h2>
-              <p className="mb-4 text-gray-600">
-                Zamawiaj jedzenie z Twoich ulubionych restauracji z wygodą
-                dostawy do domu.
-              </p>
-              <Link href="/register">
-                <Button variant="outline" className="w-full">
-                  Załóż konto klienta
-                </Button>
-              </Link>
-            </div>
-
-            <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h2 className="mb-3 text-2xl font-bold text-gray-900">
-                Dla Restauracji
-              </h2>
-              <p className="mb-4 text-gray-600">
-                Dołącz do platformy DISHLY i zacznij przyjmować zamówienia
-                online.
-              </p>
-              <Link href="/register-owner">
-                <Button className="w-full">Zarejestruj restaurację</Button>
-              </Link>
-            </div>
+        {/* Empty State */}
+        {restaurants.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="mb-4 text-6xl">🍽️</div>
+            <h3 className="mb-2 text-xl font-bold text-[var(--dishly-text)]">
+              Brak dostępnych restauracji
+            </h3>
+            <p className="text-[var(--dishly-text-muted)]">
+              Wkrótce dodamy restauracje w Twojej okolicy!
+            </p>
           </div>
-        </div>
+        )}
       </main>
+
+      {/* Trending Section */}
+      <TrendingSection items={trendingItems} />
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

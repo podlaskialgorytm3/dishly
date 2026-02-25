@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { signOut } from "@/lib/auth";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -18,6 +19,7 @@ import {
   UtensilsCrossed,
   Settings,
   ShoppingBag,
+  Home,
 } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -72,20 +74,34 @@ export default async function DashboardPage() {
                 <p className="text-xs text-gray-500">Dashboard</p>
               </div>
             </div>
-            <form
-              action={async () => {
-                "use server";
-                await signOut({ redirectTo: "/login" });
-              }}
-            >
-              <Button
-                variant="outline"
-                className="gap-2 rounded-xl border-2 transition-all hover:border-[#FF4D4F] hover:text-[#FF4D4F]"
+            <div className="flex items-center gap-3">
+              {/* Home Button for CLIENT role */}
+              {session.user.role === "CLIENT" && (
+                <Link href="/">
+                  <Button
+                    variant="outline"
+                    className="gap-2 rounded-xl border-2 transition-all hover:border-[#FF4D4F] hover:text-[#FF4D4F]"
+                  >
+                    <Home className="h-4 w-4" />
+                    Strona Główna
+                  </Button>
+                </Link>
+              )}
+              <form
+                action={async () => {
+                  "use server";
+                  await signOut({ redirectTo: "/login" });
+                }}
               >
-                <LogOut className="h-4 w-4" />
-                Wyloguj
-              </Button>
-            </form>
+                <Button
+                  variant="outline"
+                  className="gap-2 rounded-xl border-2 transition-all hover:border-[#FF4D4F] hover:text-[#FF4D4F]"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Wyloguj
+                </Button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
