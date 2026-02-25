@@ -33,10 +33,18 @@ export default function PendingApprovalPage() {
             Otrzymasz powiadomienie email gdy Twoje konto zostanie aktywowane i
             będziesz mógł rozpocząć korzystanie z platformy.
           </p>
-          <div className="pt-4">
+          <div className="space-y-2 pt-4">
             <Link href="/login" className="block">
               <Button variant="outline" className="w-full">
                 Powrót do logowania
+              </Button>
+            </Link>
+            <Link href="/" className="block">
+              <Button
+                variant="ghost"
+                className="w-full text-[var(--dishly-primary)]"
+              >
+                Strona główna
               </Button>
             </Link>
           </div>

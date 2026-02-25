@@ -149,15 +149,26 @@ export default function RegisterOwnerPage() {
       <div className="w-full max-w-2xl">
         {/* Logo i nagłówek */}
         <div className="mb-8 text-center">
-          <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br from-[#FF4D4F] to-[#FF3B30] shadow-lg">
-            <Store className="h-8 w-8 text-white" />
-          </div>
+          <Link
+            href="/"
+            className="inline-block transition-transform hover:scale-105"
+          >
+            <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br from-[#FF4D4F] to-[#FF3B30] shadow-lg">
+              <Store className="h-8 w-8 text-white" />
+            </div>
+          </Link>
           <h1 className="mb-2 text-3xl font-bold text-gray-900">
             Rejestracja Restauracji
           </h1>
           <p className="text-gray-600">
             Dołącz do platformy DISHLY i zacznij przyjmować zamówienia online
           </p>
+          <Link
+            href="/"
+            className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[#FF4D4F] transition-colors hover:text-[#FF3B30]"
+          >
+            ← Powrót do strony głównej
+          </Link>
         </div>
 
         {/* Progress bar */}
