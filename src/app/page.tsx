@@ -80,7 +80,17 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-[var(--dishly-background)]">
       {/* Sticky Header */}
-      <MainHeader user={session?.user} />
+      <MainHeader
+        user={
+          session?.user
+            ? {
+                firstName: session.user.firstName,
+                lastName: session.user.lastName,
+                role: session.user.role,
+              }
+            : null
+        }
+      />
 
       {/* Hero Section */}
       <HeroSection />

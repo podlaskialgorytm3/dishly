@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, ShoppingCart, User, UtensilsCrossed } from "lucide-react";
+import { Bell, ShoppingCart, User, UtensilsCrossed, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface MainHeaderProps {
   user?: {
     firstName?: string;
     lastName?: string;
+    role?: string;
   } | null;
 }
 
@@ -44,6 +45,20 @@ export function MainHeader({ user }: MainHeaderProps) {
           <div className="flex items-center gap-3">
             {user ? (
               <>
+                {/* Home Button (only for CLIENT) */}
+                {user.role === "CLIENT" && (
+                  <Link href="/">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full hover:bg-gray-100"
+                      title="Strona Główna"
+                    >
+                      <Home className="h-5 w-5" />
+                    </Button>
+                  </Link>
+                )}
+
                 {/* Notifications */}
                 <Button
                   variant="ghost"
@@ -56,17 +71,19 @@ export function MainHeader({ user }: MainHeaderProps) {
                   </span>
                 </Button>
 
-                {/* Cart */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="relative rounded-full"
-                >
-                  <ShoppingCart className="h-5 w-5" />
-                  <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--dishly-promo)] text-[10px] font-bold text-white">
-                    2
-                  </span>
-                </Button>
+                {/* Cart (only for CLIENT) */}
+                {user.role === "CLIENT" && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative rounded-full"
+                  >
+                    <ShoppingCart className="h-5 w-5" />
+                    <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--dishly-promo)] text-[10px] font-bold text-white">
+                      2
+                    </span>
+                  </Button>
+                )}
 
                 {/* User Avatar with Name */}
                 <Link href="/dashboard">
