@@ -6,15 +6,16 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Lock, UtensilsCrossed } from "lucide-react";
+import { User, Lock, UtensilsCrossed, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
-  const [email, setEmail] = useState("");
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -25,7 +26,7 @@ export default function LoginPage() {
 
     try {
       const result = await signIn("credentials", {
-        email,
+        email: login,
         password,
         redirect: false,
       });
@@ -36,7 +37,7 @@ export default function LoginPage() {
             "Twoje konto oczekuje na zatwierdzenie przez administratora.",
           );
         } else {
-          setError("Nieprawidłowy email lub hasło");
+          setError("Nieprawidłowy login lub hasło");
         }
       } else {
         router.push(callbackUrl);
@@ -72,22 +73,22 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* Email */}
+            {/* Login */}
             <div className="space-y-2">
               <label
-                htmlFor="email"
+                htmlFor="login"
                 className="text-sm font-semibold text-gray-700"
               >
-                Email
+                Login
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <User className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="twoj@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="login"
+                  type="text"
+                  placeholder="Twój login"
+                  value={login}
+                  onChange={(e) => setLogin(e.target.value)}
                   required
                   disabled={isLoading}
                   className="h-12 rounded-xl border-gray-200 pl-12 pr-4 transition-all focus:border-[#FF4D4F] focus:ring-2 focus:ring-[#FF4D4F]/20"
@@ -107,14 +108,26 @@ export default function LoginPage() {
                 <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="h-12 rounded-xl border-gray-200 pl-12 pr-4 transition-all focus:border-[#FF4D4F] focus:ring-2 focus:ring-[#FF4D4F]/20"
+                  className="h-12 rounded-xl border-gray-200 pl-12 pr-12 transition-all focus:border-[#FF4D4F] focus:ring-2 focus:ring-[#FF4D4F]/20"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  disabled={isLoading}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
             </div>
 
