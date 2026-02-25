@@ -7,10 +7,16 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Publiczne ścieżki które nie wymagają autoryzacji
-  const publicPaths = ["/login", "/register", "/register-owner", "/"];
+  const publicPaths = [
+    "/login",
+    "/register",
+    "/register-owner",
+    "/",
+    "/pending-approval",
+  ];
 
   // Sprawdź czy ścieżka jest publiczna
-  const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
+  const isPublicPath = publicPaths.some((path) => pathname === path);
 
   // Jeśli użytkownik nie jest zalogowany i próbuje dostać się do chronionej strony
   if (!session && !isPublicPath) {
@@ -20,31 +26,33 @@ export async function middleware(request: NextRequest) {
   }
 
   // Jeśli użytkownik jest zalogowany i próbuje dostać się do stron logowania/rejestracji
-  if (session && isPublicPath && pathname !== "/") {
+  if (
+    session &&
+    (pathname === "/login" ||
+      pathname === "/register" ||
+      pathname === "/register-owner")
+  ) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   // Ochrona tras admina
   if (pathname.startsWith("/admin")) {
     if (!session || session.user.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
 
-  // Ochrona tras dashboardu (dla owner, manager, worker)
+  // Ochrona tras dashboardu - wszyscy zalogowani mają dostęp
   if (pathname.startsWith("/dashboard")) {
     if (!session) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    const allowedRoles = ["OWNER", "MANAGER", "WORKER"];
-    if (!allowedRoles.includes(session.user.role)) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-
     // Sprawdź czy OWNER jest zatwierdzony
     if (session.user.role === "OWNER" && !session.user.isApproved) {
-      return NextResponse.redirect(new URL("/pending-approval", request.url));
+      if (pathname !== "/pending-approval") {
+        return NextResponse.redirect(new URL("/pending-approval", request.url));
+      }
     }
   }
 
