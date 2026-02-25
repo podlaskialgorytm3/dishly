@@ -1,36 +1,174 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍽️ DISHLY - Platforma do Zamawiania Jedzenia Online
 
-## Getting Started
+Aplikacja SaaS umożliwiająca restauracjom przyjmowanie zamówień online i klientom zamawianie jedzenia z dostawą do domu.
 
-First, run the development server:
+## 🚀 Getting Started
+
+### Wymagania
+
+- Node.js 20.16+
+- PostgreSQL database (rekomendowane: Neon.tech lub Supabase)
+
+### Instalacja
+
+1. **Sklonuj repozytorium**
+
+```bash
+git clone <repository-url>
+cd dishly
+```
+
+2. **Zainstaluj zależności**
+
+```bash
+npm install
+```
+
+3. **Skonfiguruj bazę danych**
+
+Utwórz darmową bazę PostgreSQL na:
+
+- [Neon.tech](https://neon.tech) (Rekomendowane)
+- [Supabase](https://supabase.com)
+
+4. **Skonfiguruj zmienne środowiskowe**
+
+Skopiuj connection string z Twojej bazy danych i zaktualizuj plik `.env`:
+
+```env
+# Database
+DATABASE_URL="postgresql://user:password@host:5432/dishly?schema=public"
+
+# NextAuth
+AUTH_SECRET="FX04qqqvhB1LxH+y9jT5/Mpeu8S9P6dbXV2ej6GWn9g="
+NEXTAUTH_SECRET="FX04qqqvhB1LxH+y9jT5/Mpeu8S9P6dbXV2ej6GWn9g="
+NEXTAUTH_URL="http://localhost:3000"
+```
+
+5. **Uruchom migracje bazy danych**
+
+```bash
+npm run db:push
+npx prisma generate
+```
+
+6. **Seeduj bazę danych kontem admina**
+
+```bash
+npm run db:seed
+```
+
+To utworzy konto administratora:
+
+- **Email:** admin
+- **Hasło:** admin
+
+7. **Uruchom serwer deweloperski**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Otwórz [http://localhost:3000](http://localhost:3000) w przeglądarce.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📋 Funkcjonalności
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### ✅ Etap 1 - Ukończony
 
-## Learn More
+- ✅ Schema bazy danych (Prisma)
+- ✅ System autentykacji (NextAuth.js)
+- ✅ Logowanie i rejestracja klientów
+- ✅ Rejestracja właścicieli restauracji (wymaga zatwierdzenia)
+- ✅ Konto administratora
+- ✅ Middleware ochrony tras (RBAC)
+- ✅ Podstawowy Dashboard
 
-To learn more about Next.js, take a look at the following resources:
+### Role użytkowników
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **ADMIN** - Administrator platformy, zatwierdza nowe restauracje
+- **OWNER** - Właściciel restauracji, zarządza menu i lokalizacjami
+- **MANAGER** - Menadżer lokalizacji
+- **WORKER** - Pracownik obsługujący zamówienia
+- **CLIENT** - Klient zamawiający jedzenie
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🔐 Logowanie
 
-## Deploy on Vercel
+### Konto administratora
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Email: `admin`
+- Hasło: `admin`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Rejestracja klienta
+
+Klienci mogą rejestrować się bezpośrednio i są automatycznie zatwierdzani.
+
+### Rejestracja właściciela restauracji
+
+Właściciele restauracji muszą zarejestrować się wraz z danymi restauracji.
+Konto wymaga zatwierdzenia przez administratora.
+
+## 📁 Struktura Projektu
+
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── (admin)/           # Panel administratora
+│   ├── (auth)/            # Strony logowania/rejestracji
+│   ├── (client)/          # Storefront dla klientów
+│   ├── (dashboard)/       # Panel restauracji
+│   └── api/               # API endpoints
+├── components/            # Komponenty React
+│   ├── ui/                # Komponenty UI (shadcn)
+│   ├── forms/             # Formularze
+│   ├── shared/            # Komponenty wspólne
+│   └── layout/            # Układy nawigacji
+├── lib/                   # Konfiguracja (db, auth)
+├── types/                 # Definicje TypeScript
+├── actions/               # Server Actions
+└── constants/             # Stałe aplikacji
+```
+
+## 🛠️ Tech Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **Język:** TypeScript
+- **Styling:** Tailwind CSS
+- **UI Components:** shadcn/ui
+- **Database:** PostgreSQL
+- **ORM:** Prisma
+- **Authentication:** NextAuth.js v5
+- **Deployment:** Vercel
+
+## 📝 Skrypty npm
+
+- `npm run dev` - Uruchom serwer deweloperski
+- `npm run build` - Zbuduj aplikację produkcyjną
+- `npm run start` - Uruchom serwer produkcyjny
+- `npm run lint` - Sprawdź kod ESLintem
+- `npm run db:push` - Wypchnij schema do bazy danych
+- `npm run db:seed` - Seeduj bazę danych
+
+## 🔄 Następne kroki
+
+- [ ] Panel administratora - zatwierdzanie restauracji
+- [ ] Panel właściciela - zarządzanie restauracjami
+- [ ] Tworzenie i edycja menu
+- [ ] System zamówień
+- [ ] Integracja z Stripe
+- [ ] System powiadomień
+- [ ] Geolokalizacja i mapy
+
+## 📚 Dokumentacja
+
+Szczegółowa dokumentacja znajduje się w folderze `docs/`:
+
+- [step-0.md](docs/step-0.md) - Inicjalizacja projektu
+- [step-1.md](docs/step-1.md) - Fundamenty i baza danych
+
+## 🤝 Contributing
+
+Projekt w fazie rozwoju.
+
+## 📄 License
+
+Projekt edukacyjny.

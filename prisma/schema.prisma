@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +8,334 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum Role {
+  ADMIN      // Zarządca DISHLY
+  OWNER      // Właściciel sieci restauracji
+  MANAGER    // Manager konkretnej lokalizacji
+  WORKER     // Pracownik operacyjny
+  CLIENT     // Klient końcowy
+}
+
+enum OrderStatus {
+  NEW
+  PROCESSING
+  READY
+  DELIVERED
+  CANCELLED
+}
+
+enum OrderType {
+  DELIVERY
+  PICKUP
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum SubscriptionInterval {
+  MONTHLY
+  YEARLY
+}
+
+// ============================================
+// AUTENTYKACJA I ROLE
+// ============================================
+
+model User {
+  id               String       @id @default(cuid())
+  email            String       @unique
+  passwordHash     String
+  role             Role         @default(CLIENT)
+  firstName        String?
+  lastName         String?
+  phone            String?
+  isApproved       Boolean      @default(false) // Dla OWNER - wymaga akceptacji admina
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  // Relacje
+  addresses        Address[]
+  orders           Order[]
+  ownedRestaurants Restaurant[] @relation("RestaurantOwner")
+  workingAt        Location?    @relation("LocationWorker", fields: [locationId], references: [id])
+  locationId       String?
+
+  @@index([email])
+  @@index([role])
+}
+
+// ============================================
+// ADRESY
+// ============================================
+
+model Address {
+  id          String   @id @default(cuid())
+  userId      String
+  street      String
+  city        String
+  postalCode  String
+  country     String   @default("PL")
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  // Relacje
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders      Order[]
+
+  @@index([userId])
+}
+
+// ============================================
+// SUBSKRYPCJE (SAAS LOGIC)
+// ============================================
+
+model SubscriptionPlan {
+  id                String               @id @default(cuid())
+  name              String               @unique
+  description       String?
+  price             Decimal              @db.Decimal(10, 2)
+  currency          String               @default("PLN")
+  interval          SubscriptionInterval @default(MONTHLY)
+  maxMeals          Int                  @default(50)
+  maxLocations      Int                  @default(1)
+  maxStaffAccounts  Int                  @default(5)
+  isActive          Boolean              @default(true)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  // Relacje
+  subscriptions     Subscription[]
+}
+
+model Subscription {
+  id                String           @id @default(cuid())
+  restaurantId      String
+  planId            String
+  startDate         DateTime         @default(now())
+  endDate           DateTime?
+  isActive          Boolean          @default(true)
+  stripeSubscriptionId String?       @unique
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  // Relacje
+  restaurant        Restaurant       @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  plan              SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  @@index([restaurantId])
+  @@index([planId])
+}
+
+// ============================================
+// STRUKTURA BIZNESOWA
+// ============================================
+
+model Restaurant {
+  id            String         @id @default(cuid())
+  name          String
+  slug          String         @unique
+  logoUrl       String?
+  bio           String?        @db.Text
+  ownerId       String
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  // Relacje
+  owner         User           @relation("RestaurantOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  locations     Location[]
+  subscriptions Subscription[]
+
+  @@index([ownerId])
+  @@index([slug])
+}
+
+model Location {
+  id              String    @id @default(cuid())
+  restaurantId    String
+  name            String
+  address         String
+  city            String
+  phone           String
+  deliveryRadius  Int       @default(5) // w km
+  deliveryFee     Decimal   @db.Decimal(10, 2)
+  minOrderValue   Decimal   @db.Decimal(10, 2)
+  openingHours    Json      // { "monday": { "open": "10:00", "close": "22:00" }, ... }
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relacje
+  restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  workers         User[]     @relation("LocationWorker")
+  meals           Meal[]
+  orders          Order[]
+
+  @@index([restaurantId])
+  @@index([city])
+}
+
+// ============================================
+// KATALOG MENU
+// ============================================
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  imageUrl    String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relacje
+  meals       Meal[]
+
+  @@index([slug])
+}
+
+model Meal {
+  id              String        @id @default(cuid())
+  locationId      String
+  categoryId      String
+  name            String
+  slug            String
+  description     String?       @db.Text
+  imageUrl        String?
+  basePrice       Decimal       @db.Decimal(10, 2)
+  preparationTime Int           // w minutach
+  calories        Int?
+  protein         Decimal?      @db.Decimal(5, 2)
+  carbs           Decimal?      @db.Decimal(5, 2)
+  fat             Decimal?      @db.Decimal(5, 2)
+  spiceLevel      Int           @default(0) // 0-9
+  isAvailable     Boolean       @default(true)
+  isVegetarian    Boolean       @default(false)
+  isVegan         Boolean       @default(false)
+  isGlutenFree    Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relacje
+  location        Location      @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  category        Category      @relation(fields: [categoryId], references: [id])
+  variants        MealVariant[]
+  addons          MealAddon[]
+  orderItems      OrderItem[]
+
+  @@unique([locationId, slug])
+  @@index([categoryId])
+  @@index([isAvailable])
+}
+
+model MealVariant {
+  id            String      @id @default(cuid())
+  mealId        String
+  name          String      // np. "Średnia", "Duża", "Rodzinna"
+  priceModifier Decimal     @db.Decimal(10, 2) // np. +10.00 dla większego rozmiaru
+  isAvailable   Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relacje
+  meal          Meal        @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  orderItems    OrderItem[]
+
+  @@index([mealId])
+}
+
+model MealAddon {
+  id          String            @id @default(cuid())
+  mealId      String
+  name        String
+  price       Decimal           @db.Decimal(10, 2)
+  maxQuantity Int               @default(1)
+  isAvailable Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // Relacje
+  meal        Meal              @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  orderItems  OrderItemAddon[]
+
+  @@index([mealId])
+}
+
+// ============================================
+// ZAMÓWIENIA
+// ============================================
+
+model Order {
+  id              String        @id @default(cuid())
+  orderNumber     String        @unique
+  userId          String
+  locationId      String
+  addressId       String?
+  type            OrderType     @default(DELIVERY)
+  status          OrderStatus   @default(NEW)
+  paymentStatus   PaymentStatus @default(PENDING)
+  subtotal        Decimal       @db.Decimal(10, 2)
+  deliveryFee     Decimal       @db.Decimal(10, 2) @default(0)
+  totalPrice      Decimal       @db.Decimal(10, 2)
+  notes           String?       @db.Text
+  estimatedTime   Int?          // w minutach
+  stripePaymentId String?       @unique
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relacje
+  user            User          @relation(fields: [userId], references: [id])
+  location        Location      @relation(fields: [locationId], references: [id])
+  address         Address?      @relation(fields: [addressId], references: [id])
+  items           OrderItem[]
+
+  @@index([userId])
+  @@index([locationId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String             @id @default(cuid())
+  orderId   String
+  mealId    String
+  variantId String?
+  quantity  Int                @default(1)
+  basePrice Decimal            @db.Decimal(10, 2)
+  totalPrice Decimal           @db.Decimal(10, 2)
+  createdAt DateTime           @default(now())
+
+  // Relacje
+  order     Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  meal      Meal               @relation(fields: [mealId], references: [id])
+  variant   MealVariant?       @relation(fields: [variantId], references: [id])
+  addons    OrderItemAddon[]
+
+  @@index([orderId])
+}
+
+model OrderItemAddon {
+  id          String     @id @default(cuid())
+  orderItemId String
+  addonId     String
+  quantity    Int        @default(1)
+  price       Decimal    @db.Decimal(10, 2)
+  createdAt   DateTime   @default(now())
+
+  // Relacje
+  orderItem   OrderItem  @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  addon       MealAddon  @relation(fields: [addonId], references: [id])
+
+  @@index([orderItemId])
 }
