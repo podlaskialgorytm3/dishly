@@ -12,7 +12,7 @@ export default async function Home() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-linear-to-b from-gray-50 to-gray-100">
       <main className="container mx-auto px-4 py-16 text-center">
         <h1 className="mb-4 text-5xl font-bold text-gray-900">
           Witaj w <span className="text-blue-600">DISHLY</span>
