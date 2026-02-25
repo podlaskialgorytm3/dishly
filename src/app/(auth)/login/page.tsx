@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User, Lock, UtensilsCrossed, Eye, EyeOff } from "lucide-react";
@@ -36,15 +37,19 @@ export default function LoginPage() {
           setError(
             "Twoje konto oczekuje na zatwierdzenie przez administratora.",
           );
+          toast.error("Konto oczekuje na zatwierdzenie przez administratora");
         } else {
           setError("Nieprawidłowy login lub hasło");
+          toast.error("Nieprawidłowy login lub hasło");
         }
       } else {
+        toast.success("Zalogowano pomyślnie!");
         router.push(callbackUrl);
         router.refresh();
       }
     } catch (error) {
       setError("Wystąpił błąd podczas logowania");
+      toast.error("Wystąpił błąd podczas logowania");
     } finally {
       setIsLoading(false);
     }

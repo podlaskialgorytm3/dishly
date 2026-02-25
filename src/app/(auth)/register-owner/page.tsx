@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -99,14 +100,19 @@ export default function RegisterOwnerPage() {
 
       if (!response.ok) {
         setError(data.error || "Wystąpił błąd podczas rejestracji");
+        toast.error(data.error || "Wystąpił błąd podczas rejestracji");
       } else {
         setSuccess(true);
+        toast.success(
+          "Restauracja zarejestrowana! Oczekuje na zatwierdzenie administratora.",
+        );
         setTimeout(() => {
           router.push("/login");
         }, 3000);
       }
     } catch (error) {
       setError("Wystąpił błąd podczas rejestracji");
+      toast.error("Wystąpił błąd podczas rejestracji");
     } finally {
       setIsLoading(false);
     }
