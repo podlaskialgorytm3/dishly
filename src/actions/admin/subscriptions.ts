@@ -39,7 +39,10 @@ export async function createSubscriptionPlan(formData: FormData) {
   const raw = Object.fromEntries(formData);
   const data = SubscriptionPlanSchema.parse({
     ...raw,
-    isActive: raw.isActive === "true" || raw.isActive === "on",
+    isActive:
+      raw.isActive !== undefined
+        ? raw.isActive === "true" || raw.isActive === "on"
+        : true,
   });
 
   await db.subscriptionPlan.create({ data });
@@ -55,7 +58,10 @@ export async function updateSubscriptionPlan(id: string, formData: FormData) {
   const raw = Object.fromEntries(formData);
   const data = SubscriptionPlanSchema.parse({
     ...raw,
-    isActive: raw.isActive === "true" || raw.isActive === "on",
+    isActive:
+      raw.isActive !== undefined
+        ? raw.isActive === "true" || raw.isActive === "on"
+        : true,
   });
 
   await db.subscriptionPlan.update({ where: { id }, data });

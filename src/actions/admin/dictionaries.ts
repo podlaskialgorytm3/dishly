@@ -12,14 +12,23 @@ function requireAdmin(role: string) {
 function handleDeleteError(e: unknown): { success: false; error: string } {
   if (e instanceof Prisma.PrismaClientKnownRequestError) {
     if (e.code === "P2025") {
-      return { success: false, error: "Rekord nie istnieje lub został już usunięty" };
+      return {
+        success: false,
+        error: "Rekord nie istnieje lub został już usunięty",
+      };
     }
     if (e.code === "P2003" || e.code === "P2014") {
-      return { success: false, error: "Nie można usunąć — etykieta jest przypisana do restauracji lub dań" };
+      return {
+        success: false,
+        error:
+          "Nie można usunąć — etykieta jest przypisana do restauracji lub dań",
+      };
     }
   }
   throw e;
 }
+
+function handleUniqueError(e: unknown): { success: false; error: string } {
   if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
     return { success: false, error: "Taka etykieta już istnieje w słowniku" };
   }

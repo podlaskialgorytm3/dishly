@@ -16,11 +16,20 @@ import { ColumnDef } from "@tanstack/react-table";
 import {
   approveRestaurant,
   rejectRestaurant,
+  assignSubscription,
 } from "@/actions/admin/restaurants";
 import { toast } from "sonner";
-import { CheckCircle2, XCircle, Clock, Eye } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Eye, CreditCard } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+type Plan = {
+  id: string;
+  name: string;
+  price: number;
+  interval: string;
+  isActive: boolean;
+};
 
 type Restaurant = {
   id: string;
@@ -33,6 +42,7 @@ type Restaurant = {
   createdAt: Date;
   owner: { email: string; firstName: string | null; lastName: string | null };
   _count: { locations: number; subscriptions: number };
+  subscriptions: Array<{ plan: { id: string; name: string; price: number } }>;
 };
 
 function statusBadge(status: string) {
@@ -52,6 +62,70 @@ function statusBadge(status: string) {
     <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">
       Oczekuje
     </Badge>
+  );
+}
+
+function AssignSubscriptionDialog({
+  restaurant,
+  plans,
+  onClose,
+  onAssign,
+}: {
+  restaurant: Restaurant;
+  plans: Plan[];
+  onClose: () => void;
+  onAssign: (restaurantId: string, planId: string) => void;
+}) {
+  const currentPlan = restaurant.subscriptions[0]?.plan;
+  const [selectedPlanId, setSelectedPlanId] = useState(currentPlan?.id ?? "");
+
+  return (
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Przypisz subskrypcję</DialogTitle>
+      </DialogHeader>
+      <p className="text-sm text-[#8C8C8C]">
+        Restauracja: <strong>{restaurant.name}</strong>
+      </p>
+      {currentPlan && (
+        <p className="text-sm text-[#8C8C8C]">
+          Obecny plan:{" "}
+          <span className="font-medium text-[#1F1F1F]">{currentPlan.name}</span>
+        </p>
+      )}
+      <div className="space-y-1.5">
+        <Label>Plan subskrypcji</Label>
+        <select
+          value={selectedPlanId}
+          onChange={(e) => setSelectedPlanId(e.target.value)}
+          className="w-full rounded-md border border-[#EEEEEE] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946]/30"
+        >
+          <option value="">-- Wybierz plan --</option>
+          {plans.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name} — {p.price} zł/
+              {p.interval === "MONTHLY" ? "mies." : "rok"}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="flex gap-3">
+        <Button
+          variant="outline"
+          onClick={onClose}
+          className="flex-1 border-[#EEEEEE]"
+        >
+          Anuluj
+        </Button>
+        <Button
+          disabled={!selectedPlanId}
+          onClick={() => onAssign(restaurant.id, selectedPlanId)}
+          className="flex-1 bg-[#E63946] hover:bg-[#c62f3b] text-white"
+        >
+          Przypisz
+        </Button>
+      </div>
+    </DialogContent>
   );
 }
 
@@ -104,11 +178,14 @@ function RejectDialog({
 
 export function RestaurantsClient({
   restaurants,
+  plans,
 }: {
   restaurants: Restaurant[];
+  plans: Plan[];
 }) {
   const router = useRouter();
   const [rejectTarget, setRejectTarget] = useState<Restaurant | null>(null);
+  const [assignTarget, setAssignTarget] = useState<Restaurant | null>(null);
 
   const pending = restaurants.filter((r) => r.status === "PENDING");
   const all = restaurants;
@@ -131,6 +208,20 @@ export function RestaurantsClient({
       router.refresh();
     } else {
       toast.error("Błąd podczas odrzucania");
+    }
+  }
+
+  async function handleAssignSubscription(
+    restaurantId: string,
+    planId: string,
+  ) {
+    const result = await assignSubscription(restaurantId, planId);
+    if (result.success) {
+      toast.success("Subskrypcja przypisana");
+      setAssignTarget(null);
+      router.refresh();
+    } else {
+      toast.error(result.error ?? "Błąd podczas przypisywania subskrypcji");
     }
   }
 
@@ -173,6 +264,31 @@ export function RestaurantsClient({
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => statusBadge(row.original.status),
+    },
+    {
+      header: "Subskrypcja",
+      cell: ({ row }) => {
+        const currentPlan = row.original.subscriptions[0]?.plan;
+        return (
+          <div className="flex items-center gap-2">
+            <span className="text-sm">
+              {currentPlan ? (
+                currentPlan.name
+              ) : (
+                <span className="text-[#8C8C8C]">Brak</span>
+              )}
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setAssignTarget(row.original)}
+              className="border-[#EEEEEE] h-8 w-8 p-0"
+            >
+              <CreditCard className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        );
+      },
     },
     {
       id: "actions",
@@ -296,6 +412,20 @@ export function RestaurantsClient({
             restaurant={rejectTarget}
             onClose={() => setRejectTarget(null)}
             onReject={handleReject}
+          />
+        )}
+      </Dialog>
+
+      <Dialog
+        open={!!assignTarget}
+        onOpenChange={(o) => !o && setAssignTarget(null)}
+      >
+        {assignTarget && (
+          <AssignSubscriptionDialog
+            restaurant={assignTarget}
+            plans={plans}
+            onClose={() => setAssignTarget(null)}
+            onAssign={handleAssignSubscription}
           />
         )}
       </Dialog>

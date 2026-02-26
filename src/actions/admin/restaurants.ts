@@ -39,6 +39,12 @@ export async function getAllRestaurants() {
     include: {
       owner: { select: { email: true, firstName: true, lastName: true } },
       _count: { select: { locations: true, subscriptions: true } },
+      subscriptions: {
+        where: { isActive: true },
+        include: { plan: { select: { id: true, name: true, price: true } } },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -80,4 +86,36 @@ export async function rejectRestaurant(restaurantId: string, note?: string) {
 
   revalidatePath("/dashboard/restaurants");
   return { success: true };
+}
+
+export async function assignSubscription(restaurantId: string, planId: string) {
+  const session = await auth();
+  if (!session) throw new Error("Nie zalogowany");
+  requireAdmin(session.user.role);
+
+  try {
+    // Deactivate existing active subscriptions for this restaurant
+    await db.subscription.updateMany({
+      where: { restaurantId, isActive: true },
+      data: { isActive: false, endDate: new Date() },
+    });
+
+    // Create new active subscription
+    await db.subscription.create({
+      data: {
+        restaurantId,
+        planId,
+        isActive: true,
+      },
+    });
+
+    revalidatePath("/dashboard/restaurants");
+    return { success: true as const };
+  } catch (e) {
+    console.error(e);
+    return {
+      success: false as const,
+      error: "Błąd podczas przypisywania subskrypcji",
+    };
+  }
 }
