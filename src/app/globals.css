@@ -254,3 +254,105 @@
   pointer-events: none;
   height: 0;
 }
+
+/* Dynamic Content Styles (for [slug] pages) */
+.dynamic-content {
+  line-height: 1.8;
+  color: #1f1f1f;
+}
+
+.dynamic-content h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-top: 2.5rem;
+  margin-bottom: 1.25rem;
+  color: #1f1f1f;
+}
+
+.dynamic-content h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #1f1f1f;
+}
+
+.dynamic-content h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #1f1f1f;
+}
+
+.dynamic-content p {
+  margin-bottom: 1rem;
+}
+
+.dynamic-content ul,
+.dynamic-content ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+  padding-left: 0.5rem;
+}
+
+.dynamic-content li {
+  margin-bottom: 0.5rem;
+}
+
+.dynamic-content a {
+  color: #ff4d4f;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.dynamic-content a:hover {
+  color: #ff3b30;
+}
+
+.dynamic-content strong {
+  font-weight: 700;
+}
+
+.dynamic-content em {
+  font-style: italic;
+}
+
+.dynamic-content u {
+  text-decoration: underline;
+}
+
+.dynamic-content s {
+  text-decoration: line-through;
+}
+
+.dynamic-content code {
+  background-color: #f3f4f6;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-family: monospace;
+}
+
+.dynamic-content pre {
+  background-color: #1f2937;
+  color: #f3f4f6;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.dynamic-content pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.dynamic-content blockquote {
+  border-left: 4px solid #ff4d4f;
+  padding-left: 1rem;
+  font-style: italic;
+  margin-bottom: 1rem;
+  color: #8c8c8c;
+}
+
