@@ -35,17 +35,33 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  // Ochrona tras admina
+  // Ochrona tras admina - /admin zawsze przekierowuje do /dashboard
+  // Admin używa /dashboard jako swojego panelu
   if (pathname.startsWith("/admin")) {
     if (!session || session.user.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
+    // Admin też trafia na /dashboard
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   // Ochrona tras dashboardu - wszyscy zalogowani mają dostęp
   if (pathname.startsWith("/dashboard")) {
     if (!session) {
       return NextResponse.redirect(new URL("/login", request.url));
+    }
+
+    // Sekcje admina w /dashboard - tylko dla ADMIN
+    const adminOnlyPaths = [
+      "/dashboard/subscriptions",
+      "/dashboard/restaurants",
+      "/dashboard/dictionaries",
+      "/dashboard/moderation",
+      "/dashboard/content-management",
+    ];
+    const isAdminOnlyPath = adminOnlyPaths.some((p) => pathname.startsWith(p));
+    if (isAdminOnlyPath && session.user.role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/", request.url));
     }
 
     // Sprawdź czy OWNER jest zatwierdzony

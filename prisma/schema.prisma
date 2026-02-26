@@ -52,6 +52,24 @@ enum PageCategory {
   INFORMATION   // Regulamin, Polityka prywatności, Polityka cookies
 }
 
+enum RestaurantStatus {
+  PENDING    // Oczekuje na akceptację admina
+  APPROVED   // Zaakceptowana
+  REJECTED   // Odrzucona
+}
+
+enum TagRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TagType {
+  CUISINE
+  AMENITY
+  DISH
+}
+
 // ============================================
 // AUTENTYKACJA I ROLE
 // ============================================
@@ -65,6 +83,7 @@ model User {
   lastName         String?
   phone            String?
   isApproved       Boolean      @default(false) // Dla OWNER - wymaga akceptacji admina
+  isActive         Boolean      @default(true)  // Ban/Deactivate użytkownika
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 
@@ -74,6 +93,8 @@ model User {
   ownedRestaurants Restaurant[] @relation("RestaurantOwner")
   workingAt        Location?    @relation("LocationWorker", fields: [locationId], references: [id])
   locationId       String?
+  reviews          Review[]
+  tagRequests      TagRequest[]
 
   @@index([email])
   @@index([role])
@@ -98,6 +119,29 @@ model Address {
   orders      Order[]
 
   @@index([userId])
+}
+
+// ============================================
+// OPINIE / RECENZJE
+// ============================================
+
+model Review {
+  id           String   @id @default(cuid())
+  restaurantId String
+  userId       String
+  rating       Int      // 1-5
+  content      String?  @db.Text
+  isVisible    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relacje
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId])
+  @@index([userId])
+  @@index([rating])
 }
 
 // ============================================
@@ -146,23 +190,30 @@ model Subscription {
 // ============================================
 
 model Restaurant {
-  id            String         @id @default(cuid())
+  id            String             @id @default(cuid())
   name          String
-  slug          String         @unique
+  slug          String             @unique
   logoUrl       String?
-  bio           String?        @db.Text
+  bio           String?            @db.Text
+  nip           String?            // NIP firmy
   ownerId       String
-  isActive      Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  status        RestaurantStatus   @default(PENDING)
+  rejectionNote String?            @db.Text
+  isActive      Boolean            @default(true)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
 
   // Relacje
-  owner         User           @relation("RestaurantOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  owner         User               @relation("RestaurantOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   locations     Location[]
   subscriptions Subscription[]
+  reviews       Review[]
+  cuisineTypes  CuisineType[]      @relation("RestaurantCuisines")
+  tags          RestaurantTag[]    @relation("RestaurantAmenities")
 
   @@index([ownerId])
   @@index([slug])
+  @@index([status])
 }
 
 model Location {
@@ -343,6 +394,66 @@ model OrderItemAddon {
   addon       MealAddon  @relation(fields: [addonId], references: [id])
 
   @@index([orderItemId])
+}
+
+// ============================================
+// GLOBALNE SŁOWNIKI
+// ============================================
+
+model CuisineType {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  slug        String       @unique
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relacje
+  restaurants Restaurant[] @relation("RestaurantCuisines")
+
+  @@index([slug])
+}
+
+model RestaurantTag {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  slug        String       @unique
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relacje
+  restaurants Restaurant[] @relation("RestaurantAmenities")
+
+  @@index([slug])
+}
+
+model DishTag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+}
+
+model TagRequest {
+  id          String           @id @default(cuid())
+  name        String
+  type        TagType
+  requestedBy String
+  status      TagRequestStatus @default(PENDING)
+  adminNote   String?          @db.Text
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  // Relacje
+  requester   User             @relation(fields: [requestedBy], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([type])
 }
 
 // ============================================

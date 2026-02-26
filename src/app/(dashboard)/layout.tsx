@@ -8,11 +8,13 @@ import {
   FileText,
   Users,
   Store,
-  Settings,
   LogOut,
   ShieldCheck,
   UtensilsCrossed,
   Home,
+  CreditCard,
+  BookOpen,
+  Shield,
   type LucideIcon,
 } from "lucide-react";
 
@@ -56,18 +58,28 @@ export default async function DashboardLayout({
           roles: ["ADMIN"],
         },
         {
-          name: "Użytkownicy",
-          href: "/dashboard/users",
-          icon: Users,
+          name: "Subskrypcje",
+          href: "/dashboard/subscriptions",
+          icon: CreditCard,
           roles: ["ADMIN"],
-          disabled: true,
         },
         {
           name: "Restauracje",
           href: "/dashboard/restaurants",
           icon: Store,
           roles: ["ADMIN"],
-          disabled: true,
+        },
+        {
+          name: "Słowniki",
+          href: "/dashboard/dictionaries",
+          icon: BookOpen,
+          roles: ["ADMIN"],
+        },
+        {
+          name: "Moderacja",
+          href: "/dashboard/moderation",
+          icon: Shield,
+          roles: ["ADMIN"],
         },
       ];
     }
