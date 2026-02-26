@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { signOut } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
   FileText,
@@ -11,6 +12,7 @@ import {
   LogOut,
   ShieldCheck,
   UtensilsCrossed,
+  Home,
   type LucideIcon,
 } from "lucide-react";
 
@@ -195,6 +197,21 @@ export default async function DashboardLayout({
 
       {/* Main content */}
       <div className="ml-64">
+        {/* Top Header with Home Button */}
+        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-[10px] border-b border-[#EEEEEE]">
+          <div className="px-8 h-[75px] flex items-center justify-end">
+            <Link href="/">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full hover:bg-transparent transition-all duration-200 hover:scale-105 group"
+                title="Strona Główna"
+              >
+                <Home className="h-5 w-5 text-[#1F1F1F] group-hover:text-[#FF4D4F] transition-colors duration-200" />
+              </Button>
+            </Link>
+          </div>
+        </header>
         {children}
       </div>
     </div>

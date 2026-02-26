@@ -80,19 +80,17 @@ export function MainHeader({ user, navigationPages = [] }: MainHeaderProps) {
             <div className="flex items-center gap-5">
               {user ? (
                 <>
-                  {/* Home Button (only for CLIENT) */}
-                  {user.role === "CLIENT" && (
-                    <Link href="/">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full hover:bg-transparent transition-all duration-200 hover:scale-105 group"
-                        title="Strona Główna"
-                      >
-                        <Home className="h-5 w-5 text-[#1F1F1F] group-hover:text-[#FF4D4F] transition-colors duration-200" />
-                      </Button>
-                    </Link>
-                  )}
+                  {/* Home Button - dla wszystkich zalogowanych użytkowników */}
+                  <Link href="/">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full hover:bg-transparent transition-all duration-200 hover:scale-105 group"
+                      title="Strona Główna"
+                    >
+                      <Home className="h-5 w-5 text-[#1F1F1F] group-hover:text-[#FF4D4F] transition-colors duration-200" />
+                    </Button>
+                  </Link>
 
                   {/* Notifications */}
                   <Button
