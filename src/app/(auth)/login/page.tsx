@@ -1,16 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import { authenticate } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User, Lock, UtensilsCrossed, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
@@ -18,41 +17,21 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError("");
 
-    try {
-      const result = await signIn("credentials", {
-        email: login,
-        password,
-        redirect: false,
-      });
+    startTransition(async () => {
+      const result = await authenticate(login, password, callbackUrl);
 
+      // If we get here, it means auth failed (success = redirect, never returns)
       if (result?.error) {
-        if (result.error === "Account pending approval") {
-          setError(
-            "Twoje konto oczekuje na zatwierdzenie przez administratora.",
-          );
-          toast.error("Konto oczekuje na zatwierdzenie przez administratora");
-        } else {
-          setError("Nieprawidłowy login lub hasło");
-          toast.error("Nieprawidłowy login lub hasło");
-        }
-      } else {
-        toast.success("Zalogowano pomyślnie!");
-        router.push(callbackUrl);
-        router.refresh();
+        setError(result.error);
+        toast.error(result.error);
       }
-    } catch (error) {
-      setError("Wystąpił błąd podczas logowania");
-      toast.error("Wystąpił błąd podczas logowania");
-    } finally {
-      setIsLoading(false);
-    }
+    });
   };
 
   return (
@@ -106,7 +85,7 @@ export default function LoginPage() {
                   value={login}
                   onChange={(e) => setLogin(e.target.value)}
                   required
-                  disabled={isLoading}
+                  disabled={isPending}
                   className="h-12 rounded-xl border-gray-200 pl-12 pr-4 transition-all focus:border-[#FF4D4F] focus:ring-2 focus:ring-[#FF4D4F]/20"
                 />
               </div>
@@ -129,14 +108,14 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  disabled={isLoading}
+                  disabled={isPending}
                   className="h-12 rounded-xl border-gray-200 pl-12 pr-12 transition-all focus:border-[#FF4D4F] focus:ring-2 focus:ring-[#FF4D4F]/20"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  disabled={isLoading}
+                  disabled={isPending}
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5" />
@@ -150,10 +129,10 @@ export default function LoginPage() {
             {/* Przycisk logowania */}
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isPending}
               className="h-12 w-full rounded-xl bg-linear-to-r from-[#FF4D4F] to-[#FF3B30] text-base font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] disabled:opacity-50"
             >
-              {isLoading ? (
+              {isPending ? (
                 <span className="flex items-center gap-2">
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                   Logowanie...

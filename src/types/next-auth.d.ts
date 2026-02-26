@@ -21,6 +21,8 @@ declare module "next-auth" {
     email: string;
     role: Role;
     isApproved: boolean;
+    restaurantId?: string;
+    locationId?: string;
     firstName?: string | null;
     lastName?: string | null;
   }

@@ -1,9 +1,13 @@
-import { auth } from "@/lib/auth";
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth.config";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
-  const session = await auth();
+// Edge-compatible auth instance — NO Prisma, NO DB calls
+const { auth } = NextAuth(authConfig);
+
+export default auth(async function middleware(request) {
+  const session = (request as any).auth;
   const { pathname } = request.nextUrl;
 
   // Publiczne ścieżki które nie wymagają autoryzacji
@@ -72,10 +76,11 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
-    // Sprawdź czy OWNER jest zatwierdzony
+    // Sprawdź czy OWNER jest zatwierdzony — pozwól na dostęp do /dashboard (widzi baner)
+    // ale zablokuj podstrony /dashboard/owner/* dopóki nie jest zatwierdzony
     if (session.user.role === "OWNER" && !session.user.isApproved) {
-      if (pathname !== "/pending-approval") {
-        return NextResponse.redirect(new URL("/pending-approval", request.url));
+      if (pathname !== "/dashboard" && pathname.startsWith("/dashboard/")) {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
       }
     }
 
@@ -92,7 +97,7 @@ export async function middleware(request: NextRequest) {
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: [
