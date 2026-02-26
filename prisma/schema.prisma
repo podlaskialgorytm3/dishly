@@ -47,6 +47,11 @@ enum SubscriptionInterval {
   YEARLY
 }
 
+enum PageCategory {
+  NAVIGATION    // O nas, Jak to działa, Kariera, Blog, Kontakt
+  INFORMATION   // Regulamin, Polityka prywatności, Polityka cookies
+}
+
 // ============================================
 // AUTENTYKACJA I ROLE
 // ============================================
@@ -338,4 +343,25 @@ model OrderItemAddon {
   addon       MealAddon  @relation(fields: [addonId], references: [id])
 
   @@index([orderItemId])
+}
+
+// ============================================
+// ZARZĄDZANIE TREŚCIĄ
+// ============================================
+
+model Page {
+  id              String       @id @default(cuid())
+  title           String
+  slug            String       @unique
+  category        PageCategory
+  content         String       @db.Text
+  metaDescription String?
+  isPublished     Boolean      @default(false)
+  sortOrder       Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([slug])
+  @@index([category])
+  @@index([isPublished])
 }

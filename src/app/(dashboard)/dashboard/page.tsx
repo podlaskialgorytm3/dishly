@@ -230,10 +230,12 @@ export default async function DashboardPage() {
                 </Button>
               )}
               {session.user.role === "ADMIN" && (
-                <Button className="w-full justify-start gap-2 rounded-xl bg-linear-to-r from-purple-500 to-purple-600 text-white hover:opacity-90">
-                  <ShieldCheck className="h-4 w-4" />
-                  Panel administratora
-                </Button>
+                <Link href="/dashboard/content-management" className="w-full">
+                  <Button className="w-full justify-start gap-2 rounded-xl bg-linear-to-r from-purple-500 to-purple-600 text-white hover:opacity-90">
+                    <ShieldCheck className="h-4 w-4" />
+                    Zarządzanie treścią
+                  </Button>
+                </Link>
               )}
             </CardContent>
           </Card>
