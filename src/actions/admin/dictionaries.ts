@@ -3,9 +3,17 @@
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 
 function requireAdmin(role: string) {
   if (role !== "ADMIN") throw new Error("Brak uprawnień");
+}
+
+function handleUniqueError(e: unknown): { success: false; error: string } {
+  if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+    return { success: false, error: "Taka etykieta już istnieje w słowniku" };
+  }
+  throw e;
 }
 
 function toSlug(name: string) {
@@ -31,9 +39,13 @@ export async function createCuisineType(name: string) {
   if (!session) throw new Error("Nie zalogowany");
   requireAdmin(session.user.role);
 
-  await db.cuisineType.create({ data: { name, slug: toSlug(name) } });
+  try {
+    await db.cuisineType.create({ data: { name, slug: toSlug(name) } });
+  } catch (e) {
+    return handleUniqueError(e);
+  }
   revalidatePath("/dashboard/dictionaries");
-  return { success: true };
+  return { success: true as const };
 }
 
 export async function updateCuisineType(id: string, name: string) {
@@ -41,12 +53,16 @@ export async function updateCuisineType(id: string, name: string) {
   if (!session) throw new Error("Nie zalogowany");
   requireAdmin(session.user.role);
 
-  await db.cuisineType.update({
-    where: { id },
-    data: { name, slug: toSlug(name) },
-  });
+  try {
+    await db.cuisineType.update({
+      where: { id },
+      data: { name, slug: toSlug(name) },
+    });
+  } catch (e) {
+    return handleUniqueError(e);
+  }
   revalidatePath("/dashboard/dictionaries");
-  return { success: true };
+  return { success: true as const };
 }
 
 export async function deleteCuisineType(id: string) {
@@ -83,9 +99,13 @@ export async function createRestaurantTag(name: string) {
   if (!session) throw new Error("Nie zalogowany");
   requireAdmin(session.user.role);
 
-  await db.restaurantTag.create({ data: { name, slug: toSlug(name) } });
+  try {
+    await db.restaurantTag.create({ data: { name, slug: toSlug(name) } });
+  } catch (e) {
+    return handleUniqueError(e);
+  }
   revalidatePath("/dashboard/dictionaries");
-  return { success: true };
+  return { success: true as const };
 }
 
 export async function updateRestaurantTag(id: string, name: string) {
@@ -93,12 +113,16 @@ export async function updateRestaurantTag(id: string, name: string) {
   if (!session) throw new Error("Nie zalogowany");
   requireAdmin(session.user.role);
 
-  await db.restaurantTag.update({
-    where: { id },
-    data: { name, slug: toSlug(name) },
-  });
+  try {
+    await db.restaurantTag.update({
+      where: { id },
+      data: { name, slug: toSlug(name) },
+    });
+  } catch (e) {
+    return handleUniqueError(e);
+  }
   revalidatePath("/dashboard/dictionaries");
-  return { success: true };
+  return { success: true as const };
 }
 
 export async function deleteRestaurantTag(id: string) {
@@ -125,9 +149,13 @@ export async function createDishTag(name: string) {
   if (!session) throw new Error("Nie zalogowany");
   requireAdmin(session.user.role);
 
-  await db.dishTag.create({ data: { name, slug: toSlug(name) } });
+  try {
+    await db.dishTag.create({ data: { name, slug: toSlug(name) } });
+  } catch (e) {
+    return handleUniqueError(e);
+  }
   revalidatePath("/dashboard/dictionaries");
-  return { success: true };
+  return { success: true as const };
 }
 
 export async function updateDishTag(id: string, name: string) {
@@ -135,12 +163,16 @@ export async function updateDishTag(id: string, name: string) {
   if (!session) throw new Error("Nie zalogowany");
   requireAdmin(session.user.role);
 
-  await db.dishTag.update({
-    where: { id },
-    data: { name, slug: toSlug(name) },
-  });
+  try {
+    await db.dishTag.update({
+      where: { id },
+      data: { name, slug: toSlug(name) },
+    });
+  } catch (e) {
+    return handleUniqueError(e);
+  }
   revalidatePath("/dashboard/dictionaries");
-  return { success: true };
+  return { success: true as const };
 }
 
 export async function deleteDishTag(id: string) {
@@ -177,18 +209,28 @@ export async function approveTagRequest(id: string) {
   const req = await db.tagRequest.findUnique({ where: { id } });
   if (!req) return { success: false, error: "Nie znaleziono prośby" };
 
-  if (req.type === "CUISINE") {
-    await db.cuisineType.create({
-      data: { name: req.name, slug: toSlug(req.name) },
-    });
-  } else if (req.type === "AMENITY") {
-    await db.restaurantTag.create({
-      data: { name: req.name, slug: toSlug(req.name) },
-    });
-  } else if (req.type === "DISH") {
-    await db.dishTag.create({
-      data: { name: req.name, slug: toSlug(req.name) },
-    });
+  try {
+    if (req.type === "CUISINE") {
+      await db.cuisineType.create({
+        data: { name: req.name, slug: toSlug(req.name) },
+      });
+    } else if (req.type === "AMENITY") {
+      await db.restaurantTag.create({
+        data: { name: req.name, slug: toSlug(req.name) },
+      });
+    } else if (req.type === "DISH") {
+      await db.dishTag.create({
+        data: { name: req.name, slug: toSlug(req.name) },
+      });
+    }
+  } catch (e) {
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === "P2002"
+    ) {
+      return { success: false, error: "Taka etykieta już istnieje w słowniku" };
+    }
+    throw e;
   }
 
   await db.tagRequest.update({ where: { id }, data: { status: "APPROVED" } });

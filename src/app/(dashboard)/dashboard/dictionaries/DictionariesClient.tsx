@@ -63,7 +63,7 @@ function AddTagForm({
   onAdd,
   placeholder,
 }: {
-  onAdd: (name: string) => Promise<void>;
+  onAdd: (name: string) => Promise<{ success: boolean; error?: string }>;
   placeholder: string;
 }) {
   const [name, setName] = useState("");
@@ -74,11 +74,15 @@ function AddTagForm({
     if (!name.trim()) return;
     setLoading(true);
     try {
-      await onAdd(name.trim());
-      setName("");
-      toast.success("Dodano pomyślnie");
+      const result = await onAdd(name.trim());
+      if (!result.success) {
+        toast.error(result.error || "Błąd podczas dodawania");
+      } else {
+        setName("");
+        toast.success("Dodano pomyślnie");
+      }
     } catch {
-      toast.error("Błąd podczas dodawania");
+      toast.error("Wystąpił nieoczekiwany błąd");
     } finally {
       setLoading(false);
     }
@@ -111,7 +115,10 @@ function EditTagDialog({
   onClose,
 }: {
   tag: Tag;
-  onSave: (id: string, name: string) => Promise<void>;
+  onSave: (
+    id: string,
+    name: string,
+  ) => Promise<{ success: boolean; error?: string }>;
   onClose: () => void;
 }) {
   const [name, setName] = useState(tag.name);
@@ -120,11 +127,15 @@ function EditTagDialog({
   async function handleSave() {
     setLoading(true);
     try {
-      await onSave(tag.id, name);
-      toast.success("Zaktualizowano");
-      onClose();
+      const result = await onSave(tag.id, name);
+      if (!result.success) {
+        toast.error(result.error || "Błąd podczas zapisywania");
+      } else {
+        toast.success("Zaktualizowano");
+        onClose();
+      }
     } catch {
-      toast.error("Błąd");
+      toast.error("Wystąpił nieoczekiwany błąd");
     } finally {
       setLoading(false);
     }
@@ -169,9 +180,12 @@ function TagTable({
   addPlaceholder,
 }: {
   tags: Tag[];
-  onCreate: (name: string) => Promise<void>;
-  onUpdate: (id: string, name: string) => Promise<void>;
-  onDelete: (id: string) => Promise<void>;
+  onCreate: (name: string) => Promise<{ success: boolean; error?: string }>;
+  onUpdate: (
+    id: string,
+    name: string,
+  ) => Promise<{ success: boolean; error?: string }>;
+  onDelete: (id: string) => Promise<{ success: boolean; error?: string }>;
   addPlaceholder: string;
 }) {
   const router = useRouter();
@@ -180,11 +194,14 @@ function TagTable({
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Usuń "${name}"?`)) return;
     try {
-      await onDelete(id);
-      toast.success("Usunięto");
-      router.refresh();
+      const result = await onDelete(id);
+      if (!result.success) toast.error(result.error || "Błąd podczas usuwania");
+      else {
+        toast.success("Usunięto");
+        router.refresh();
+      }
     } catch {
-      toast.error("Błąd podczas usuwania");
+      toast.error("Wystąpił nieoczekiwany błąd");
     }
   }
 
@@ -235,8 +252,9 @@ function TagTable({
               <EditTagDialog
                 tag={editTag}
                 onSave={async (id, name) => {
-                  await onUpdate(id, name);
-                  router.refresh();
+                  const result = await onUpdate(id, name);
+                  if (result.success) router.refresh();
+                  return result;
                 }}
                 onClose={() => setEditTag(null)}
               />
@@ -259,8 +277,9 @@ function TagTable({
     <div className="space-y-4">
       <AddTagForm
         onAdd={async (name) => {
-          await onCreate(name);
-          router.refresh();
+          const result = await onCreate(name);
+          if (result.success) router.refresh();
+          return result;
         }}
         placeholder={addPlaceholder}
       />
@@ -426,27 +445,63 @@ export function DictionariesClient({
             <TabsContent value="cuisine">
               <TagTable
                 tags={cuisineTypes}
-                onCreate={createCuisineType}
-                onUpdate={updateCuisineType}
-                onDelete={deleteCuisineType}
+                onCreate={async (name) => {
+                  const result = await createCuisineType(name);
+                  if (result.success) router.refresh();
+                  return result;
+                }}
+                onUpdate={async (id, name) => {
+                  const result = await updateCuisineType(id, name);
+                  if (result.success) router.refresh();
+                  return result;
+                }}
+                onDelete={async (id) => {
+                  const result = await deleteCuisineType(id);
+                  if (result.success) router.refresh();
+                  return result;
+                }}
                 addPlaceholder="np. Włoska, Japońska, Fusion..."
               />
             </TabsContent>
             <TabsContent value="amenities">
               <TagTable
                 tags={restaurantTags}
-                onCreate={createRestaurantTag}
-                onUpdate={updateRestaurantTag}
-                onDelete={deleteRestaurantTag}
+                onCreate={async (name) => {
+                  const result = await createRestaurantTag(name);
+                  if (result.success) router.refresh();
+                  return result;
+                }}
+                onUpdate={async (id, name) => {
+                  const result = await updateRestaurantTag(id, name);
+                  if (result.success) router.refresh();
+                  return result;
+                }}
+                onDelete={async (id) => {
+                  const result = await deleteRestaurantTag(id);
+                  if (result.success) router.refresh();
+                  return result;
+                }}
                 addPlaceholder="np. Wi-Fi, Ogródek letni, Przyjazne dzieciom..."
               />
             </TabsContent>
             <TabsContent value="dish">
               <TagTable
                 tags={dishTags}
-                onCreate={createDishTag}
-                onUpdate={updateDishTag}
-                onDelete={deleteDishTag}
+                onCreate={async (name) => {
+                  const result = await createDishTag(name);
+                  if (result.success) router.refresh();
+                  return result;
+                }}
+                onUpdate={async (id, name) => {
+                  const result = await updateDishTag(id, name);
+                  if (result.success) router.refresh();
+                  return result;
+                }}
+                onDelete={async (id) => {
+                  const result = await deleteDishTag(id);
+                  if (result.success) router.refresh();
+                  return result;
+                }}
                 addPlaceholder="np. Wegetariańskie, Ostre, Bezglutenowe..."
               />
             </TabsContent>
