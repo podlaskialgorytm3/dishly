@@ -14,19 +14,20 @@ export async function POST(req: Request) {
       phone,
       restaurantName,
       restaurantBio,
+      planId,
     } = body;
 
     // Walidacja danych
     if (!email || !password || !restaurantName) {
       return NextResponse.json(
-        { error: "Email, password, and restaurant name are required" },
+        { error: "Email, hasło i nazwa restauracji są wymagane" },
         { status: 400 },
       );
     }
 
     if (password.length < 8) {
       return NextResponse.json(
-        { error: "Password must be at least 8 characters" },
+        { error: "Hasło musi mieć co najmniej 8 znaków" },
         { status: 400 },
       );
     }
@@ -38,7 +39,7 @@ export async function POST(req: Request) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "User with this email already exists" },
+        { error: "Użytkownik z tym adresem email już istnieje" },
         { status: 409 },
       );
     }
@@ -46,6 +47,8 @@ export async function POST(req: Request) {
     // Generowanie slug dla restauracji
     const slug = restaurantName
       .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
@@ -56,9 +59,23 @@ export async function POST(req: Request) {
 
     if (existingRestaurant) {
       return NextResponse.json(
-        { error: "Restaurant with this name already exists" },
+        { error: "Restauracja o tej nazwie już istnieje" },
         { status: 409 },
       );
+    }
+
+    // Weryfikacja planu subskrypcji jeśli podany
+    let subscriptionPlan = null;
+    if (planId) {
+      subscriptionPlan = await db.subscriptionPlan.findUnique({
+        where: { id: planId, isActive: true },
+      });
+      if (!subscriptionPlan) {
+        return NextResponse.json(
+          { error: "Wybrany plan subskrypcji nie istnieje" },
+          { status: 400 },
+        );
+      }
     }
 
     // Haszowanie hasła
@@ -89,14 +106,26 @@ export async function POST(req: Request) {
           },
         });
 
-        return { user, restaurant };
+        // Jeśli plan wybrany - utwórz subskrypcję (nieaktywną do zatwierdzenia)
+        let subscription = null;
+        if (subscriptionPlan) {
+          subscription = await tx.subscription.create({
+            data: {
+              restaurantId: restaurant.id,
+              planId: subscriptionPlan.id,
+              isActive: false, // Aktywowana po zatwierdzeniu przez admina
+            },
+          });
+        }
+
+        return { user, restaurant, subscription };
       },
     );
 
     return NextResponse.json(
       {
         message:
-          "Restaurant owner registered successfully. Awaiting admin approval.",
+          "Właściciel restauracji zarejestrowany pomyślnie. Oczekuje na zatwierdzenie administratora.",
         user: {
           id: result.user.id,
           email: result.user.email,
@@ -116,8 +145,9 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Owner registration error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Wewnętrzny błąd serwera" },
       { status: 500 },
     );
   }
 }
+

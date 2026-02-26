@@ -33,11 +33,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        // Sprawdzenie czy użytkownik OWNER jest zatwierdzony
-        if (user.role === "OWNER" && !user.isApproved) {
-          throw new Error("Account pending approval");
-        }
-
+        // Sprawdzenie isApproved odbywa się w middleware (przekierowanie do /pending-approval)
+        // MANAGER i WORKER zawsze mają dostęp (konta tworzone przez Właściciela)
         return {
           id: user.id,
           email: user.email,
@@ -57,7 +54,34 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.isApproved = user.isApproved;
         token.firstName = user.firstName;
         token.lastName = user.lastName;
+
+        // Dla MANAGER/WORKER pobierz locationId i restaurantId
+        if (user.role === "MANAGER" || user.role === "WORKER") {
+          const dbUser = await db.user.findUnique({
+            where: { id: user.id },
+            select: {
+              locationId: true,
+              workingAt: { select: { restaurantId: true } },
+            },
+          });
+          if (dbUser?.locationId) {
+            token.locationId = dbUser.locationId;
+            token.restaurantId = dbUser.workingAt?.restaurantId;
+          }
+        }
       }
+
+      // Odśwież isApproved z bazy dla OWNER oczekujących na zatwierdzenie
+      if (token.role === "OWNER" && !token.isApproved) {
+        const freshUser = await db.user.findUnique({
+          where: { id: token.id as string },
+          select: { isApproved: true },
+        });
+        if (freshUser?.isApproved) {
+          token.isApproved = true;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
@@ -80,6 +104,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             select: { id: true },
           });
           session.user.restaurantId = restaurant?.id;
+        }
+
+        // Jeśli użytkownik jest MANAGER lub WORKER, przekaż locationId i restaurantId
+        if (token.role === "MANAGER" || token.role === "WORKER") {
+          session.user.locationId = token.locationId as string | undefined;
+          session.user.restaurantId = token.restaurantId as string | undefined;
         }
       }
       return session;

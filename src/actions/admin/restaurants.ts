@@ -57,7 +57,7 @@ export async function approveRestaurant(restaurantId: string) {
 
   const restaurant = await db.restaurant.update({
     where: { id: restaurantId },
-    data: { status: "APPROVED" },
+    data: { status: "APPROVED", isActive: true },
     include: { owner: true },
   });
 
@@ -65,6 +65,12 @@ export async function approveRestaurant(restaurantId: string) {
   await db.user.update({
     where: { id: restaurant.ownerId },
     data: { isApproved: true },
+  });
+
+  // Aktywuj subskrypcję restauracji (utworzoną przy rejestracji jako nieaktywna)
+  await db.subscription.updateMany({
+    where: { restaurantId, isActive: false },
+    data: { isActive: true, startDate: new Date() },
   });
 
   revalidatePath("/dashboard/restaurants");

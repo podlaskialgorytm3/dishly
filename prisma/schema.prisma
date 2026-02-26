@@ -194,6 +194,7 @@ model Restaurant {
   name          String
   slug          String             @unique
   logoUrl       String?
+  coverImageUrl String?            // Zdjęcie główne (cover)
   bio           String?            @db.Text
   nip           String?            // NIP firmy
   ownerId       String
@@ -204,12 +205,13 @@ model Restaurant {
   updatedAt     DateTime           @updatedAt
 
   // Relacje
-  owner         User               @relation("RestaurantOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  locations     Location[]
-  subscriptions Subscription[]
-  reviews       Review[]
-  cuisineTypes  CuisineType[]      @relation("RestaurantCuisines")
-  tags          RestaurantTag[]    @relation("RestaurantAmenities")
+  owner              User               @relation("RestaurantOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  locations          Location[]
+  subscriptions      Subscription[]
+  reviews            Review[]
+  cuisineTypes       CuisineType[]      @relation("RestaurantCuisines")
+  tags               RestaurantTag[]    @relation("RestaurantAmenities")
+  visibilitySettings VisibilitySettings[]
 
   @@index([ownerId])
   @@index([slug])
@@ -222,11 +224,13 @@ model Location {
   name            String
   address         String
   city            String
+  postalCode      String    @default("")
   phone           String
   deliveryRadius  Int       @default(5) // w km
   deliveryFee     Decimal   @db.Decimal(10, 2)
   minOrderValue   Decimal   @db.Decimal(10, 2)
-  openingHours    Json      // { "monday": { "open": "10:00", "close": "22:00" }, ... }
+  openingHours    Json      // { "monday": { "open": "10:00", "close": "22:00", "closed": false }, ... }
+  isAllDay        Boolean   @default(false) // Sprzedaż całodobowa
   isActive        Boolean   @default(true)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -454,6 +458,33 @@ model TagRequest {
 
   @@index([status])
   @@index([type])
+}
+
+// ============================================
+// ZARZĄDZANIE WIDOCZNOŚCIĄ UI (Owner)
+// ============================================
+
+// Klucze paneli UI dostępnych do kontroli widoczności:
+// "statistics"   - Karta Statystyk
+// "revenue"      - Strona Główna z Przychodem
+// "reports"      - Raporty
+// "staff"        - Zarządzanie Personelem
+// "menu"         - Zarządzanie Menu
+// "orders"       - Zamówienia
+model VisibilitySettings {
+  id           String   @id @default(cuid())
+  restaurantId String
+  role         Role     // MANAGER lub WORKER
+  panelKey     String   // np. "statistics", "revenue", "reports"
+  isVisible    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relacje
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([restaurantId, role, panelKey])
+  @@index([restaurantId])
 }
 
 // ============================================

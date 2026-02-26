@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, PageCategory } from "@prisma/client";
 import { hash } from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -37,7 +37,17 @@ async function main() {
   });
 
   // Utworzenie początkowych stron
-  const pagesData = [
+  const pagesData: {
+    title: string;
+    slug: string;
+    category: PageCategory;
+    content: string;
+    metaDescription: string;
+    isPublished: boolean;
+    showInHeader: boolean;
+    showInFooter: boolean;
+    sortOrder: number;
+  }[] = [
     // Nawigacja
     {
       title: "O nas",

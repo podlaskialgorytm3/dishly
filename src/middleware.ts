@@ -64,10 +64,29 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
 
+    // Sekcje właściciela - tylko dla OWNER
+    if (
+      pathname.startsWith("/dashboard/owner") &&
+      session.user.role !== "OWNER"
+    ) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
     // Sprawdź czy OWNER jest zatwierdzony
     if (session.user.role === "OWNER" && !session.user.isApproved) {
       if (pathname !== "/pending-approval") {
         return NextResponse.redirect(new URL("/pending-approval", request.url));
+      }
+    }
+
+    // MANAGER i WORKER mają dostęp tylko do /dashboard i /dashboard/orders
+    if (session.user.role === "MANAGER" || session.user.role === "WORKER") {
+      const allowedForStaff = ["/dashboard", "/dashboard/orders"];
+      const isAllowedForStaff = allowedForStaff.some(
+        (p) => pathname === p || pathname.startsWith(p + "/"),
+      );
+      if (!isAllowedForStaff) {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
       }
     }
   }

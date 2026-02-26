@@ -389,6 +389,7 @@ export function DictionariesClient({
   dishTags: Tag[];
   tagRequests: TagRequest[];
 }) {
+  const router = useRouter();
   return (
     <div className="space-y-6">
       <div>

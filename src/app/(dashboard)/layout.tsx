@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { signOut } from "@/lib/auth";
+import { db } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -15,6 +16,14 @@ import {
   CreditCard,
   BookOpen,
   Shield,
+  MapPin,
+  Users2,
+  Palette,
+  Eye,
+  ShoppingBag,
+  BarChart3,
+  ClipboardList,
+  Clock,
   type LucideIcon,
 } from "lucide-react";
 
@@ -24,6 +33,7 @@ type MenuItem = {
   icon: LucideIcon;
   roles: string[];
   disabled?: boolean;
+  panelKey?: string; // Klucz panelu dla kontroli widoczności
 };
 
 export default async function DashboardLayout({
@@ -35,6 +45,23 @@ export default async function DashboardLayout({
 
   if (!session) {
     redirect("/login");
+  }
+
+  // Pobierz ustawienia widoczności paneli dla MANAGER/WORKER
+  let visibilityMap: Record<string, boolean> = {};
+  if (
+    (session.user.role === "MANAGER" || session.user.role === "WORKER") &&
+    session.user.restaurantId
+  ) {
+    const settings = await db.visibilitySettings.findMany({
+      where: {
+        restaurantId: session.user.restaurantId,
+        role: session.user.role as any,
+      },
+    });
+    for (const s of settings) {
+      visibilityMap[s.panelKey] = s.isVisible;
+    }
   }
 
   // Menu items based on role
@@ -88,13 +115,80 @@ export default async function DashboardLayout({
       return [
         ...baseItems,
         {
-          name: "Moja restauracja",
-          href: "/dashboard/restaurant",
-          icon: Store,
+          name: "Lokalizacje",
+          href: "/dashboard/owner/locations",
+          icon: MapPin,
           roles: ["OWNER"],
+        },
+        {
+          name: "Zespół",
+          href: "/dashboard/owner/staff",
+          icon: Users2,
+          roles: ["OWNER"],
+        },
+        {
+          name: "Branding",
+          href: "/dashboard/owner/branding",
+          icon: Palette,
+          roles: ["OWNER"],
+        },
+        {
+          name: "Widoczność paneli",
+          href: "/dashboard/owner/visibility",
+          icon: Eye,
+          roles: ["OWNER"],
+        },
+      ];
+    }
+
+    if (session.user.role === "MANAGER") {
+      const allItems: MenuItem[] = [
+        ...baseItems,
+        {
+          name: "Zamówienia",
+          href: "/dashboard/orders",
+          icon: ShoppingBag,
+          roles: ["MANAGER"],
+          panelKey: "orders",
+        },
+        {
+          name: "Statystyki",
+          href: "/dashboard/statistics",
+          icon: BarChart3,
+          roles: ["MANAGER"],
+          panelKey: "statistics",
+          disabled: true,
+        },
+        {
+          name: "Raporty",
+          href: "/dashboard/reports",
+          icon: ClipboardList,
+          roles: ["MANAGER"],
+          panelKey: "reports",
           disabled: true,
         },
       ];
+      // Filtruj wg ustawień widoczności (domyślnie widoczne)
+      return allItems.filter(
+        (item) => !item.panelKey || visibilityMap[item.panelKey] !== false,
+      );
+    }
+
+    if (session.user.role === "WORKER") {
+      const allItems: MenuItem[] = [
+        ...baseItems,
+        {
+          name: "Zamówienia",
+          href: "/dashboard/orders",
+          icon: ShoppingBag,
+          roles: ["WORKER"],
+          panelKey: "orders",
+        },
+      ];
+      // Filtruj wg ustawień widoczności (domyślnie widoczne)
+      return allItems.filter(
+        (item) => !item.panelKey || visibilityMap[item.panelKey] !== false,
+      );
     }
 
     return baseItems;
@@ -114,7 +208,17 @@ export default async function DashboardLayout({
             </div>
             <div>
               <h1 className="text-lg font-bold text-[#1F1F1F]">DISHLY</h1>
-              <p className="text-xs text-[#8C8C8C]">Admin Panel</p>
+              <p className="text-xs text-[#8C8C8C]">
+                {session.user.role === "ADMIN"
+                  ? "Panel Admina"
+                  : session.user.role === "OWNER"
+                    ? "Panel Właściciela"
+                    : session.user.role === "MANAGER"
+                      ? "Panel Menadżera"
+                      : session.user.role === "WORKER"
+                        ? "Panel Pracownika"
+                        : "Panel Klienta"}
+              </p>
             </div>
           </div>
 
@@ -183,7 +287,11 @@ export default async function DashboardLayout({
                       ? "Administrator"
                       : session.user.role === "OWNER"
                         ? "Właściciel"
-                        : "Klient"}
+                        : session.user.role === "MANAGER"
+                          ? "Menadżer"
+                          : session.user.role === "WORKER"
+                            ? "Pracownik"
+                            : "Klient"}
                   </p>
                 </div>
               </div>

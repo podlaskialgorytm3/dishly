@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { db } from "@/lib/db";
 import {
   FileText,
   Users,
@@ -10,6 +11,12 @@ import {
   AlertCircle,
   ArrowUpRight,
   ArrowDownRight,
+  MapPin,
+  Users2,
+  Palette,
+  Eye,
+  Briefcase,
+  Shield,
 } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -35,6 +42,116 @@ export default async function DashboardPage() {
         return role;
     }
   };
+
+  // Owner stats from DB
+  let ownerData: {
+    locationsCount: number;
+    staffCount: number;
+    restaurantName: string | null;
+    planName: string | null;
+    maxLocations: number | null;
+    maxStaff: number | null;
+  } | null = null;
+
+  if (session.user.role === "OWNER" && session.user.restaurantId) {
+    const [locCount, staffCount, restaurant] = await Promise.all([
+      db.location.count({ where: { restaurantId: session.user.restaurantId } }),
+      db.user.count({
+        where: {
+          workingAt: { restaurantId: session.user.restaurantId },
+          role: { in: ["MANAGER", "WORKER"] },
+        },
+      }),
+      db.restaurant.findUnique({
+        where: { id: session.user.restaurantId },
+        select: {
+          name: true,
+          subscriptions: {
+            where: { isActive: true },
+            include: {
+              plan: {
+                select: {
+                  name: true,
+                  maxLocations: true,
+                  maxStaffAccounts: true,
+                },
+              },
+            },
+            take: 1,
+          },
+        },
+      }),
+    ]);
+    const activeSub = restaurant?.subscriptions[0];
+    ownerData = {
+      locationsCount: locCount,
+      staffCount: staffCount,
+      restaurantName: restaurant?.name ?? null,
+      planName: activeSub?.plan?.name ?? null,
+      maxLocations: activeSub?.plan?.maxLocations ?? null,
+      maxStaff: activeSub?.plan?.maxStaffAccounts ?? null,
+    };
+  }
+
+  // Manager/Worker location info
+  let staffLocationInfo: {
+    restaurantName: string;
+    locationCity: string;
+    locationAddress: string;
+  } | null = null;
+  if (
+    (session.user.role === "MANAGER" || session.user.role === "WORKER") &&
+    session.user.locationId
+  ) {
+    const loc = await db.location.findUnique({
+      where: { id: session.user.locationId },
+      select: {
+        city: true,
+        address: true,
+        restaurant: { select: { name: true } },
+      },
+    });
+    if (loc) {
+      staffLocationInfo = {
+        restaurantName: loc.restaurant.name,
+        locationCity: loc.city,
+        locationAddress: loc.address,
+      };
+    }
+  }
+
+  const ownerStats = ownerData
+    ? [
+        {
+          title: "Lokalizacje",
+          value: String(ownerData.locationsCount),
+          subtitle: ownerData.maxLocations
+            ? `Limit: ${ownerData.maxLocations}`
+            : "Brak limitu",
+          icon: MapPin,
+          color: "#FF4D4F",
+          bgColor: "#FFF1F1",
+        },
+        {
+          title: "Pracownicy",
+          value: String(ownerData.staffCount),
+          subtitle: ownerData.maxStaff
+            ? `Limit: ${ownerData.maxStaff}`
+            : "Brak limitu",
+          icon: Users2,
+          color: "#4CAF50",
+          bgColor: "#E8F5E9",
+        },
+        {
+          title: "Plan subskrypcji",
+          value: ownerData.planName ?? "Brak",
+          subtitle: "Aktywny plan",
+          icon: Store,
+          color: "#FF8C42",
+          bgColor: "#FFF4E6",
+        },
+      ]
+    : [];
 
   // Admin stats
   const adminStats = [
@@ -96,7 +213,12 @@ export default async function DashboardPage() {
     },
   ];
 
-  const stats = session.user.role === "ADMIN" ? adminStats : clientStats;
+  const stats =
+    session.user.role === "ADMIN"
+      ? adminStats
+      : session.user.role === "OWNER"
+        ? ownerStats
+        : clientStats;
 
   // Quick actions based on role
   const getQuickActions = () => {
@@ -131,12 +253,44 @@ export default async function DashboardPage() {
     if (session.user.role === "OWNER") {
       return [
         {
-          title: "Moja restauracja",
-          description: "Zarządzaj menu i lokalizacjami",
-          href: "/dashboard/restaurant",
-          icon: Store,
+          title: "Lokalizacje",
+          description: "Zarządzaj adresami i godzinami",
+          href: "/dashboard/owner/locations",
+          icon: MapPin,
           color: "#FF4D4F",
-          disabled: true,
+        },
+        {
+          title: "Zespół",
+          description: "Pracownicy i menadżerowie",
+          href: "/dashboard/owner/staff",
+          icon: Users2,
+          color: "#4CAF50",
+        },
+        {
+          title: "Branding",
+          description: "Logo, zdjęcia, kuchnia, tagi",
+          href: "/dashboard/owner/branding",
+          icon: Palette,
+          color: "#FF8C42",
+        },
+        {
+          title: "Widoczność paneli",
+          description: "Uprawnienia dla ról",
+          href: "/dashboard/owner/visibility",
+          icon: Eye,
+          color: "#2196F3",
+        },
+      ];
+    }
+
+    if (session.user.role === "MANAGER" || session.user.role === "WORKER") {
+      return [
+        {
+          title: "Zamówienia",
+          description: "Przeglądaj i obsługuj zamówienia",
+          href: "/dashboard/orders",
+          icon: ShoppingBag,
+          color: "#FF4D4F",
         },
       ];
     }
@@ -378,6 +532,41 @@ export default async function DashboardPage() {
               </div>
             </div>
           )}
+
+          {/* Manager/Worker location assignment info */}
+          {(session.user.role === "MANAGER" ||
+            session.user.role === "WORKER") &&
+            staffLocationInfo && (
+              <div className="rounded-[20px] border border-[#EEEEEE] bg-white p-6 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
+                <div className="flex items-start gap-4">
+                  <div
+                    className={`flex h-12 w-12 items-center justify-center rounded-xl ${session.user.role === "MANAGER" ? "bg-purple-100" : "bg-blue-100"}`}
+                  >
+                    {session.user.role === "MANAGER" ? (
+                      <Shield className="h-6 w-6 text-purple-600" />
+                    ) : (
+                      <Briefcase className="h-6 w-6 text-blue-600" />
+                    )}
+                  </div>
+                  <div>
+                    <h2 className="font-semibold text-[#1F1F1F]">
+                      Twoje przypisanie
+                    </h2>
+                    <p className="mt-1 text-sm text-[#8C8C8C]">
+                      Jesteś przypisany do restauracji{" "}
+                      <span className="font-medium text-[#1F1F1F]">
+                        {staffLocationInfo.restaurantName}
+                      </span>
+                      , lokalizacja:{" "}
+                      <span className="font-medium text-[#1F1F1F]">
+                        {staffLocationInfo.locationAddress},{" "}
+                        {staffLocationInfo.locationCity}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
           {/* Pending approval warning for OWNER */}
           {!session.user.isApproved && session.user.role === "OWNER" && (
