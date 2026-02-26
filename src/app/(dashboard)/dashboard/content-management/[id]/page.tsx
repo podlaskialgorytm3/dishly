@@ -3,12 +3,13 @@ import { PageForm } from "../PageForm";
 import { notFound } from "next/navigation";
 
 interface EditPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function EditPagePage({ params }: EditPageProps) {
+  const { id } = await params;
   const page = await db.page.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
 
   if (!page) {

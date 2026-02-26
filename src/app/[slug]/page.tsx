@@ -3,14 +3,15 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 interface PageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
   const page = await db.page.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
   });
 
   if (!page) {
@@ -26,8 +27,9 @@ export async function generateMetadata({
 }
 
 export default async function DynamicPage({ params }: PageProps) {
+  const { slug } = await params;
   const page = await db.page.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
   });
 
   // Jeśli strona nie istnieje lub nie jest opublikowana, pokaż 404
