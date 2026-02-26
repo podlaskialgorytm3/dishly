@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PageCategory } from "@prisma/client";
 import Link from "next/link";
+import { RichTextEditor } from "@/components/shared/RichTextEditor";
 
 interface PageFormProps {
   page?: {
@@ -16,6 +17,8 @@ interface PageFormProps {
     content: string;
     metaDescription: string | null;
     isPublished: boolean;
+    showInHeader: boolean;
+    showInFooter: boolean;
     sortOrder: number;
   };
 }
@@ -32,6 +35,8 @@ export function PageForm({ page }: PageFormProps) {
     content: page?.content || "",
     metaDescription: page?.metaDescription || "",
     isPublished: page?.isPublished || false,
+    showInHeader: page?.showInHeader || false,
+    showInFooter: page?.showInFooter || false,
     sortOrder: page?.sortOrder || 0,
   });
 
@@ -155,19 +160,13 @@ export function PageForm({ page }: PageFormProps) {
         <label htmlFor="content" className="text-sm font-medium text-[#1F1F1F]">
           Treść <span className="text-[#F44336]">*</span>
         </label>
-        <textarea
-          id="content"
-          value={formData.content}
-          onChange={(e) =>
-            setFormData({ ...formData, content: e.target.value })
-          }
-          required
-          rows={15}
-          placeholder="Wpisz treść strony (HTML)..."
-          className="w-full rounded-[14px] border border-[#EEEEEE] bg-white px-4 py-3 text-sm text-[#1F1F1F] transition-all placeholder:text-[#8C8C8C] focus:border-[#FF4D4F] focus:outline-none focus:ring-2 focus:ring-[#FF4D4F]/20 font-mono"
+        <RichTextEditor
+          content={formData.content}
+          onChange={(content) => setFormData({ ...formData, content })}
+          placeholder="Wpisz treść strony..."
         />
         <p className="text-xs text-[#8C8C8C]">
-          Możesz używać HTML (np. {`<h2>`, `<p>`, `<ul>`, `<li>`})
+          Użyj paska narzędzi aby sformatować tekst (nagłówki, pogrubienie, listy, itp.)
         </p>
       </div>
 
@@ -217,6 +216,60 @@ export function PageForm({ page }: PageFormProps) {
         <p className="text-xs text-[#8C8C8C]">
           Mniejsza wartość = wyższa pozycja w menu
         </p>
+      </div>
+
+      {/* Wyświetlanie w nagłówku i stopce */}
+      <div className="space-y-3">
+        <label className="text-sm font-medium text-[#1F1F1F]">
+          Wyświetlanie na stronie
+        </label>
+        <div className="space-y-2 rounded-[14px] border border-[#EEEEEE] bg-[#FAFAFA] p-4">
+          <div className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              id="showInHeader"
+              checked={formData.showInHeader}
+              onChange={(e) =>
+                setFormData({ ...formData, showInHeader: e.target.checked })
+              }
+              className="mt-0.5 h-4 w-4 rounded border-[#EEEEEE] text-[#FF4D4F] focus:ring-2 focus:ring-[#FF4D4F]/20"
+            />
+            <div className="flex-1">
+              <label
+                htmlFor="showInHeader"
+                className="cursor-pointer text-sm font-medium text-[#1F1F1F]"
+              >
+                Wyświetl w nagłówku
+              </label>
+              <p className="mt-0.5 text-xs text-[#8C8C8C]">
+                Strona pojawi się w menu nawigacyjnym w górnej części witryny
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              id="showInFooter"
+              checked={formData.showInFooter}
+              onChange={(e) =>
+                setFormData({ ...formData, showInFooter: e.target.checked })
+              }
+              className="mt-0.5 h-4 w-4 rounded border-[#EEEEEE] text-[#FF4D4F] focus:ring-2 focus:ring-[#FF4D4F]/20"
+            />
+            <div className="flex-1">
+              <label
+                htmlFor="showInFooter"
+                className="cursor-pointer text-sm font-medium text-[#1F1F1F]"
+              >
+                Wyświetl w stopce
+              </label>
+              <p className="mt-0.5 text-xs text-[#8C8C8C]">
+                Strona pojawi się w stopce witryny (polecane dla Regulaminu, Polityki prywatności)
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="flex items-center gap-3 rounded-[14px] border border-[#EEEEEE] bg-[#FAFAFA] p-4">

@@ -357,6 +357,8 @@ model Page {
   content         String       @db.Text
   metaDescription String?
   isPublished     Boolean      @default(false)
+  showInHeader    Boolean      @default(false)  // Wyświetl w nagłówku
+  showInFooter    Boolean      @default(false)  // Wyświetl w stopce
   sortOrder       Int          @default(0)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt

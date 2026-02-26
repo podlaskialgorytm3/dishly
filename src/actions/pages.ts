@@ -101,6 +101,8 @@ export async function createPage(data: {
   content: string;
   metaDescription?: string;
   isPublished?: boolean;
+  showInHeader?: boolean;
+  showInFooter?: boolean;
   sortOrder?: number;
 }) {
   await requireAdmin();
@@ -123,6 +125,8 @@ export async function createPage(data: {
         content: data.content,
         metaDescription: data.metaDescription,
         isPublished: data.isPublished ?? false,
+        showInHeader: data.showInHeader ?? false,
+        showInFooter: data.showInFooter ?? false,
         sortOrder: data.sortOrder ?? 0,
       },
     });
@@ -147,6 +151,8 @@ export async function updatePage(
     content?: string;
     metaDescription?: string;
     isPublished?: boolean;
+    showInHeader?: boolean;
+    showInFooter?: boolean;
     sortOrder?: number;
   },
 ) {

@@ -26,6 +26,21 @@ export default async function Home() {
     take: 12,
   });
 
+  // Pobierz strony do wyświetlenia w nagłówku
+  const navigationPages = await db.page.findMany({
+    where: {
+      isPublished: true,
+      showInHeader: true,
+    },
+    orderBy: {
+      sortOrder: "asc",
+    },
+    select: {
+      title: true,
+      slug: true,
+    },
+  });
+
   // Transform restaurants to stories format
   const stories = restaurants.slice(0, 8).map((restaurant) => ({
     id: restaurant.id,
@@ -90,6 +105,7 @@ export default async function Home() {
               }
             : null
         }
+        navigationPages={navigationPages}
       />
 
       {/* Hero Section */}

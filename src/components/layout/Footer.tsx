@@ -7,8 +7,38 @@ import {
   Mail,
   Phone,
 } from "lucide-react";
+import { db } from "@/lib/db";
 
-export function Footer() {
+export async function Footer() {
+  // Pobierz strony do wyświetlenia w nagłówku i stopce
+  const headerPages = await db.page.findMany({
+    where: {
+      isPublished: true,
+      showInHeader: true,
+    },
+    orderBy: {
+      sortOrder: "asc",
+    },
+    select: {
+      title: true,
+      slug: true,
+    },
+  });
+
+  const footerPages = await db.page.findMany({
+    where: {
+      isPublished: true,
+      showInFooter: true,
+    },
+    orderBy: {
+      sortOrder: "asc",
+    },
+    select: {
+      title: true,
+      slug: true,
+    },
+  });
+
   return (
     <footer className="bg-gradient-to-b from-white to-[#FAFAFA] border-t border-[#EEEEEE]">
       {/* Main Footer Content */}
@@ -76,20 +106,14 @@ export function Footer() {
               Nawigacja
             </h3>
             <ul className="space-y-3">
-              {[
-                { label: "O nas", href: "#" },
-                { label: "Jak to działa", href: "#" },
-                { label: "Kariera", href: "#" },
-                { label: "Blog", href: "#" },
-                { label: "Kontakt", href: "#" },
-              ].map((link) => (
-                <li key={link.label}>
+              {headerPages.map((page) => (
+                <li key={page.slug}>
                   <Link
-                    href={link.href}
+                    href={`/${page.slug}`}
                     className="group relative inline-block text-[#1F1F1F] transition-colors hover:text-[var(--dishly-primary)]"
                   >
                     <span className="relative">
-                      {link.label}
+                      {page.title}
                       <span className="absolute bottom-0 left-0 h-[2px] w-0 bg-[var(--dishly-primary)] transition-all duration-300 group-hover:w-full"></span>
                     </span>
                   </Link>
@@ -131,18 +155,14 @@ export function Footer() {
               Informacje
             </h3>
             <ul className="space-y-3 mb-6">
-              {[
-                { label: "Regulamin", href: "#" },
-                { label: "Polityka prywatności", href: "#" },
-                { label: "Polityka cookies", href: "#" },
-              ].map((link) => (
-                <li key={link.label}>
+              {footerPages.map((page) => (
+                <li key={page.slug}>
                   <Link
-                    href={link.href}
+                    href={`/${page.slug}`}
                     className="group relative inline-block text-[#1F1F1F] transition-colors hover:text-[var(--dishly-primary)]"
                   >
                     <span className="relative">
-                      {link.label}
+                      {page.title}
                       <span className="absolute bottom-0 left-0 h-[2px] w-0 bg-[var(--dishly-primary)] transition-all duration-300 group-hover:w-full"></span>
                     </span>
                   </Link>

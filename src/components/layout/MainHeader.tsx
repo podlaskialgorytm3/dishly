@@ -4,15 +4,21 @@ import Link from "next/link";
 import { Bell, ShoppingCart, User, UtensilsCrossed, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+interface NavigationPage {
+  title: string;
+  slug: string;
+}
+
 interface MainHeaderProps {
   user?: {
     firstName?: string;
     lastName?: string;
     role?: string;
   } | null;
+  navigationPages?: NavigationPage[];
 }
 
-export function MainHeader({ user }: MainHeaderProps) {
+export function MainHeader({ user, navigationPages = [] }: MainHeaderProps) {
   const getInitials = () => {
     if (user?.firstName && user?.lastName) {
       return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
@@ -30,9 +36,9 @@ export function MainHeader({ user }: MainHeaderProps) {
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="mx-auto max-w-7xl px-4 py-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-8">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 shrink-0">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--dishly-primary)] to-[var(--dishly-promo)] shadow-lg">
               <UtensilsCrossed className="h-5 w-5 text-white" />
             </div>
@@ -40,6 +46,22 @@ export function MainHeader({ user }: MainHeaderProps) {
               DISHLY
             </span>
           </Link>
+
+          {/* Navigation Links */}
+          {navigationPages.length > 0 && (
+            <nav className="hidden md:flex items-center gap-6">
+              {navigationPages.map((page) => (
+                <Link
+                  key={page.slug}
+                  href={`/${page.slug}`}
+                  className="text-sm font-medium text-[#1F1F1F] hover:text-[var(--dishly-primary)] transition-colors relative group"
+                >
+                  {page.title}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[var(--dishly-primary)] transition-all duration-300 group-hover:w-full"></span>
+                </Link>
+              ))}
+            </nav>
+          )}
 
           {/* Right Section */}
           <div className="flex items-center gap-3">

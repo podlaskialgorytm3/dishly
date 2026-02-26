@@ -54,6 +54,8 @@ async function main() {
       metaDescription:
         "Poznaj DISHLY - platformę łączącą restauracje z klientami. Odkryj naszą historię i misję.",
       isPublished: true,
+      showInHeader: true,
+      showInFooter: false,
       sortOrder: 1,
     },
     {
@@ -77,6 +79,8 @@ async function main() {
       metaDescription:
         "Dowiedz się, jak w prosty sposób zamawiać jedzenie przez DISHLY. Proces zamawiania krok po kroku.",
       isPublished: true,
+      showInHeader: true,
+      showInFooter: false,
       sortOrder: 2,
     },
     {
@@ -109,6 +113,8 @@ async function main() {
       metaDescription:
         "Dołącz do zespołu DISHLY! Zobacz aktualne oferty pracy i aplikuj już dziś.",
       isPublished: true,
+      showInHeader: true,
+      showInFooter: false,
       sortOrder: 3,
     },
     {
@@ -131,6 +137,8 @@ async function main() {
       metaDescription:
         "Blog DISHLY - porady kulinarne, nowości i ciekawostki ze świata gastronomii.",
       isPublished: true,
+      showInHeader: true,
+      showInFooter: false,
       sortOrder: 4,
     },
     {
@@ -159,6 +167,8 @@ Polska</p>
       metaDescription:
         "Skontaktuj się z DISHLY. Znajdź nasze dane kontaktowe, adres biura i formy komunikacji.",
       isPublished: true,
+      showInHeader: true,
+      showInFooter: false,
       sortOrder: 5,
     },
     // Informacje
@@ -208,6 +218,8 @@ Polska</p>
       metaDescription:
         "Regulamin serwisu DISHLY - poznaj zasady korzystania z platformy do zamawiania jedzenia.",
       isPublished: true,
+      showInHeader: false,
+      showInFooter: true,
       sortOrder: 1,
     },
     {
@@ -278,6 +290,8 @@ Polska</p>
       metaDescription:
         "Polityka prywatności DISHLY - dowiedz się, jak chronimy Twoje dane osobowe.",
       isPublished: true,
+      showInHeader: false,
+      showInFooter: true,
       sortOrder: 2,
     },
     {
@@ -340,6 +354,8 @@ Polska</p>
       metaDescription:
         "Polityka cookies DISHLY - dowiedz się, jakie pliki cookies wykorzystujemy i jak nimi zarządzać.",
       isPublished: true,
+      showInHeader: false,
+      showInFooter: true,
       sortOrder: 3,
     },
   ];

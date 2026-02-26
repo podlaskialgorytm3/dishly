@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { MainHeader } from "@/components/layout/MainHeader";
+import { db } from "@/lib/db";
 
 export default async function ClientLayout({
   children,
@@ -19,6 +20,21 @@ export default async function ClientLayout({
     redirect("/dashboard");
   }
 
+  // Pobierz strony do wyświetlenia w nagłówku
+  const navigationPages = await db.page.findMany({
+    where: {
+      isPublished: true,
+      showInHeader: true,
+    },
+    orderBy: {
+      sortOrder: "asc",
+    },
+    select: {
+      title: true,
+      slug: true,
+    },
+  });
+
   return (
     <div className="min-h-screen bg-[var(--dishly-background)]">
       <MainHeader
@@ -27,6 +43,7 @@ export default async function ClientLayout({
           lastName: session.user.lastName,
           role: session.user.role,
         }}
+        navigationPages={navigationPages}
       />
       <main>{children}</main>
     </div>
