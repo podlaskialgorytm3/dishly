@@ -1,11 +1,7 @@
 "use client";
 
 import { createPage, updatePage } from "@/actions/pages";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select";
+import { Save, X } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PageCategory } from "@prisma/client";
@@ -47,10 +43,8 @@ export function PageForm({ page }: PageFormProps) {
     try {
       let result;
       if (page) {
-        // Edytowanie istniejącej strony
         result = await updatePage(page.id, formData);
       } else {
-        // Tworzenie nowej strony
         result = await createPage(formData);
       }
 
@@ -80,57 +74,64 @@ export function PageForm({ page }: PageFormProps) {
   };
 
   const handleTitleChange = (value: string) => {
-    setFormData({ ...formData, title: value });
-    // Auto-generuj slug tylko dla nowych stron
     if (!page) {
       setFormData({ ...formData, title: value, slug: generateSlug(value) });
+    } else {
+      setFormData({ ...formData, title: value });
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded">
+        <div className="rounded-[20px] border border-[#FFEBEE] bg-[#FFF5F5] p-4 text-[#F44336]">
           {error}
         </div>
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="title">
-          Tytuł strony <span className="text-red-500">*</span>
-        </Label>
-        <Input
+        <label htmlFor="title" className="text-sm font-medium text-[#1F1F1F]">
+          Tytuł strony <span className="text-[#F44336]">*</span>
+        </label>
+        <input
           id="title"
+          type="text"
           value={formData.title}
           onChange={(e) => handleTitleChange(e.target.value)}
           required
           placeholder="np. O nas, Regulamin"
+          className="w-full rounded-[14px] border border-[#EEEEEE] bg-white px-4 py-3 text-sm text-[#1F1F1F] transition-all placeholder:text-[#8C8C8C] focus:border-[#FF4D4F] focus:outline-none focus:ring-2 focus:ring-[#FF4D4F]/20"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="slug">
-          Slug (URL) <span className="text-red-500">*</span>
-        </Label>
-        <Input
+        <label htmlFor="slug" className="text-sm font-medium text-[#1F1F1F]">
+          Slug (URL) <span className="text-[#F44336]">*</span>
+        </label>
+        <input
           id="slug"
+          type="text"
           value={formData.slug}
           onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
           required
           placeholder="np. o-nas, regulamin"
           pattern="[a-z0-9\-]+"
           title="Tylko małe litery, cyfry i myślniki"
+          className="w-full rounded-[14px] border border-[#EEEEEE] bg-white px-4 py-3 text-sm text-[#1F1F1F] transition-all placeholder:text-[#8C8C8C] focus:border-[#FF4D4F] focus:outline-none focus:ring-2 focus:ring-[#FF4D4F]/20"
         />
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[#8C8C8C]">
           Strona będzie dostępna pod adresem: /{formData.slug}
         </p>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="category">
-          Kategoria <span className="text-red-500">*</span>
-        </Label>
-        <Select
+        <label
+          htmlFor="category"
+          className="text-sm font-medium text-[#1F1F1F]"
+        >
+          Kategoria <span className="text-[#F44336]">*</span>
+        </label>
+        <select
           id="category"
           value={formData.category}
           onChange={(e) =>
@@ -140,20 +141,21 @@ export function PageForm({ page }: PageFormProps) {
             })
           }
           required
+          className="w-full rounded-[14px] border border-[#EEEEEE] bg-white px-4 py-3 text-sm text-[#1F1F1F] transition-all focus:border-[#FF4D4F] focus:outline-none focus:ring-2 focus:ring-[#FF4D4F]/20"
         >
           <option value="NAVIGATION">Nawigacja</option>
           <option value="INFORMATION">Informacje</option>
-        </Select>
-        <p className="text-xs text-muted-foreground">
+        </select>
+        <p className="text-xs text-[#8C8C8C]">
           Nawigacja: menu główne, Informacje: stopka
         </p>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="content">
-          Treść <span className="text-red-500">*</span>
-        </Label>
-        <Textarea
+        <label htmlFor="content" className="text-sm font-medium text-[#1F1F1F]">
+          Treść <span className="text-[#F44336]">*</span>
+        </label>
+        <textarea
           id="content"
           value={formData.content}
           onChange={(e) =>
@@ -161,17 +163,22 @@ export function PageForm({ page }: PageFormProps) {
           }
           required
           rows={15}
-          placeholder="Wpisz treść strony..."
-          className="font-mono"
+          placeholder="Wpisz treść strony (HTML)..."
+          className="w-full rounded-[14px] border border-[#EEEEEE] bg-white px-4 py-3 text-sm text-[#1F1F1F] transition-all placeholder:text-[#8C8C8C] focus:border-[#FF4D4F] focus:outline-none focus:ring-2 focus:ring-[#FF4D4F]/20 font-mono"
         />
-        <p className="text-xs text-muted-foreground">
-          Możesz używać HTML lub Markdown
+        <p className="text-xs text-[#8C8C8C]">
+          Możesz używać HTML (np. {`<h2>`, `<p>`, `<ul>`, `<li>`})
         </p>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="metaDescription">Opis meta (SEO)</Label>
-        <Textarea
+        <label
+          htmlFor="metaDescription"
+          className="text-sm font-medium text-[#1F1F1F]"
+        >
+          Opis meta (SEO)
+        </label>
+        <textarea
           id="metaDescription"
           value={formData.metaDescription}
           onChange={(e) =>
@@ -180,15 +187,21 @@ export function PageForm({ page }: PageFormProps) {
           rows={3}
           placeholder="Krótki opis strony dla wyszukiwarek (150-160 znaków)"
           maxLength={160}
+          className="w-full rounded-[14px] border border-[#EEEEEE] bg-white px-4 py-3 text-sm text-[#1F1F1F] transition-all placeholder:text-[#8C8C8C] focus:border-[#FF4D4F] focus:outline-none focus:ring-2 focus:ring-[#FF4D4F]/20"
         />
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[#8C8C8C]">
           {formData.metaDescription.length}/160 znaków
         </p>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="sortOrder">Kolejność sortowania</Label>
-        <Input
+        <label
+          htmlFor="sortOrder"
+          className="text-sm font-medium text-[#1F1F1F]"
+        >
+          Kolejność sortowania
+        </label>
+        <input
           id="sortOrder"
           type="number"
           value={formData.sortOrder}
@@ -199,13 +212,14 @@ export function PageForm({ page }: PageFormProps) {
             })
           }
           placeholder="0"
+          className="w-full rounded-[14px] border border-[#EEEEEE] bg-white px-4 py-3 text-sm text-[#1F1F1F] transition-all placeholder:text-[#8C8C8C] focus:border-[#FF4D4F] focus:outline-none focus:ring-2 focus:ring-[#FF4D4F]/20"
         />
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[#8C8C8C]">
           Mniejsza wartość = wyższa pozycja w menu
         </p>
       </div>
 
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-3 rounded-[14px] border border-[#EEEEEE] bg-[#FAFAFA] p-4">
         <input
           type="checkbox"
           id="isPublished"
@@ -213,25 +227,34 @@ export function PageForm({ page }: PageFormProps) {
           onChange={(e) =>
             setFormData({ ...formData, isPublished: e.target.checked })
           }
-          className="h-4 w-4 rounded border-gray-300"
+          className="h-4 w-4 rounded border-[#EEEEEE] text-[#FF4D4F] focus:ring-2 focus:ring-[#FF4D4F]/20"
         />
-        <Label htmlFor="isPublished" className="cursor-pointer">
+        <label htmlFor="isPublished" className="cursor-pointer text-sm text-[#1F1F1F]">
           Opublikuj stronę (widoczna dla użytkowników)
-        </Label>
+        </label>
       </div>
 
-      <div className="flex gap-4 pt-4">
-        <Button type="submit" disabled={isSubmitting}>
+      <div className="flex gap-3 pt-4">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="flex items-center gap-2 rounded-[14px] bg-[#FF4D4F] px-6 py-3 text-sm font-medium text-white transition-all hover:bg-[#FF3B30] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Save className="h-4 w-4" />
           {isSubmitting
             ? "Zapisywanie..."
             : page
               ? "Zapisz zmiany"
               : "Utwórz stronę"}
-        </Button>
+        </button>
         <Link href="/dashboard/content-management">
-          <Button type="button" variant="outline">
+          <button
+            type="button"
+            className="flex items-center gap-2 rounded-[14px] border border-[#EEEEEE] bg-white px-6 py-3 text-sm font-medium text-[#1F1F1F] transition-all hover:bg-[#FAFAFA]"
+          >
+            <X className="h-4 w-4" />
             Anuluj
-          </Button>
+          </button>
         </Link>
       </div>
     </form>

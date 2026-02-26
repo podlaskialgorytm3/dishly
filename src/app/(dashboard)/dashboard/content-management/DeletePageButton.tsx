@@ -1,7 +1,7 @@
 "use client";
 
 import { deletePage } from "@/actions/pages";
-import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -35,13 +35,13 @@ export function DeletePageButton({ pageId, pageTitle }: DeletePageButtonProps) {
   };
 
   return (
-    <Button
-      size="sm"
-      variant="destructive"
+    <button
       onClick={handleDelete}
       disabled={isDeleting}
+      className="rounded-xl border border-[#FFEBEE] bg-white p-2 text-[#F44336] transition-colors hover:border-[#F44336] hover:bg-[#FFEBEE] disabled:cursor-not-allowed disabled:opacity-50"
+      title="Usuń stronę"
     >
-      {isDeleting ? "Usuwanie..." : "Usuń"}
-    </Button>
+      <Trash2 className="h-4 w-4" />
+    </button>
   );
 }
