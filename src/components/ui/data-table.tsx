@@ -123,10 +123,27 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
       <div className="flex items-center justify-between">
-        <p className="text-sm text-[#8C8C8C]">
-          Strona {table.getState().pagination.pageIndex + 1} z{" "}
-          {table.getPageCount()}
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="text-sm text-[#8C8C8C]">
+            Strona {table.getState().pagination.pageIndex + 1} z{" "}
+            {table.getPageCount()}
+          </p>
+          <span className="text-[#EEEEEE]">|</span>
+          <label className="flex items-center gap-1.5 text-sm text-[#8C8C8C]">
+            Wierszy na stronie:
+            <Input
+              type="number"
+              min={1}
+              max={200}
+              value={table.getState().pagination.pageSize}
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                if (val > 0) table.setPageSize(val);
+              }}
+              className="h-8 w-16 border-[#EEEEEE] text-center text-sm px-1"
+            />
+          </label>
+        </div>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"

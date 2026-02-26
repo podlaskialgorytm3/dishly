@@ -9,7 +9,17 @@ function requireAdmin(role: string) {
   if (role !== "ADMIN") throw new Error("Brak uprawnień");
 }
 
-function handleUniqueError(e: unknown): { success: false; error: string } {
+function handleDeleteError(e: unknown): { success: false; error: string } {
+  if (e instanceof Prisma.PrismaClientKnownRequestError) {
+    if (e.code === "P2025") {
+      return { success: false, error: "Rekord nie istnieje lub został już usunięty" };
+    }
+    if (e.code === "P2003" || e.code === "P2014") {
+      return { success: false, error: "Nie można usunąć — etykieta jest przypisana do restauracji lub dań" };
+    }
+  }
+  throw e;
+}
   if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
     return { success: false, error: "Taka etykieta już istnieje w słowniku" };
   }
@@ -70,9 +80,13 @@ export async function deleteCuisineType(id: string) {
   if (!session) throw new Error("Nie zalogowany");
   requireAdmin(session.user.role);
 
-  await db.cuisineType.delete({ where: { id } });
+  try {
+    await db.cuisineType.delete({ where: { id } });
+  } catch (e) {
+    return handleDeleteError(e);
+  }
   revalidatePath("/dashboard/dictionaries");
-  return { success: true };
+  return { success: true as const };
 }
 
 export async function toggleCuisineType(id: string, isActive: boolean) {
@@ -130,9 +144,13 @@ export async function deleteRestaurantTag(id: string) {
   if (!session) throw new Error("Nie zalogowany");
   requireAdmin(session.user.role);
 
-  await db.restaurantTag.delete({ where: { id } });
+  try {
+    await db.restaurantTag.delete({ where: { id } });
+  } catch (e) {
+    return handleDeleteError(e);
+  }
   revalidatePath("/dashboard/dictionaries");
-  return { success: true };
+  return { success: true as const };
 }
 
 // ==================== DISH TAGS ====================
@@ -180,9 +198,13 @@ export async function deleteDishTag(id: string) {
   if (!session) throw new Error("Nie zalogowany");
   requireAdmin(session.user.role);
 
-  await db.dishTag.delete({ where: { id } });
+  try {
+    await db.dishTag.delete({ where: { id } });
+  } catch (e) {
+    return handleDeleteError(e);
+  }
   revalidatePath("/dashboard/dictionaries");
-  return { success: true };
+  return { success: true as const };
 }
 
 // ==================== TAG REQUESTS ====================
