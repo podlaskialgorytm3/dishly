@@ -108,6 +108,8 @@ type LeafletMapProps = {
   restaurantLng: number;
   status: string;
   progress: number;
+  deliveryAddress?: string;
+  restaurantName?: string;
 };
 
 // Dynamically load map to avoid SSR issues with Leaflet
@@ -134,6 +136,8 @@ function DeliveryMap({
   restaurantLng,
   status,
   progress,
+  deliveryAddress,
+  restaurantName,
 }: {
   customerLat: number | null;
   customerLng: number | null;
@@ -141,6 +145,8 @@ function DeliveryMap({
   restaurantLng: number | null;
   status: string;
   progress: number;
+  deliveryAddress?: string;
+  restaurantName?: string;
 }) {
   const custLat = customerLat ?? 52.2297;
   const custLng = customerLng ?? 21.0122;
@@ -171,6 +177,8 @@ function DeliveryMap({
         restaurantLng={restLng}
         status={status}
         progress={progress}
+        deliveryAddress={deliveryAddress}
+        restaurantName={restaurantName}
       />
       {/* Map overlay info */}
       <div className="absolute bottom-3 left-3 z-[1000] flex gap-2">
@@ -538,6 +546,8 @@ export default function OrderTrackingClient({ order }: { order: OrderData }) {
               restaurantLng={data.location.longitude}
               status={data.status}
               progress={overallProgress}
+              deliveryAddress={data.deliveryAddress ?? undefined}
+              restaurantName={data.restaurantName ?? data.location.name}
             />
 
             {/* Restaurant info */}

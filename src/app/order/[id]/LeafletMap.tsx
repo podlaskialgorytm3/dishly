@@ -128,6 +128,8 @@ type LeafletMapProps = {
   restaurantLng: number;
   status: string;
   progress: number;
+  deliveryAddress?: string;
+  restaurantName?: string;
 };
 
 export default function LeafletMap({
@@ -137,6 +139,8 @@ export default function LeafletMap({
   restaurantLng,
   status,
   progress,
+  deliveryAddress,
+  restaurantName,
 }: LeafletMapProps) {
   const restPos: [number, number] = [restaurantLat, restaurantLng];
   const custPos: [number, number] = [customerLat, customerLng];
@@ -233,7 +237,9 @@ export default function LeafletMap({
         <Marker position={restPos} icon={restaurantIcon}>
           <Popup>
             <div className="text-center">
-              <span className="text-sm font-bold">🍽️ Restauracja</span>
+              <p className="text-sm font-bold">
+                🍽️ {restaurantName ?? "Restauracja"}
+              </p>
             </div>
           </Popup>
         </Marker>
@@ -242,7 +248,10 @@ export default function LeafletMap({
         <Marker position={custPos} icon={customerIcon}>
           <Popup>
             <div className="text-center">
-              <span className="text-sm font-bold">📍 Twoja lokalizacja</span>
+              <p className="text-sm font-bold">📍 Adres dostawy</p>
+              {deliveryAddress && (
+                <p className="mt-1 text-xs text-gray-600">{deliveryAddress}</p>
+              )}
             </div>
           </Popup>
         </Marker>

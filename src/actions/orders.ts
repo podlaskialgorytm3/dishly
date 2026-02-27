@@ -55,6 +55,30 @@ function generateOrderNumber(): string {
   return `DSH-${date}-${random}`;
 }
 
+// Geocode an address using Nominatim (OpenStreetMap) - free, no API key
+async function geocodeAddress(
+  address: string,
+): Promise<{ lat: number; lng: number } | null> {
+  try {
+    const query = encodeURIComponent(address);
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1&countrycodes=pl`,
+      {
+        headers: { "User-Agent": "DISHLY/1.0 (food delivery app)" },
+        signal: AbortSignal.timeout(5000),
+      },
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.length > 0) {
+      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 // Average preparation time based on items (simulation)
 function estimateDeliveryMinutes(itemCount: number): number {
   const basePrep = 15; // 15 min base
@@ -94,6 +118,17 @@ export async function placeOrder(input: PlaceOrderInput) {
     Date.now() + estimatedMinutes * 60 * 1000,
   );
 
+  // Geocode delivery address if coordinates are missing
+  let finalCustomerLat = input.customerLat || null;
+  let finalCustomerLng = input.customerLng || null;
+  if ((!finalCustomerLat || !finalCustomerLng) && input.deliveryAddress) {
+    const geocoded = await geocodeAddress(input.deliveryAddress);
+    if (geocoded) {
+      finalCustomerLat = geocoded.lat;
+      finalCustomerLng = geocoded.lng;
+    }
+  }
+
   try {
     const order = await db.order.create({
       data: {
@@ -114,8 +149,8 @@ export async function placeOrder(input: PlaceOrderInput) {
         guestEmail: input.guestEmail || null,
         guestPhone: input.guestPhone || null,
         deliveryAddress: input.deliveryAddress,
-        customerLat: input.customerLat || null,
-        customerLng: input.customerLng || null,
+        customerLat: finalCustomerLat,
+        customerLng: finalCustomerLng,
         restaurantName: input.restaurantName,
         restaurantSlug: input.restaurantSlug,
         items: {
