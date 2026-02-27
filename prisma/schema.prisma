@@ -23,11 +23,13 @@ enum Role {
 }
 
 enum OrderStatus {
-  NEW
-  PROCESSING
-  READY
-  DELIVERED
-  CANCELLED
+  PENDING       // Oczekujące – właśnie złożone
+  ACCEPTED      // Przyjęte – restauracja potwierdziła
+  PREPARING     // W przygotowaniu – kuchnia gotuje
+  READY         // Gotowe – czeka na kuriera / odbiór
+  IN_DELIVERY   // W dostawie – kurier w drodze
+  DELIVERED     // Dostarczone
+  CANCELLED     // Anulowane
 }
 
 enum OrderType {
@@ -241,6 +243,8 @@ model Location {
   minOrderValue   Decimal   @db.Decimal(10, 2)
   openingHours    Json      // { "monday": { "open": "10:00", "close": "22:00", "closed": false }, ... }
   isAllDay        Boolean   @default(false) // Sprzedaż całodobowa
+  latitude        Float?    // Szerokość geograficzna
+  longitude       Float?    // Długość geograficzna
   isActive        Boolean   @default(true)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -382,23 +386,48 @@ model MealAddon {
 model Order {
   id              String        @id @default(cuid())
   orderNumber     String        @unique
-  userId          String
+  userId          String?
   locationId      String
   addressId       String?
   type            OrderType     @default(DELIVERY)
-  status          OrderStatus   @default(NEW)
+  status          OrderStatus   @default(PENDING)
   paymentStatus   PaymentStatus @default(PENDING)
   subtotal        Decimal       @db.Decimal(10, 2)
   deliveryFee     Decimal       @db.Decimal(10, 2) @default(0)
+  discountPercent Int           @default(0)
   totalPrice      Decimal       @db.Decimal(10, 2)
   notes           String?       @db.Text
   estimatedTime   Int?          // w minutach
+  estimatedDeliveryAt DateTime? // szacowany czas dostawy
   stripePaymentId String?       @unique
+
+  // Dane gościa (niezalogowany użytkownik)
+  guestName       String?
+  guestEmail      String?
+  guestPhone      String?
+  deliveryAddress String?       @db.Text // Adres dostawy tekstowo
+
+  // Koordynaty do mapy śledzenia
+  customerLat     Float?
+  customerLng     Float?
+
+  // Nazwa restauracji (snapshot)
+  restaurantName  String?
+  restaurantSlug  String?
+
+  // Status history
+  acceptedAt      DateTime?
+  preparingAt     DateTime?
+  readyAt         DateTime?
+  inDeliveryAt    DateTime?
+  deliveredAt     DateTime?
+  cancelledAt     DateTime?
+
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
   // Relacje
-  user            User          @relation(fields: [userId], references: [id])
+  user            User?         @relation(fields: [userId], references: [id])
   location        Location      @relation(fields: [locationId], references: [id])
   address         Address?      @relation(fields: [addressId], references: [id])
   items           OrderItem[]
@@ -407,6 +436,7 @@ model Order {
   @@index([locationId])
   @@index([status])
   @@index([createdAt])
+  @@index([orderNumber])
 }
 
 model OrderItem {
@@ -417,6 +447,8 @@ model OrderItem {
   quantity  Int                @default(1)
   basePrice Decimal            @db.Decimal(10, 2)
   totalPrice Decimal           @db.Decimal(10, 2)
+  note      String?            @db.Text // Uwagi dla szefa kuchni
+  mealName  String?            // Snapshot nazwy dania
   createdAt DateTime           @default(now())
 
   // Relacje

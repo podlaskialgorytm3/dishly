@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   ShoppingCart,
   X,
@@ -11,17 +12,27 @@ import {
   ChevronRight,
   AlertCircle,
   MapPin,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCartStore } from "@/stores/cart-store";
+import { placeOrder } from "@/actions/orders";
 
 export function CartDrawer() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [discountInput, setDiscountInput] = useState("");
   const [showDiscount, setShowDiscount] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [guestName, setGuestName] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [orderNotes, setOrderNotes] = useState("");
+  const [orderError, setOrderError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const items = useCartStore((s) => s.items);
   const restaurant = useCartStore((s) => s.restaurant);
@@ -364,13 +375,143 @@ export function CartDrawer() {
                   )}
 
                   {/* Order button */}
-                  <Button
-                    disabled={!meetsMinOrder}
-                    className="w-full gap-2 rounded-xl bg-[#FF4D4F] py-5 text-base font-semibold text-white transition-all hover:bg-[#FF3B30] disabled:opacity-50"
-                  >
-                    Zamów
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
+                  {!showCheckout ? (
+                    <Button
+                      disabled={!meetsMinOrder}
+                      onClick={() => setShowCheckout(true)}
+                      className="w-full gap-2 rounded-xl bg-[#FF4D4F] py-5 text-base font-semibold text-white transition-all hover:bg-[#FF3B30] disabled:opacity-50"
+                    >
+                      Zamów
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <div className="space-y-3 rounded-xl border border-[#EEEEEE] p-3">
+                      <p className="text-sm font-semibold text-[#1F1F1F]">
+                        Dane dostawy
+                      </p>
+                      <Input
+                        placeholder="Imię i nazwisko"
+                        value={guestName}
+                        onChange={(e) => setGuestName(e.target.value)}
+                        className="rounded-lg text-sm"
+                      />
+                      <Input
+                        placeholder="Numer telefonu"
+                        value={guestPhone}
+                        onChange={(e) => setGuestPhone(e.target.value)}
+                        className="rounded-lg text-sm"
+                      />
+                      <Input
+                        placeholder="Adres dostawy"
+                        value={deliveryAddress}
+                        onChange={(e) => setDeliveryAddress(e.target.value)}
+                        className="rounded-lg text-sm"
+                      />
+                      <Input
+                        placeholder="Uwagi do zamówienia (opcjonalnie)"
+                        value={orderNotes}
+                        onChange={(e) => setOrderNotes(e.target.value)}
+                        className="rounded-lg text-sm"
+                      />
+                      {orderError && (
+                        <p className="text-xs text-red-500">{orderError}</p>
+                      )}
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setShowCheckout(false);
+                            setOrderError(null);
+                          }}
+                          className="flex-1 rounded-lg text-sm"
+                        >
+                          Wróć
+                        </Button>
+                        <Button
+                          disabled={
+                            isPending ||
+                            !deliveryAddress.trim() ||
+                            !guestName.trim()
+                          }
+                          onClick={() => {
+                            setOrderError(null);
+                            startTransition(async () => {
+                              try {
+                                // Get customer coordinates from locationStore if available
+                                let customerLat: number | undefined;
+                                let customerLng: number | undefined;
+                                try {
+                                  const locStoreRaw =
+                                    localStorage.getItem("dishly-location");
+                                  if (locStoreRaw) {
+                                    const locStore = JSON.parse(locStoreRaw);
+                                    customerLat = locStore?.state?.latitude;
+                                    customerLng = locStore?.state?.longitude;
+                                  }
+                                } catch {}
+
+                                const result = await placeOrder({
+                                  locationId: location!.id,
+                                  restaurantName:
+                                    restaurant?.name ?? "Restauracja",
+                                  restaurantSlug: restaurant?.slug ?? "",
+                                  items: items.map((item) => ({
+                                    mealId: item.mealId,
+                                    mealName: item.mealName,
+                                    variantId: item.variantId,
+                                    variantName: item.variantName,
+                                    basePrice: item.basePrice,
+                                    variantPriceModifier:
+                                      item.variantPriceModifier,
+                                    addons: item.addons.map((a) => ({
+                                      addonId: a.id,
+                                      name: a.name,
+                                      price: a.price,
+                                      quantity: a.quantity,
+                                    })),
+                                    quantity: item.quantity,
+                                    note: item.note,
+                                  })),
+                                  subtotal,
+                                  deliveryFee,
+                                  discountPercent: discountPercent,
+                                  totalPrice: total,
+                                  deliveryAddress: deliveryAddress.trim(),
+                                  customerLat,
+                                  customerLng,
+                                  guestName: guestName.trim(),
+                                  guestPhone: guestPhone.trim() || undefined,
+                                  notes: orderNotes.trim() || undefined,
+                                });
+
+                                if (result.success && result.orderId) {
+                                  clearCart();
+                                  setIsOpen(false);
+                                  setShowCheckout(false);
+                                  router.push(`/order/${result.orderId}`);
+                                } else {
+                                  setOrderError(
+                                    result.error ??
+                                      "Wystąpił błąd przy składaniu zamówienia",
+                                  );
+                                }
+                              } catch (err) {
+                                setOrderError(
+                                  "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.",
+                                );
+                              }
+                            });
+                          }}
+                          className="flex-1 gap-2 rounded-lg bg-[#FF4D4F] text-sm font-semibold text-white hover:bg-[#FF3B30]"
+                        >
+                          {isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : null}
+                          Potwierdź zamówienie
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </motion.div>

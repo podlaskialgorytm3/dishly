@@ -13,10 +13,15 @@ export default auth(async function middleware(request) {
   // Chronione ścieżki które wymagają autoryzacji
   const protectedPaths = ["/dashboard", "/orders"];
 
+  // Publiczne ścieżki - nie wymagają autoryzacji
+  const publicPaths = ["/order/"]; // /order/[id] tracking page
+
+  // Sprawdź publiczne ścieżki
+  const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
+
   // Sprawdź czy ścieżka jest chroniona
-  const isProtectedPath = protectedPaths.some((path) =>
-    pathname.startsWith(path),
-  );
+  const isProtectedPath =
+    !isPublicPath && protectedPaths.some((path) => pathname.startsWith(path));
 
   // Jeśli użytkownik nie jest zalogowany i próbuje dostać się do chronionej strony
   if (!session && isProtectedPath) {
