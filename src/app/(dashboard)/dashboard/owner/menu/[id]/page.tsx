@@ -9,11 +9,7 @@ export default async function EditMealPage({
   params: Promise<{ id: string }>;
 }) {
   const session = await auth();
-  if (
-    !session ||
-    (session.user.role !== "OWNER" && session.user.role !== "MANAGER")
-  )
-    redirect("/dashboard");
+  if (!session || session.user.role !== "OWNER") redirect("/dashboard");
 
   const { id } = await params;
 

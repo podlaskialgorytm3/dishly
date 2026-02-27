@@ -30,7 +30,8 @@ type PendingMeal = {
   };
   creator: {
     id: string;
-    name: string | null;
+    firstName: string | null;
+    lastName: string | null;
     email: string | null;
   } | null;
   locations: Array<{
@@ -165,7 +166,10 @@ export default function PendingMealsSection({
                     <div className="mt-2 flex items-center gap-2 text-sm text-[#8C8C8C]">
                       <User className="h-4 w-4" />
                       <span>
-                        Dodane przez: {meal.creator.name || meal.creator.email}
+                        Dodane przez:{" "}
+                        {meal.creator.firstName
+                          ? `${meal.creator.firstName} ${meal.creator.lastName || ""}`.trim()
+                          : meal.creator.email}
                       </span>
                     </div>
                   )}

@@ -178,7 +178,8 @@ export async function getMeals() {
       creator: {
         select: {
           id: true,
-          name: true,
+          firstName: true,
+          lastName: true,
           email: true,
         },
       },
@@ -962,7 +963,8 @@ export async function getPendingMeals() {
       creator: {
         select: {
           id: true,
-          name: true,
+          firstName: true,
+          lastName: true,
           email: true,
         },
       },

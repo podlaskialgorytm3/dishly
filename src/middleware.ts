@@ -64,23 +64,7 @@ export default auth(async function middleware(request) {
       return NextResponse.redirect(new URL("/", request.url));
     }
 
-    // Sekcje właściciela - tylko dla OWNER
-    if (
-      pathname.startsWith("/dashboard/owner") &&
-      session.user.role !== "OWNER"
-    ) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-
-    // Sprawdź czy OWNER jest zatwierdzony — pozwól na dostęp do /dashboard (widzi baner)
-    // ale zablokuj podstrony /dashboard/owner/* dopóki nie jest zatwierdzony
-    if (session.user.role === "OWNER" && !session.user.isApproved) {
-      if (pathname !== "/dashboard" && pathname.startsWith("/dashboard/")) {
-        return NextResponse.redirect(new URL("/dashboard", request.url));
-      }
-    }
-
-    // MANAGER i WORKER mają dostęp do określonych paneli
+    // MANAGER i WORKER mają dostęp do określonych paneli (sprawdź PRZED blokowaniem /dashboard/owner)
     if (session.user.role === "MANAGER" || session.user.role === "WORKER") {
       const allowedForStaff = [
         "/dashboard",
@@ -94,6 +78,21 @@ export default auth(async function middleware(request) {
         (p) => pathname === p || pathname.startsWith(p + "/"),
       );
       if (!isAllowedForStaff) {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
+      }
+    }
+    // Sekcje właściciela - tylko dla OWNER (i dozwolonych pracowników powyżej)
+    else if (
+      pathname.startsWith("/dashboard/owner") &&
+      session.user.role !== "OWNER"
+    ) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
+    // Sprawdź czy OWNER jest zatwierdzony — pozwól na dostęp do /dashboard (widzi baner)
+    // ale zablokuj podstrony /dashboard/owner/* dopóki nie jest zatwierdzony
+    if (session.user.role === "OWNER" && !session.user.isApproved) {
+      if (pathname !== "/dashboard" && pathname.startsWith("/dashboard/")) {
         return NextResponse.redirect(new URL("/dashboard", request.url));
       }
     }

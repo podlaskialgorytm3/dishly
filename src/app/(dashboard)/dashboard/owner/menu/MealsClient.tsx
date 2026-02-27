@@ -395,32 +395,36 @@ export default function MealsClient({
 
                 {/* Akcje */}
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleToggleAvailability(meal.id)}
-                    className={`h-9 w-9 rounded-xl ${
-                      meal.isAvailable
-                        ? "hover:bg-orange-50 hover:text-orange-600"
-                        : "bg-orange-100 text-orange-600 hover:bg-orange-200"
-                    }`}
-                    title={meal.isAvailable ? "Ukryj danie" : "Pokaż danie"}
-                  >
-                    {meal.isAvailable ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                  <Link href={`/dashboard/owner/menu/${meal.id}`}>
+                  {isOwner && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-9 w-9 rounded-xl hover:bg-[#FFF1F1] hover:text-[#FF4D4F]"
+                      onClick={() => handleToggleAvailability(meal.id)}
+                      className={`h-9 w-9 rounded-xl ${
+                        meal.isAvailable
+                          ? "hover:bg-orange-50 hover:text-orange-600"
+                          : "bg-orange-100 text-orange-600 hover:bg-orange-200"
+                      }`}
+                      title={meal.isAvailable ? "Ukryj danie" : "Pokaż danie"}
                     >
-                      <Edit className="h-4 w-4" />
+                      {meal.isAvailable ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
                     </Button>
-                  </Link>
+                  )}
+                  {isOwner && (
+                    <Link href={`/dashboard/owner/menu/${meal.id}`}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 rounded-xl hover:bg-[#FFF1F1] hover:text-[#FF4D4F]"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  )}
                   {isOwner && (
                     <Button
                       variant="ghost"
