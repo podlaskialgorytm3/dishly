@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getMeals } from "@/actions/owner/meals";
+import { getMeals, getPendingMeals } from "@/actions/owner/meals";
 import { Button } from "@/components/ui/button";
 import {
   Plus,
@@ -9,8 +9,10 @@ import {
   AlertCircle,
   Search,
   Filter,
+  Clock,
 } from "lucide-react";
 import MealsClient from "./MealsClient";
+import PendingMealsSection from "./PendingMealsSection";
 
 export default async function MenuPage() {
   const session = await auth();
@@ -22,6 +24,9 @@ export default async function MenuPage() {
 
   const { meals, restaurant, limits } = await getMeals();
   const isOwner = session.user.role === "OWNER";
+
+  // Pobierz oczekujące posiłki tylko dla Owner
+  const pendingMeals = isOwner ? await getPendingMeals() : [];
 
   return (
     <div className="min-h-screen">
@@ -36,6 +41,12 @@ export default async function MenuPage() {
               {isOwner && (
                 <p className="mt-1 text-sm text-[#8C8C8C]">
                   {limits.currentMealsCount} / {limits.maxMeals} dań w planie
+                  {pendingMeals.length > 0 && (
+                    <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700">
+                      <Clock className="h-3 w-3" />
+                      {pendingMeals.length} do zatwierdzenia
+                    </span>
+                  )}
                 </p>
               )}
             </div>
@@ -84,7 +95,16 @@ export default async function MenuPage() {
 
       {/* Content */}
       <div className="px-8 py-8">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-7xl space-y-8">
+          {/* Pending meals section - tylko dla Owner */}
+          {isOwner && pendingMeals.length > 0 && (
+            <PendingMealsSection
+              pendingMeals={pendingMeals}
+              locations={restaurant.locations}
+            />
+          )}
+
+          {/* Approved meals section */}
           {meals.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-[20px] border border-dashed border-[#EEEEEE] bg-white px-8 py-16 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#FFF1F1]">

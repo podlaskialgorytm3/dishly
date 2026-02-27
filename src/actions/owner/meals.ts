@@ -134,10 +134,32 @@ export type MealInput = {
 // ============================================
 
 export async function getMeals() {
+  const session = await auth();
+  if (!session || !session.user) {
+    throw new Error("Unauthorized");
+  }
+
   const restaurant = await getOwnerRestaurant();
 
+  // Dla Menadżera - pokazuj tylko zaakceptowane posiłki + jego własne oczekujące
+  // Dla Owner - pokazuj wszystkie posiłki
+  const isManager = session.user.role === "MANAGER";
+
+  const whereClause = isManager
+    ? {
+        restaurantId: restaurant.id,
+        OR: [
+          { approvalStatus: "APPROVED" },
+          {
+            approvalStatus: "PENDING",
+            createdBy: session.user.id,
+          },
+        ],
+      }
+    : { restaurantId: restaurant.id };
+
   const meals = await db.meal.findMany({
-    where: { restaurantId: restaurant.id },
+    where: whereClause,
     include: {
       category: true,
       variants: {
@@ -151,6 +173,13 @@ export async function getMeals() {
           location: {
             select: { id: true, name: true, city: true },
           },
+        },
+      },
+      creator: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
         },
       },
     },
@@ -177,7 +206,9 @@ export async function getMeals() {
   // Oblicz statystyki limitów
   const activeSub = restaurant.subscriptions[0];
   const maxMeals = activeSub?.plan?.maxMeals ?? 50;
-  const currentMealsCount = meals.length;
+  const currentMealsCount = meals.filter(
+    (m) => m.approvalStatus === "APPROVED",
+  ).length;
 
   return {
     meals: serializedMeals,
@@ -257,6 +288,11 @@ export async function getCategories() {
 // ============================================
 
 export async function createMeal(data: MealInput) {
+  const session = await auth();
+  if (!session || !session.user) {
+    throw new Error("Unauthorized");
+  }
+
   const restaurant = await getOwnerRestaurant();
 
   // Sprawdź limit subskrypcji
@@ -298,6 +334,10 @@ export async function createMeal(data: MealInput) {
       restaurant.locations.some((loc) => loc.id === locId),
     ) ?? [];
 
+  // Dla Manager - ustaw status oczekujący na zatwierdzenie
+  const isManager = session.user.role === "MANAGER";
+  const approvalStatus = isManager ? "PENDING" : "APPROVED";
+
   // Stwórz danie wraz z wariantami, dodatkami i przypisaniami do lokalizacji
   const meal = await db.meal.create({
     data: {
@@ -319,6 +359,9 @@ export async function createMeal(data: MealInput) {
       isVegan: data.isVegan ?? false,
       isGlutenFree: data.isGlutenFree ?? false,
       isAvailable: data.isAvailable ?? true,
+      approvalStatus,
+      createdBy: session.user.id,
+      createdByRole: session.user.role,
       variants: {
         create:
           data.variants?.map((v) => ({
@@ -359,7 +402,12 @@ export async function createMeal(data: MealInput) {
   });
 
   revalidatePath("/dashboard/owner/menu");
-  return { success: true, meal };
+
+  return {
+    success: true,
+    meal,
+    isPending: isManager,
+  };
 }
 
 // ============================================
@@ -821,4 +869,136 @@ export async function submitCategoryRequest(data: { name: string }) {
   });
 
   return { success: true };
+}
+
+// ============================================
+// ZATWIERDZANIE POSIŁKÓW PRZEZ WŁAŚCICIELA
+// ============================================
+
+export async function approveMeal(mealId: string) {
+  const session = await auth();
+  if (!session || session.user.role !== "OWNER") {
+    throw new Error("Only owners can approve meals");
+  }
+
+  const restaurant = await getOwnerRestaurant();
+
+  // Sprawdź czy danie należy do restauracji i ma status PENDING
+  const meal = await db.meal.findFirst({
+    where: {
+      id: mealId,
+      restaurantId: restaurant.id,
+      approvalStatus: "PENDING",
+    },
+  });
+
+  if (!meal) {
+    throw new Error("Meal not found or already approved");
+  }
+
+  await db.meal.update({
+    where: { id: mealId },
+    data: {
+      approvalStatus: "APPROVED",
+      approvedBy: session.user.id,
+      approvedAt: new Date(),
+    },
+  });
+
+  revalidatePath("/dashboard/owner/menu");
+  return { success: true };
+}
+
+export async function rejectMeal(mealId: string, rejectionNote?: string) {
+  const session = await auth();
+  if (!session || session.user.role !== "OWNER") {
+    throw new Error("Only owners can reject meals");
+  }
+
+  const restaurant = await getOwnerRestaurant();
+
+  // Sprawdź czy danie należy do restauracji i ma status PENDING
+  const meal = await db.meal.findFirst({
+    where: {
+      id: mealId,
+      restaurantId: restaurant.id,
+      approvalStatus: "PENDING",
+    },
+  });
+
+  if (!meal) {
+    throw new Error("Meal not found or not pending approval");
+  }
+
+  await db.meal.update({
+    where: { id: mealId },
+    data: {
+      approvalStatus: "REJECTED",
+      approvedBy: session.user.id,
+      approvedAt: new Date(),
+      rejectionNote: rejectionNote || "Brak powodu",
+    },
+  });
+
+  revalidatePath("/dashboard/owner/menu");
+  return { success: true };
+}
+
+export async function getPendingMeals() {
+  const session = await auth();
+  if (!session || session.user.role !== "OWNER") {
+    throw new Error("Only owners can view pending meals");
+  }
+
+  const restaurant = await getOwnerRestaurant();
+
+  const pendingMeals = await db.meal.findMany({
+    where: {
+      restaurantId: restaurant.id,
+      approvalStatus: "PENDING",
+    },
+    include: {
+      category: true,
+      creator: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      variants: {
+        orderBy: { createdAt: "asc" },
+      },
+      addons: {
+        orderBy: { createdAt: "asc" },
+      },
+      locations: {
+        include: {
+          location: {
+            select: { id: true, name: true, city: true },
+          },
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  // Serializacja Decimal na number
+  const serializedMeals = pendingMeals.map((meal) => ({
+    ...meal,
+    basePrice: Number(meal.basePrice),
+    protein: meal.protein ? Number(meal.protein) : null,
+    carbs: meal.carbs ? Number(meal.carbs) : null,
+    fat: meal.fat ? Number(meal.fat) : null,
+    variants: meal.variants.map((v) => ({
+      ...v,
+      priceModifier: Number(v.priceModifier),
+    })),
+    addons: meal.addons.map((a) => ({
+      ...a,
+      price: Number(a.price),
+    })),
+  }));
+
+  return serializedMeals;
 }

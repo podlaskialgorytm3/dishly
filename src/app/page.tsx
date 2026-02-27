@@ -10,59 +10,68 @@ import { Footer } from "@/components/layout/Footer";
 export default async function Home() {
   const session = await auth();
 
-  // Fetch restaurants with their locations
-  const restaurants = await db.restaurant.findMany({
-    where: {
-      isActive: true,
-    },
-    include: {
-      locations: {
-        where: {
-          isActive: true,
-        },
-        take: 1,
-      },
-    },
-    take: 12,
-  });
+  let restaurants = [];
+  let navigationPages = [];
+  let meals = [];
 
-  // Pobierz strony do wyświetlenia w nagłówku
-  const navigationPages = await db.page.findMany({
-    where: {
-      isPublished: true,
-      showInHeader: true,
-    },
-    orderBy: {
-      sortOrder: "asc",
-    },
-    select: {
-      title: true,
-      slug: true,
-    },
-  });
-
-  // Pobierz posiłki do sekcji "Trendujące"
-  const meals = await db.meal.findMany({
-    where: {
-      isAvailable: true,
-      restaurant: {
+  try {
+    // Fetch restaurants with their locations
+    restaurants = await db.restaurant.findMany({
+      where: {
         isActive: true,
-        status: "APPROVED",
       },
-    },
-    include: {
-      restaurant: {
-        select: {
-          name: true,
-          slug: true,
+      include: {
+        locations: {
+          where: {
+            isActive: true,
+          },
+          take: 1,
         },
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    take: 10,
-  });
+      take: 12,
+    });
+
+    // Pobierz strony do wyświetlenia w nagłówku
+    navigationPages = await db.page.findMany({
+      where: {
+        isPublished: true,
+        showInHeader: true,
+      },
+      orderBy: {
+        sortOrder: "asc",
+      },
+      select: {
+        title: true,
+        slug: true,
+      },
+    });
+
+    // Pobierz posiłki do sekcji "Trendujące"
+    meals = await db.meal.findMany({
+      where: {
+        isAvailable: true,
+        restaurant: {
+          isActive: true,
+          status: "APPROVED",
+        },
+      },
+      include: {
+        restaurant: {
+          select: {
+            name: true,
+            slug: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 10,
+    });
+  } catch (error) {
+    console.error("Database connection error:", error);
+    // Zwróć puste dane - strona załaduje się bez treści z bazy
+  }
 
   // Transform restaurants to stories format
   const stories = restaurants.slice(0, 8).map((restaurant) => ({

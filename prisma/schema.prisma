@@ -58,6 +58,12 @@ enum RestaurantStatus {
   REJECTED   // Odrzucona
 }
 
+enum MealApprovalStatus {
+  PENDING    // Oczekuje na zatwierdzenie przez właściciela
+  APPROVED   // Zatwierdzony
+  REJECTED   // Odrzucony
+}
+
 enum TagRequestStatus {
   PENDING
   APPROVED
@@ -96,6 +102,8 @@ model User {
   locationId       String?
   reviews          Review[]
   tagRequests      TagRequest[]
+  createdMeals     Meal[]       @relation("MealCreator")
+  approvedMeals    Meal[]       @relation("MealApprover")
 
   @@index([email])
   @@index([role])
@@ -268,35 +276,46 @@ model Category {
 }
 
 model Meal {
-  id              String        @id @default(cuid())
-  restaurantId    String        // Globalne danie dla całej sieci restauracji
+  id              String              @id @default(cuid())
+  restaurantId    String              // Globalne danie dla całej sieci restauracji
   categoryId      String
   name            String
   slug            String
-  description     String?       @db.Text
+  description     String?             @db.Text
   imageUrl        String?
-  basePrice       Decimal       @db.Decimal(10, 2)
-  preparationTime Int           // w minutach
-  weight          Int?          // Gramatura w gramach
-  calories        Int?          // Łączna ilość kalorii [kcal]
-  protein         Decimal?      @db.Decimal(5, 2) // Białko na 100g
-  carbs           Decimal?      @db.Decimal(5, 2) // Węglowodany na 100g
-  fat             Decimal?      @db.Decimal(5, 2) // Tłuszcze na 100g
-  spiceLevel      Int           @default(0) // 0-9
-  isAvailable     Boolean       @default(true)
-  isVegetarian    Boolean       @default(false)
-  isVegan         Boolean       @default(false)
-  isGlutenFree    Boolean       @default(false)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  basePrice       Decimal             @db.Decimal(10, 2)
+  preparationTime Int                 // w minutach
+  weight          Int?                // Gramatura w gramach
+  calories        Int?                // Łączna ilość kalorii [kcal]
+  protein         Decimal?            @db.Decimal(5, 2) // Białko na 100g
+  carbs           Decimal?            @db.Decimal(5, 2) // Węglowodany na 100g
+  fat             Decimal?            @db.Decimal(5, 2) // Tłuszcze na 100g
+  spiceLevel      Int                 @default(0) // 0-9
+  isAvailable     Boolean             @default(true)
+  isVegetarian    Boolean             @default(false)
+  isVegan         Boolean             @default(false)
+  isGlutenFree    Boolean             @default(false)
+  
+  // Pola zatwierdzania (dla Menadżerów)
+  approvalStatus  MealApprovalStatus  @default(APPROVED) // OWNER zawsze APPROVED, MANAGER PENDING
+  createdBy       String?             // ID użytkownika który utworzył
+  createdByRole   Role?               // Rola twórcy (OWNER/MANAGER)
+  approvedBy      String?             // ID właściciela który zatwierdził
+  approvedAt      DateTime?           // Data zatwierdzenia
+  rejectionNote   String?             @db.Text // Powód odrzucenia
+  
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
 
   // Relacje
-  restaurant      Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  category        Category      @relation(fields: [categoryId], references: [id])
+  restaurant      Restaurant          @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  category        Category            @relation(fields: [categoryId], references: [id])
   variants        MealVariant[]
   addons          MealAddon[]
   locations       MealLocation[]
   orderItems      OrderItem[]
+  creator         User?               @relation("MealCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  approver        User?               @relation("MealApprover", fields: [approvedBy], references: [id], onDelete: SetNull)
 
   @@unique([restaurantId, slug])
   @@index([restaurantId])
