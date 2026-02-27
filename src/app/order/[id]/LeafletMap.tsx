@@ -195,9 +195,9 @@ export default function LeafletMap({
       <MapContainer
         center={center}
         zoom={14}
-        scrollWheelZoom={false}
+        scrollWheelZoom={true}
         style={{ height: "100%", width: "100%", borderRadius: "1rem" }}
-        zoomControl={false}
+        zoomControl={true}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
