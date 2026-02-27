@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import {
   Clock,
   MapPin,
@@ -97,8 +98,34 @@ ORDER_STATUSES.forEach((s, i) => {
 });
 
 // ============================================
-// SIMULATED MAP COMPONENT
+// DELIVERY MAP COMPONENT (Leaflet / OpenStreetMap)
 // ============================================
+
+type LeafletMapProps = {
+  customerLat: number;
+  customerLng: number;
+  restaurantLat: number;
+  restaurantLng: number;
+  status: string;
+  progress: number;
+};
+
+// Dynamically load map to avoid SSR issues with Leaflet
+const LeafletMap = dynamic<LeafletMapProps>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  () => import("./LeafletMap") as any,
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-[350px] items-center justify-center rounded-2xl border border-[#EEEEEE] bg-[#F8F9FA]">
+        <div className="text-center">
+          <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-4 border-[#EEEEEE] border-t-[#FF4D4F]" />
+          <p className="text-sm text-[#8C8C8C]">Ładowanie mapy...</p>
+        </div>
+      </div>
+    ),
+  },
+);
 
 function DeliveryMap({
   customerLat,
@@ -113,230 +140,40 @@ function DeliveryMap({
   restaurantLat: number | null;
   restaurantLng: number | null;
   status: string;
-  progress: number; // 0..1 overall progress
+  progress: number;
 }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animRef = useRef<number>(0);
-  const [pulse, setPulse] = useState(0);
-
-  // Use fallback coordinates if not provided (Warsaw center / example restaurant)
   const custLat = customerLat ?? 52.2297;
   const custLng = customerLng ?? 21.0122;
   const restLat = restaurantLat ?? 52.2351;
   const restLng = restaurantLng ?? 21.0022;
 
-  useEffect(() => {
-    let frame = 0;
-    const animate = () => {
-      frame++;
-      setPulse((frame % 60) / 60);
-      animRef.current = requestAnimationFrame(animate);
-    };
-    animRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animRef.current);
-  }, []);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const W = canvas.width;
-    const H = canvas.height;
-    ctx.clearRect(0, 0, W, H);
-
-    // Background
-    ctx.fillStyle = "#F8F9FA";
-    ctx.fillRect(0, 0, W, H);
-
-    // Grid lines (subtle)
-    ctx.strokeStyle = "#E8E8E8";
-    ctx.lineWidth = 1;
-    for (let x = 0; x < W; x += 40) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, H);
-      ctx.stroke();
-    }
-    for (let y = 0; y < H; y += 40) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(W, y);
-      ctx.stroke();
-    }
-
-    // Positions (mapped to canvas)
-    const margin = 60;
-    const restX = margin;
-    const restY = H - margin;
-    const custX = W - margin;
-    const custY = margin;
-
-    // Draw road path (curved)
-    ctx.strokeStyle = "#CCCCCC";
-    ctx.lineWidth = 4;
-    ctx.setLineDash([8, 4]);
-    ctx.beginPath();
-    ctx.moveTo(restX, restY);
-
-    // Waypoints for a road-like path
-    const midX1 = restX + (custX - restX) * 0.3;
-    const midY1 = restY - (restY - custY) * 0.1;
-    const midX2 = restX + (custX - restX) * 0.5;
-    const midY2 = custY + (restY - custY) * 0.5;
-    const midX3 = restX + (custX - restX) * 0.7;
-    const midY3 = custY + (restY - custY) * 0.2;
-
-    ctx.bezierCurveTo(midX1, midY1, midX2, midY2, custX, custY);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Draw traveled path
-    if (status === "IN_DELIVERY" || status === "DELIVERED") {
-      const dProgress = status === "DELIVERED" ? 1 : Math.min(progress * 2, 1);
-      ctx.strokeStyle = "#FF4D4F";
-      ctx.lineWidth = 4;
-      ctx.setLineDash([]);
-
-      // Approximate traveled path
-      const steps = Math.floor(dProgress * 100);
-      ctx.beginPath();
-      ctx.moveTo(restX, restY);
-      for (let i = 1; i <= steps; i++) {
-        const t = i / 100;
-        const tt = 1 - t;
-        // Approximate bezier point
-        const px =
-          tt * tt * tt * restX +
-          3 * tt * tt * t * midX1 +
-          3 * tt * t * t * midX2 +
-          t * t * t * custX;
-        const py =
-          tt * tt * tt * restY +
-          3 * tt * tt * t * midY1 +
-          3 * tt * t * t * midY2 +
-          t * t * t * custY;
-        ctx.lineTo(px, py);
-      }
-      ctx.stroke();
-
-      // Delivery cursor
-      if (status === "IN_DELIVERY") {
-        const t = dProgress;
-        const tt = 1 - t;
-        const cx =
-          tt * tt * tt * restX +
-          3 * tt * tt * t * midX1 +
-          3 * tt * t * t * midX2 +
-          t * t * t * custX;
-        const cy =
-          tt * tt * tt * restY +
-          3 * tt * tt * t * midY1 +
-          3 * tt * t * t * midY2 +
-          t * t * t * custY;
-
-        // Pulse ring
-        const pulseRadius = 12 + pulse * 10;
-        ctx.beginPath();
-        ctx.arc(cx, cy, pulseRadius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 77, 79, ${0.2 - pulse * 0.2})`;
-        ctx.fill();
-
-        // Cursor dot
-        ctx.beginPath();
-        ctx.arc(cx, cy, 8, 0, Math.PI * 2);
-        ctx.fillStyle = "#FF4D4F";
-        ctx.fill();
-        ctx.strokeStyle = "#FFFFFF";
-        ctx.lineWidth = 3;
-        ctx.stroke();
-      }
-    }
-
-    // Restaurant marker
-    ctx.beginPath();
-    ctx.arc(restX, restY, 16, 0, Math.PI * 2);
-    ctx.fillStyle = "#FF4D4F";
-    ctx.fill();
-    ctx.strokeStyle = "#FFFFFF";
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    // Restaurant icon (fork/knife emoji via text)
-    ctx.fillStyle = "#FFFFFF";
-    ctx.font = "14px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("🍽️", restX, restY);
-
-    // Restaurant label
-    ctx.fillStyle = "#1F1F1F";
-    ctx.font = "bold 12px Inter, sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Restauracja", restX, restY + 30);
-
-    // Customer marker
-    ctx.beginPath();
-    ctx.arc(custX, custY, 16, 0, Math.PI * 2);
-    ctx.fillStyle = "#4CAF50";
-    ctx.fill();
-    ctx.strokeStyle = "#FFFFFF";
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    // Customer icon
-    ctx.fillStyle = "#FFFFFF";
-    ctx.font = "14px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("📍", custX, custY);
-
-    // Customer label
-    ctx.fillStyle = "#1F1F1F";
-    ctx.font = "bold 12px Inter, sans-serif";
-    ctx.fillText("Twoja lokalizacja", custX, custY + 30);
-
-    // Distance info
-    if (customerLat && customerLng && restaurantLat && restaurantLng) {
-      const R = 6371;
-      const dLat = ((customerLat - restaurantLat) * Math.PI) / 180;
-      const dLng = ((customerLng - restaurantLng) * Math.PI) / 180;
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos((restaurantLat * Math.PI) / 180) *
-          Math.cos((customerLat * Math.PI) / 180) *
-          Math.sin(dLng / 2) *
-          Math.sin(dLng / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      const dist = R * c;
-
-      ctx.fillStyle = "#8C8C8C";
-      ctx.font = "11px Inter, sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(`~${dist.toFixed(1)} km`, W / 2, H / 2 + 30);
-    }
-  }, [
-    pulse,
-    progress,
-    status,
-    customerLat,
-    customerLng,
-    restaurantLat,
-    restaurantLng,
-  ]);
+  // Haversine distance
+  const distance = useMemo(() => {
+    const R = 6371;
+    const dLat = ((custLat - restLat) * Math.PI) / 180;
+    const dLng = ((custLng - restLng) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((restLat * Math.PI) / 180) *
+        Math.cos((custLat * Math.PI) / 180) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }, [custLat, custLng, restLat, restLng]);
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-[#EEEEEE] bg-white">
-      <canvas
-        ref={canvasRef}
-        width={600}
-        height={350}
-        className="h-full w-full"
-        style={{ maxHeight: "350px" }}
+      <LeafletMap
+        customerLat={custLat}
+        customerLng={custLng}
+        restaurantLat={restLat}
+        restaurantLng={restLng}
+        status={status}
+        progress={progress}
       />
-      {/* Map legend overlay */}
-      <div className="absolute bottom-3 left-3 flex gap-2">
+      {/* Map overlay info */}
+      <div className="absolute bottom-3 left-3 z-[1000] flex gap-2">
         <div className="flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium shadow-sm backdrop-blur-sm">
           <div className="h-2.5 w-2.5 rounded-full bg-[#FF4D4F]" />
           Restauracja
@@ -344,6 +181,9 @@ function DeliveryMap({
         <div className="flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium shadow-sm backdrop-blur-sm">
           <div className="h-2.5 w-2.5 rounded-full bg-[#4CAF50]" />
           Twoja lokalizacja
+        </div>
+        <div className="flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium shadow-sm backdrop-blur-sm">
+          ~{distance.toFixed(1)} km
         </div>
       </div>
     </div>
