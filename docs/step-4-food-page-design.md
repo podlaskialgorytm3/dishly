@@ -99,7 +99,7 @@ Jeśli wariant wybrany:
 
 - Kolor: `#8C8C8C`
 - Line-height: 1.6
-- Max-width: 90%
+- Max-width: 90%o
 - Oddzielony odstępem 16–24px
 
 ---

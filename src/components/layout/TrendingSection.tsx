@@ -1,12 +1,15 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Flame } from "lucide-react";
 
 interface TrendingItem {
   id: string;
   name: string;
+  slug: string;
   restaurantName: string;
+  restaurantSlug: string;
   imageUrl: string;
   price: number;
   badge?: "Nowość" | "Hit" | "Promocja";
@@ -30,6 +33,11 @@ export function TrendingSection({ items }: TrendingSectionProps) {
     }
   };
 
+  // Nie wyświetlaj sekcji, jeśli nie ma posiłków
+  if (items.length === 0) {
+    return null;
+  }
+
   return (
     <section className="bg-[#FFF3E0] py-12">
       <div className="mx-auto max-w-7xl px-4">
@@ -43,8 +51,9 @@ export function TrendingSection({ items }: TrendingSectionProps) {
         {/* Horizontal Scroll */}
         <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
           {items.map((item) => (
-            <button
+            <Link
               key={item.id}
+              href={`/${item.restaurantSlug}/${item.slug}`}
               className="group flex-shrink-0 w-64 overflow-hidden rounded-2xl bg-white shadow-md transition-all hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="relative aspect-square overflow-hidden bg-gray-200">
@@ -82,7 +91,7 @@ export function TrendingSection({ items }: TrendingSectionProps) {
                   {item.price.toFixed(2)} zł
                 </p>
               </div>
-            </button>
+            </Link>
           ))}
         </div>
       </div>

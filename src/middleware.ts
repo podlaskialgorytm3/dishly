@@ -10,20 +10,16 @@ export default auth(async function middleware(request) {
   const session = (request as any).auth;
   const { pathname } = request.nextUrl;
 
-  // Publiczne ścieżki które nie wymagają autoryzacji
-  const publicPaths = [
-    "/login",
-    "/register",
-    "/register-owner",
-    "/",
-    "/pending-approval",
-  ];
+  // Chronione ścieżki które wymagają autoryzacji
+  const protectedPaths = ["/dashboard", "/orders"];
 
-  // Sprawdź czy ścieżka jest publiczna
-  const isPublicPath = publicPaths.some((path) => pathname === path);
+  // Sprawdź czy ścieżka jest chroniona
+  const isProtectedPath = protectedPaths.some((path) =>
+    pathname.startsWith(path),
+  );
 
   // Jeśli użytkownik nie jest zalogowany i próbuje dostać się do chronionej strony
-  if (!session && !isPublicPath) {
+  if (!session && isProtectedPath) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);

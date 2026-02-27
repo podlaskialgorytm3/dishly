@@ -41,6 +41,29 @@ export default async function Home() {
     },
   });
 
+  // Pobierz posiłki do sekcji "Trendujące"
+  const meals = await db.meal.findMany({
+    where: {
+      isAvailable: true,
+      restaurant: {
+        isActive: true,
+        status: "APPROVED",
+      },
+    },
+    include: {
+      restaurant: {
+        select: {
+          name: true,
+          slug: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 10,
+  });
+
   // Transform restaurants to stories format
   const stories = restaurants.slice(0, 8).map((restaurant) => ({
     id: restaurant.id,
@@ -49,48 +72,17 @@ export default async function Home() {
     hasPromo: Math.random() > 0.5, // For demo purposes
   }));
 
-  // Mock trending items (to be replaced with real data)
-  const trendingItems = [
-    {
-      id: "1",
-      name: "Margherita Pizza",
-      restaurantName: "Pizza Palace",
-      imageUrl: "",
-      price: 29.99,
-      badge: "Hit" as const,
-    },
-    {
-      id: "2",
-      name: "Burger Klasyczny",
-      restaurantName: "Burger House",
-      imageUrl: "",
-      price: 24.99,
-      badge: "Nowość" as const,
-    },
-    {
-      id: "3",
-      name: "Sushi Set",
-      restaurantName: "Sushi Master",
-      imageUrl: "",
-      price: 49.99,
-      badge: "Promocja" as const,
-    },
-    {
-      id: "4",
-      name: "Pad Thai",
-      restaurantName: "Thai Food",
-      imageUrl: "",
-      price: 32.99,
-    },
-    {
-      id: "5",
-      name: "Tiramisu",
-      restaurantName: "Dolce Vita",
-      imageUrl: "",
-      price: 18.99,
-      badge: "Hit" as const,
-    },
-  ];
+  // Transform meals for TrendingSection
+  const trendingItems = meals.map((meal, index) => ({
+    id: meal.id,
+    name: meal.name,
+    slug: meal.slug,
+    restaurantName: meal.restaurant.name,
+    restaurantSlug: meal.restaurant.slug,
+    imageUrl: meal.imageUrl || "",
+    price: Number(meal.basePrice),
+    badge: index < 2 ? ("Nowość" as const) : undefined,
+  }));
 
   return (
     <div className="min-h-screen bg-[var(--dishly-background)]">
