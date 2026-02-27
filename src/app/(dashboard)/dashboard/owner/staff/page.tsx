@@ -13,6 +13,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import DeleteStaffButton from "./DeleteStaffButton";
+import ResetPasswordButton from "./ResetPasswordButton";
 
 export default async function StaffPage() {
   const session = await auth();
@@ -192,6 +193,10 @@ export default async function StaffPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-1">
+                          <ResetPasswordButton
+                            staffId={member.id}
+                            staffName={`${member.firstName} ${member.lastName}`}
+                          />
                           <Link href={`/dashboard/owner/staff/${member.id}`}>
                             <Button
                               variant="ghost"

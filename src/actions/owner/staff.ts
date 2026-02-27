@@ -233,7 +233,10 @@ export async function deleteStaff(id: string) {
   return { success: true };
 }
 
-export async function resetStaffPassword(id: string, newPassword: string) {
+export async function resetStaffPassword(
+  id: string,
+  newPassword?: string,
+): Promise<{ success: true; generatedPassword: string }> {
   const { restaurant } = await getOwnerRestaurant();
 
   const locationIds = (
@@ -255,8 +258,10 @@ export async function resetStaffPassword(id: string, newPassword: string) {
     throw new Error("Staff member not found");
   }
 
-  const passwordHash = await hash(newPassword, 12);
+  // Generuj hasło jeśli nie zostało podane
+  const password = newPassword || generatePassword(12);
+  const passwordHash = await hash(password, 12);
   await db.user.update({ where: { id }, data: { passwordHash } });
 
-  return { success: true };
+  return { success: true, generatedPassword: password };
 }
