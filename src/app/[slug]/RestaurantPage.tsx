@@ -1,23 +1,17 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import {
   MapPin,
   Phone,
   Clock,
   Truck,
   Flame,
-  Leaf,
   Search,
-  Filter,
-  ChevronDown,
-  Star,
   Zap,
   Scale,
-  Plus,
-  X,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 type MealVariant = {
@@ -114,7 +108,6 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
   const [filterDietary, setFilterDietary] = useState<string | null>(null);
-  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
 
   // Pobierz unikalne kategorie z dań
   const categories = useMemo(() => {
@@ -203,21 +196,6 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
     ];
     const today = days[new Date().getDay()];
     return openingHours[today];
-  };
-
-  const renderSpiceLevel = (level: number) => {
-    return (
-      <div className="flex items-center gap-0.5">
-        {Array.from({ length: 9 }).map((_, i) => (
-          <Flame
-            key={i}
-            className={`h-3 w-3 ${
-              i < level ? "text-[#FF4D4F]" : "text-gray-200"
-            }`}
-          />
-        ))}
-      </div>
-    );
   };
 
   return (
@@ -394,10 +372,10 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
                   </h2>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {mealsByCategory.get(category.id)?.map((meal) => (
-                      <div
+                      <Link
                         key={meal.id}
-                        onClick={() => setSelectedMeal(meal)}
-                        className="group cursor-pointer rounded-[16px] bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+                        href={`/${restaurant.slug}/${meal.slug}`}
+                        className="group cursor-pointer rounded-[16px] bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md block"
                       >
                         {/* Obrazek */}
                         <div className="mb-3 h-40 overflow-hidden rounded-xl bg-[#F5F5F5]">
@@ -485,7 +463,7 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
                             </span>
                           )}
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </div>
@@ -493,189 +471,6 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
           </div>
         )}
       </div>
-
-      {/* Modal szczegółów dania */}
-      {selectedMeal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={() => setSelectedMeal(null)}
-        >
-          <div
-            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-[20px] bg-white p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="flex items-start justify-between">
-              <h2 className="text-xl font-bold text-[#1F1F1F]">
-                {selectedMeal.name}
-              </h2>
-              <button
-                onClick={() => setSelectedMeal(null)}
-                className="rounded-lg p-1 hover:bg-[#F5F5F5]"
-              >
-                <X className="h-5 w-5 text-[#8C8C8C]" />
-              </button>
-            </div>
-
-            {/* Obrazek */}
-            {selectedMeal.imageUrl && (
-              <div className="mt-4 h-48 overflow-hidden rounded-xl">
-                <img
-                  src={selectedMeal.imageUrl}
-                  alt={selectedMeal.name}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            )}
-
-            {/* Opis */}
-            {selectedMeal.description && (
-              <p className="mt-4 text-sm text-[#8C8C8C]">
-                {selectedMeal.description}
-              </p>
-            )}
-
-            {/* Tagi */}
-            <div className="mt-4 flex flex-wrap gap-2">
-              {selectedMeal.isVegan && (
-                <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
-                  Wegańskie
-                </span>
-              )}
-              {selectedMeal.isVegetarian && !selectedMeal.isVegan && (
-                <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
-                  Wegetariańskie
-                </span>
-              )}
-              {selectedMeal.isGlutenFree && (
-                <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
-                  Bezglutenowe
-                </span>
-              )}
-            </div>
-
-            {/* Cena bazowa */}
-            <div className="mt-4 flex items-center justify-between border-t border-[#EEEEEE] pt-4">
-              <span className="text-sm text-[#8C8C8C]">Cena bazowa</span>
-              <span className="text-xl font-bold text-[#FF4D4F]">
-                {formatPrice(selectedMeal.basePrice)}
-              </span>
-            </div>
-
-            {/* Warianty */}
-            {selectedMeal.variants.length > 0 && (
-              <div className="mt-4 border-t border-[#EEEEEE] pt-4">
-                <h3 className="mb-2 font-semibold text-[#1F1F1F]">
-                  Wybierz rozmiar
-                </h3>
-                <div className="space-y-2">
-                  {selectedMeal.variants.map((variant) => (
-                    <div
-                      key={variant.id}
-                      className="flex items-center justify-between rounded-xl border border-[#EEEEEE] p-3"
-                    >
-                      <span>{variant.name}</span>
-                      <span className="font-medium text-[#FF4D4F]">
-                        {variant.priceModifier >= 0 ? "+" : ""}
-                        {formatPrice(variant.priceModifier)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Dodatki */}
-            {selectedMeal.addons.length > 0 && (
-              <div className="mt-4 border-t border-[#EEEEEE] pt-4">
-                <h3 className="mb-2 font-semibold text-[#1F1F1F]">Dodatki</h3>
-                <div className="space-y-2">
-                  {selectedMeal.addons.map((addon) => (
-                    <div
-                      key={addon.id}
-                      className="flex items-center justify-between rounded-xl border border-[#EEEEEE] p-3"
-                    >
-                      <div>
-                        <span>{addon.name}</span>
-                        {addon.isRequired && (
-                          <span className="ml-2 text-xs text-[#FF4D4F]">
-                            (wymagane)
-                          </span>
-                        )}
-                        {addon.maxQuantity > 1 && (
-                          <span className="ml-2 text-xs text-[#8C8C8C]">
-                            max: {addon.maxQuantity}
-                          </span>
-                        )}
-                      </div>
-                      <span className="font-medium text-[#FF4D4F]">
-                        +{formatPrice(addon.price)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Wartości odżywcze */}
-            <div className="mt-4 border-t border-[#EEEEEE] pt-4">
-              <h3 className="mb-2 font-semibold text-[#1F1F1F]">
-                Informacje o produkcie
-              </h3>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="flex justify-between rounded-lg bg-[#F5F5F5] p-2">
-                  <span className="text-[#8C8C8C]">Czas przygotowania</span>
-                  <span>{selectedMeal.preparationTime} min</span>
-                </div>
-                {selectedMeal.weight && (
-                  <div className="flex justify-between rounded-lg bg-[#F5F5F5] p-2">
-                    <span className="text-[#8C8C8C]">Gramatura</span>
-                    <span>{selectedMeal.weight}g</span>
-                  </div>
-                )}
-                {selectedMeal.calories && (
-                  <div className="flex justify-between rounded-lg bg-[#F5F5F5] p-2">
-                    <span className="text-[#8C8C8C]">Kalorie</span>
-                    <span>{selectedMeal.calories} kcal</span>
-                  </div>
-                )}
-                {selectedMeal.protein && (
-                  <div className="flex justify-between rounded-lg bg-[#F5F5F5] p-2">
-                    <span className="text-[#8C8C8C]">Białko (100g)</span>
-                    <span>{selectedMeal.protein}g</span>
-                  </div>
-                )}
-                {selectedMeal.carbs && (
-                  <div className="flex justify-between rounded-lg bg-[#F5F5F5] p-2">
-                    <span className="text-[#8C8C8C]">Węglowodany (100g)</span>
-                    <span>{selectedMeal.carbs}g</span>
-                  </div>
-                )}
-                {selectedMeal.fat && (
-                  <div className="flex justify-between rounded-lg bg-[#F5F5F5] p-2">
-                    <span className="text-[#8C8C8C]">Tłuszcze (100g)</span>
-                    <span>{selectedMeal.fat}g</span>
-                  </div>
-                )}
-              </div>
-              {selectedMeal.spiceLevel > 0 && (
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="text-sm text-[#8C8C8C]">
-                    Poziom ostrości:
-                  </span>
-                  {renderSpiceLevel(selectedMeal.spiceLevel)}
-                </div>
-              )}
-            </div>
-
-            {/* Przycisk dodawania do koszyka (placeholder) */}
-            <Button className="mt-6 w-full gap-2 rounded-xl bg-[#FF4D4F] py-6 text-white hover:bg-[#FF3B30]">
-              <Plus className="h-5 w-5" />
-              Dodaj do koszyka
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
