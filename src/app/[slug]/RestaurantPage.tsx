@@ -305,16 +305,28 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
 
                 {currentLocation && (
                   <div className="space-y-1 text-sm">
-                    <div className="flex items-center gap-2 text-[#8C8C8C]">
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                        `${currentLocation.address}, ${currentLocation.city}`,
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-[#8C8C8C] hover:text-[#FF4D4F] transition-colors cursor-pointer"
+                    >
                       <MapPin className="h-4 w-4" />
-                      <span>
+                      <span className="underline decoration-dotted underline-offset-2">
                         {currentLocation.address}, {currentLocation.city}
                       </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[#8C8C8C]">
+                    </a>
+                    <a
+                      href={`tel:${currentLocation.phone.replace(/\s/g, "")}`}
+                      className="flex items-center gap-2 text-[#8C8C8C] hover:text-[#FF4D4F] transition-colors cursor-pointer"
+                    >
                       <Phone className="h-4 w-4" />
-                      <span>{currentLocation.phone}</span>
-                    </div>
+                      <span className="underline decoration-dotted underline-offset-2">
+                        {currentLocation.phone}
+                      </span>
+                    </a>
                     <div className="flex items-center gap-2 text-[#8C8C8C]">
                       <Truck className="h-4 w-4" />
                       <span>
