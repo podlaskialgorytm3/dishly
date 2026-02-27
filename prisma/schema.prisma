@@ -207,6 +207,7 @@ model Restaurant {
   // Relacje
   owner              User               @relation("RestaurantOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   locations          Location[]
+  meals              Meal[]
   subscriptions      Subscription[]
   reviews            Review[]
   cuisineTypes       CuisineType[]      @relation("RestaurantCuisines")
@@ -238,7 +239,7 @@ model Location {
   // Relacje
   restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   workers         User[]     @relation("LocationWorker")
-  meals           Meal[]
+  mealLocations   MealLocation[]
   orders          Order[]
 
   @@index([restaurantId])
@@ -267,7 +268,7 @@ model Category {
 
 model Meal {
   id              String        @id @default(cuid())
-  locationId      String
+  restaurantId    String        // Globalne danie dla całej sieci restauracji
   categoryId      String
   name            String
   slug            String
@@ -275,10 +276,11 @@ model Meal {
   imageUrl        String?
   basePrice       Decimal       @db.Decimal(10, 2)
   preparationTime Int           // w minutach
-  calories        Int?
-  protein         Decimal?      @db.Decimal(5, 2)
-  carbs           Decimal?      @db.Decimal(5, 2)
-  fat             Decimal?      @db.Decimal(5, 2)
+  weight          Int?          // Gramatura w gramach
+  calories        Int?          // Łączna ilość kalorii [kcal]
+  protein         Decimal?      @db.Decimal(5, 2) // Białko na 100g
+  carbs           Decimal?      @db.Decimal(5, 2) // Węglowodany na 100g
+  fat             Decimal?      @db.Decimal(5, 2) // Tłuszcze na 100g
   spiceLevel      Int           @default(0) // 0-9
   isAvailable     Boolean       @default(true)
   isVegetarian    Boolean       @default(false)
@@ -288,15 +290,35 @@ model Meal {
   updatedAt       DateTime      @updatedAt
 
   // Relacje
-  location        Location      @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  restaurant      Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   category        Category      @relation(fields: [categoryId], references: [id])
   variants        MealVariant[]
   addons          MealAddon[]
+  locations       MealLocation[]
   orderItems      OrderItem[]
 
-  @@unique([locationId, slug])
+  @@unique([restaurantId, slug])
+  @@index([restaurantId])
   @@index([categoryId])
   @@index([isAvailable])
+}
+
+// Tabela łącznikowa dla przypisania posiłków do lokalizacji
+model MealLocation {
+  id          String   @id @default(cuid())
+  mealId      String
+  locationId  String
+  isAvailable Boolean  @default(true) // Dostępność w danej lokalizacji
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relacje
+  meal        Meal     @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  location    Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([mealId, locationId])
+  @@index([mealId])
+  @@index([locationId])
 }
 
 model MealVariant {
@@ -320,7 +342,8 @@ model MealAddon {
   mealId      String
   name        String
   price       Decimal           @db.Decimal(10, 2)
-  maxQuantity Int               @default(1)
+  isRequired  Boolean           @default(false) // Czy klient musi wybrać
+  maxQuantity Int               @default(1)     // Max ilość do wyboru
   isAvailable Boolean           @default(true)
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt

@@ -24,6 +24,9 @@ import {
   createDishTag,
   updateDishTag,
   deleteDishTag,
+  createCategory,
+  updateCategory,
+  deleteCategory,
   approveTagRequest,
   rejectTagRequest,
 } from "@/actions/admin/dictionaries";
@@ -36,7 +39,8 @@ type Tag = {
   id: string;
   name: string;
   slug: string;
-  isActive: boolean;
+  isActive?: boolean;
+  sortOrder?: number;
 };
 
 type TagRequest = {
@@ -217,17 +221,27 @@ function TagTable({
     {
       accessorKey: "isActive",
       header: "Status",
-      cell: ({ row }) => (
-        <Badge
-          className={
-            row.original.isActive
-              ? "bg-green-100 text-green-700 hover:bg-green-100"
-              : "bg-[#EEEEEE] text-[#8C8C8C] hover:bg-[#EEEEEE]"
-          }
-        >
-          {row.original.isActive ? "Aktywna" : "Nieaktywna"}
-        </Badge>
-      ),
+      cell: ({ row }) => {
+        // Categories have sortOrder instead of isActive
+        if (row.original.isActive === undefined) {
+          return (
+            <span className="text-xs text-[#8C8C8C]">
+              Kolejność: {row.original.sortOrder ?? 0}
+            </span>
+          );
+        }
+        return (
+          <Badge
+            className={
+              row.original.isActive
+                ? "bg-green-100 text-green-700 hover:bg-green-100"
+                : "bg-[#EEEEEE] text-[#8C8C8C] hover:bg-[#EEEEEE]"
+            }
+          >
+            {row.original.isActive ? "Aktywna" : "Nieaktywna"}
+          </Badge>
+        );
+      },
     },
     {
       id: "actions",
@@ -382,11 +396,13 @@ export function DictionariesClient({
   cuisineTypes,
   restaurantTags,
   dishTags,
+  categories,
   tagRequests,
 }: {
   cuisineTypes: Tag[];
   restaurantTags: Tag[];
   dishTags: Tag[];
+  categories: Tag[];
   tagRequests: TagRequest[];
 }) {
   const router = useRouter();
@@ -408,9 +424,15 @@ export function DictionariesClient({
       )}
 
       <div className="rounded-xl border border-[#EEEEEE] bg-white">
-        <Tabs defaultValue="cuisine">
+        <Tabs defaultValue="categories">
           <div className="border-b border-[#EEEEEE] px-6 pt-4">
             <TabsList className="bg-transparent gap-1">
+              <TabsTrigger
+                value="categories"
+                className="data-[state=active]:bg-[#FAFAFA] data-[state=active]:border data-[state=active]:border-[#EEEEEE]"
+              >
+                Kategorie menu ({categories.length})
+              </TabsTrigger>
               <TabsTrigger
                 value="cuisine"
                 className="data-[state=active]:bg-[#FAFAFA] data-[state=active]:border data-[state=active]:border-[#EEEEEE]"
@@ -443,6 +465,27 @@ export function DictionariesClient({
             </TabsList>
           </div>
           <div className="p-6">
+            <TabsContent value="categories">
+              <TagTable
+                tags={categories}
+                onCreate={async (name) => {
+                  const result = await createCategory(name);
+                  if (result.success) router.refresh();
+                  return result;
+                }}
+                onUpdate={async (id, name) => {
+                  const result = await updateCategory(id, name);
+                  if (result.success) router.refresh();
+                  return result;
+                }}
+                onDelete={async (id) => {
+                  const result = await deleteCategory(id);
+                  if (result.success) router.refresh();
+                  return result;
+                }}
+                addPlaceholder="np. Dania główne, Desery, Napoje..."
+              />
+            </TabsContent>
             <TabsContent value="cuisine">
               <TagTable
                 tags={cuisineTypes}

@@ -281,3 +281,92 @@ export async function rejectTagRequest(id: string, note?: string) {
   revalidatePath("/dashboard/dictionaries");
   return { success: true };
 }
+
+// ==================== MENU CATEGORIES ====================
+
+export async function getCategories() {
+  const session = await auth();
+  if (!session) throw new Error("Nie zalogowany");
+  requireAdmin(session.user.role);
+  return db.category.findMany({ orderBy: { sortOrder: "asc" } });
+}
+
+export async function createCategory(name: string) {
+  const session = await auth();
+  if (!session) throw new Error("Nie zalogowany");
+  requireAdmin(session.user.role);
+
+  const maxSortOrder = await db.category.aggregate({
+    _max: { sortOrder: true },
+  });
+
+  try {
+    await db.category.create({
+      data: {
+        name,
+        slug: toSlug(name),
+        sortOrder: (maxSortOrder._max.sortOrder ?? 0) + 1,
+      },
+    });
+  } catch (e) {
+    return handleUniqueError(e);
+  }
+  revalidatePath("/dashboard/dictionaries");
+  revalidatePath("/dashboard/owner/menu");
+  return { success: true as const };
+}
+
+export async function updateCategory(id: string, name: string) {
+  const session = await auth();
+  if (!session) throw new Error("Nie zalogowany");
+  requireAdmin(session.user.role);
+
+  try {
+    await db.category.update({
+      where: { id },
+      data: { name, slug: toSlug(name) },
+    });
+  } catch (e) {
+    return handleUniqueError(e);
+  }
+  revalidatePath("/dashboard/dictionaries");
+  revalidatePath("/dashboard/owner/menu");
+  return { success: true as const };
+}
+
+export async function deleteCategory(id: string) {
+  const session = await auth();
+  if (!session) throw new Error("Nie zalogowany");
+  requireAdmin(session.user.role);
+
+  // Sprawdź czy kategoria ma przypisane dania
+  const mealsCount = await db.meal.count({ where: { categoryId: id } });
+  if (mealsCount > 0) {
+    return {
+      success: false as const,
+      error: `Nie można usunąć kategorii - jest przypisana do ${mealsCount} dań`,
+    };
+  }
+
+  try {
+    await db.category.delete({ where: { id } });
+  } catch (e) {
+    return handleDeleteError(e);
+  }
+  revalidatePath("/dashboard/dictionaries");
+  revalidatePath("/dashboard/owner/menu");
+  return { success: true as const };
+}
+
+export async function updateCategoryOrder(id: string, sortOrder: number) {
+  const session = await auth();
+  if (!session) throw new Error("Nie zalogowany");
+  requireAdmin(session.user.role);
+
+  await db.category.update({
+    where: { id },
+    data: { sortOrder },
+  });
+  revalidatePath("/dashboard/dictionaries");
+  return { success: true };
+}

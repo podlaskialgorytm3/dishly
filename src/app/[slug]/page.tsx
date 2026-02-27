@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import RestaurantPage from "./RestaurantPage";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -10,6 +11,21 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+
+  // Najpierw sprawdź czy to restauracja
+  const restaurant = await db.restaurant.findUnique({
+    where: { slug },
+    select: { name: true, bio: true },
+  });
+
+  if (restaurant) {
+    return {
+      title: restaurant.name,
+      description: restaurant.bio || `Menu restauracji ${restaurant.name}`,
+    };
+  }
+
+  // Jeśli nie restauracja, sprawdź strony CMS
   const page = await db.page.findUnique({
     where: { slug },
   });
@@ -28,6 +44,79 @@ export async function generateMetadata({
 
 export default async function DynamicPage({ params }: PageProps) {
   const { slug } = await params;
+
+  // Najpierw sprawdź czy to restauracja
+  const restaurant = await db.restaurant.findUnique({
+    where: { slug },
+    include: {
+      locations: {
+        where: { isActive: true },
+        select: {
+          id: true,
+          name: true,
+          city: true,
+          address: true,
+          phone: true,
+          openingHours: true,
+          deliveryRadius: true,
+          deliveryFee: true,
+          minOrderValue: true,
+        },
+      },
+      meals: {
+        where: { isAvailable: true },
+        include: {
+          category: true,
+          variants: {
+            where: { isAvailable: true },
+            orderBy: { priceModifier: "asc" },
+          },
+          addons: {
+            where: { isAvailable: true },
+            orderBy: { price: "asc" },
+          },
+          locations: {
+            where: { isAvailable: true },
+            select: { locationId: true },
+          },
+        },
+        orderBy: [{ category: { sortOrder: "asc" } }, { name: "asc" }],
+      },
+      cuisineTypes: true,
+      tags: true,
+    },
+  });
+
+  if (restaurant && restaurant.status === "APPROVED" && restaurant.isActive) {
+    // Serializuj dane dla klienta
+    const serializedRestaurant = {
+      ...restaurant,
+      locations: restaurant.locations.map((loc) => ({
+        ...loc,
+        deliveryFee: Number(loc.deliveryFee),
+        minOrderValue: Number(loc.minOrderValue),
+      })),
+      meals: restaurant.meals.map((meal) => ({
+        ...meal,
+        basePrice: Number(meal.basePrice),
+        protein: meal.protein ? Number(meal.protein) : null,
+        carbs: meal.carbs ? Number(meal.carbs) : null,
+        fat: meal.fat ? Number(meal.fat) : null,
+        variants: meal.variants.map((v) => ({
+          ...v,
+          priceModifier: Number(v.priceModifier),
+        })),
+        addons: meal.addons.map((a) => ({
+          ...a,
+          price: Number(a.price),
+        })),
+      })),
+    };
+
+    return <RestaurantPage restaurant={serializedRestaurant} />;
+  }
+
+  // Jeśli nie restauracja, sprawdź strony CMS
   const page = await db.page.findUnique({
     where: { slug },
   });
@@ -51,14 +140,21 @@ export default async function DynamicPage({ params }: PageProps) {
   );
 }
 
-// Generuj statyczne ścieżki dla opublikowanych stron
+// Generuj statyczne ścieżki dla opublikowanych stron i zatwierdzonych restauracji
 export async function generateStaticParams() {
-  const pages = await db.page.findMany({
-    where: { isPublished: true },
-    select: { slug: true },
-  });
+  const [pages, restaurants] = await Promise.all([
+    db.page.findMany({
+      where: { isPublished: true },
+      select: { slug: true },
+    }),
+    db.restaurant.findMany({
+      where: { status: "APPROVED", isActive: true },
+      select: { slug: true },
+    }),
+  ]);
 
-  return pages.map((page) => ({
-    slug: page.slug,
-  }));
+  return [
+    ...pages.map((page) => ({ slug: page.slug })),
+    ...restaurants.map((restaurant) => ({ slug: restaurant.slug })),
+  ];
 }

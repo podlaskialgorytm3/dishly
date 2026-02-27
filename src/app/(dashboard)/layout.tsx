@@ -121,6 +121,12 @@ export default async function DashboardLayout({
           roles: ["OWNER"],
         },
         {
+          name: "Menu",
+          href: "/dashboard/owner/menu",
+          icon: UtensilsCrossed,
+          roles: ["OWNER"],
+        },
+        {
           name: "Zespół",
           href: "/dashboard/owner/staff",
           icon: Users2,
