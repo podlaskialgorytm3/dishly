@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import {
   ShoppingCart,
   X,
@@ -13,12 +14,45 @@ import {
   AlertCircle,
   MapPin,
   Loader2,
+  Navigation,
+  ChevronDown,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCartStore } from "@/stores/cart-store";
 import { placeOrder } from "@/actions/orders";
+import { getClientAddresses, reverseGeocode } from "@/actions/client/addresses";
+
+type CheckoutMapProps = {
+  latitude: number;
+  longitude: number;
+  address?: string;
+};
+
+const CheckoutMap = dynamic<CheckoutMapProps>(
+  () => import("@/components/storefront/CheckoutMap"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-[180px] items-center justify-center rounded-xl bg-gray-100">
+        <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+      </div>
+    ),
+  },
+);
+
+type SavedAddress = {
+  id: string;
+  label: string | null;
+  street: string;
+  city: string;
+  postalCode: string;
+  latitude: number | null;
+  longitude: number | null;
+  isDefault: boolean;
+};
 
 export function CartDrawer() {
   const router = useRouter();
@@ -33,6 +67,15 @@ export function CartDrawer() {
   const [orderNotes, setOrderNotes] = useState("");
   const [orderError, setOrderError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  // Geolocation & saved addresses state
+  const [customerLat, setCustomerLat] = useState<number | undefined>();
+  const [customerLng, setCustomerLng] = useState<number | undefined>();
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [showAddressPicker, setShowAddressPicker] = useState(false);
+  const [addressesLoaded, setAddressesLoaded] = useState(false);
+  const [geoAsked, setGeoAsked] = useState(false);
 
   const items = useCartStore((s) => s.items);
   const restaurant = useCartStore((s) => s.restaurant);
@@ -53,6 +96,110 @@ export function CartDrawer() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Load saved addresses when checkout opens
+  const loadSavedAddresses = useCallback(async () => {
+    if (addressesLoaded) return;
+    try {
+      const addrs = await getClientAddresses();
+      setSavedAddresses(addrs as SavedAddress[]);
+      setAddressesLoaded(true);
+
+      // Auto-fill from default address if no address filled yet
+      if (!deliveryAddress.trim()) {
+        const defaultAddr = addrs.find((a) => a.isDefault);
+        if (defaultAddr) {
+          setDeliveryAddress(
+            `${defaultAddr.street}, ${defaultAddr.postalCode} ${defaultAddr.city}`,
+          );
+          if (defaultAddr.latitude && defaultAddr.longitude) {
+            setCustomerLat(defaultAddr.latitude);
+            setCustomerLng(defaultAddr.longitude);
+          }
+        }
+      }
+    } catch {
+      // Ignore - user might not be logged in
+    }
+  }, [addressesLoaded, deliveryAddress]);
+
+  // Ask for geolocation when checkout opens
+  const askGeolocation = useCallback(() => {
+    if (geoAsked || customerLat) return;
+    setGeoAsked(true);
+
+    if (!navigator.geolocation) return;
+
+    setGeoLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        setCustomerLat(latitude);
+        setCustomerLng(longitude);
+
+        // If no address filled yet, reverse geocode
+        if (!deliveryAddress.trim()) {
+          try {
+            const result = await reverseGeocode(latitude, longitude);
+            if (result) {
+              const addr = `${result.street}, ${result.postalCode} ${result.city}`;
+              setDeliveryAddress(addr);
+            }
+          } catch {}
+        }
+
+        setGeoLoading(false);
+      },
+      () => {
+        setGeoLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+    );
+  }, [geoAsked, customerLat, deliveryAddress]);
+
+  // When showCheckout changes to true, load addresses + ask geolocation
+  useEffect(() => {
+    if (showCheckout) {
+      loadSavedAddresses();
+      askGeolocation();
+    }
+  }, [showCheckout, loadSavedAddresses, askGeolocation]);
+
+  const selectSavedAddress = (addr: SavedAddress) => {
+    setDeliveryAddress(`${addr.street}, ${addr.postalCode} ${addr.city}`);
+    if (addr.latitude && addr.longitude) {
+      setCustomerLat(addr.latitude);
+      setCustomerLng(addr.longitude);
+    }
+    setShowAddressPicker(false);
+  };
+
+  const handleManualGeolocate = () => {
+    if (!navigator.geolocation) return;
+    setGeoLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        setCustomerLat(latitude);
+        setCustomerLng(longitude);
+
+        try {
+          const result = await reverseGeocode(latitude, longitude);
+          if (result) {
+            setDeliveryAddress(
+              `${result.street}, ${result.postalCode} ${result.city}`,
+            );
+          }
+        } catch {}
+
+        setGeoLoading(false);
+      },
+      () => {
+        setGeoLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+    );
+  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("pl-PL", {
@@ -401,12 +548,113 @@ export function CartDrawer() {
                         onChange={(e) => setGuestPhone(e.target.value)}
                         className="rounded-lg text-sm"
                       />
-                      <Input
-                        placeholder="Adres dostawy"
-                        value={deliveryAddress}
-                        onChange={(e) => setDeliveryAddress(e.target.value)}
-                        className="rounded-lg text-sm"
-                      />
+
+                      {/* Delivery address with geolocation + saved addresses */}
+                      <div className="space-y-2">
+                        <div className="relative">
+                          <Input
+                            placeholder="Adres dostawy"
+                            value={deliveryAddress}
+                            onChange={(e) => {
+                              setDeliveryAddress(e.target.value);
+                              // Clear coordinates when manually typing
+                              setCustomerLat(undefined);
+                              setCustomerLng(undefined);
+                            }}
+                            className="rounded-lg pr-10 text-sm"
+                          />
+                          {savedAddresses.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setShowAddressPicker(!showAddressPicker)
+                              }
+                              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-[#8C8C8C] hover:text-[#FF4D4F]"
+                            >
+                              <ChevronDown className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Saved addresses dropdown */}
+                        <AnimatePresence>
+                          {showAddressPicker && savedAddresses.length > 0 && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="overflow-hidden rounded-lg border border-[#EEEEEE]"
+                            >
+                              <div className="max-h-36 overflow-y-auto">
+                                {savedAddresses.map((addr) => (
+                                  <button
+                                    key={addr.id}
+                                    type="button"
+                                    onClick={() => selectSavedAddress(addr)}
+                                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-[#FFF1F1] transition-colors"
+                                  >
+                                    <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-[#FF4D4F]" />
+                                    <div className="flex-1 min-w-0">
+                                      <span className="font-medium text-[#1F1F1F] truncate block">
+                                        {addr.label && (
+                                          <span className="text-[#8C8C8C]">
+                                            {addr.label} –{" "}
+                                          </span>
+                                        )}
+                                        {addr.street}
+                                      </span>
+                                      <span className="text-[#8C8C8C] block">
+                                        {addr.postalCode} {addr.city}
+                                      </span>
+                                    </div>
+                                    {addr.isDefault && (
+                                      <Star className="h-3 w-3 flex-shrink-0 text-amber-400" />
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+
+                        {/* Geolocation button */}
+                        <button
+                          type="button"
+                          onClick={handleManualGeolocate}
+                          disabled={geoLoading}
+                          className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#FF4D4F]/40 py-1.5 text-xs text-[#FF4D4F] transition-colors hover:bg-[#FFF1F1]"
+                        >
+                          {geoLoading ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Navigation className="h-3.5 w-3.5" />
+                          )}
+                          {geoLoading
+                            ? "Pobieranie lokalizacji..."
+                            : "Użyj mojej lokalizacji"}
+                        </button>
+
+                        {/* Map preview */}
+                        {customerLat && customerLng && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            className="overflow-hidden rounded-xl"
+                          >
+                            <CheckoutMap
+                              latitude={customerLat}
+                              longitude={customerLng}
+                              address={deliveryAddress}
+                            />
+                            <p className="mt-1 flex items-center gap-1 text-[10px] text-green-600">
+                              <MapPin className="h-3 w-3" />
+                              GPS: {customerLat.toFixed(4)},{" "}
+                              {customerLng.toFixed(4)}
+                            </p>
+                          </motion.div>
+                        )}
+                      </div>
+
                       <Input
                         placeholder="Uwagi do zamówienia (opcjonalnie)"
                         value={orderNotes}
@@ -437,19 +685,6 @@ export function CartDrawer() {
                             setOrderError(null);
                             startTransition(async () => {
                               try {
-                                // Get customer coordinates from locationStore if available
-                                let customerLat: number | undefined;
-                                let customerLng: number | undefined;
-                                try {
-                                  const locStoreRaw =
-                                    localStorage.getItem("dishly-location");
-                                  if (locStoreRaw) {
-                                    const locStore = JSON.parse(locStoreRaw);
-                                    customerLat = locStore?.state?.latitude;
-                                    customerLng = locStore?.state?.longitude;
-                                  }
-                                } catch {}
-
                                 const result = await placeOrder({
                                   locationId: location!.id,
                                   restaurantName:

@@ -9,6 +9,7 @@ import {
   Home,
   Menu,
   X,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -118,6 +119,20 @@ export function MainHeader({ user, navigationPages = [] }: MainHeaderProps) {
                     </Button>
                   )}
 
+                  {/* Delivery addresses (only for CLIENT) */}
+                  {user.role === "CLIENT" && (
+                    <Link href="/delivery-settings">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-transparent transition-all duration-200 hover:scale-105 group"
+                        title="Adresy dostawy"
+                      >
+                        <MapPin className="h-5 w-5 text-[#1F1F1F] group-hover:text-[#FF4D4F] transition-colors duration-200" />
+                      </Button>
+                    </Link>
+                  )}
+
                   {/* User Avatar with Name */}
                   <Link href="/dashboard">
                     <div className="hidden md:flex items-center gap-2 rounded-full bg-gray-100 py-1.5 pl-1.5 pr-4 transition-all duration-200 hover:bg-gray-200">
@@ -211,24 +226,44 @@ export function MainHeader({ user, navigationPages = [] }: MainHeaderProps) {
               {/* Mobile User Actions */}
               <div className="mt-auto p-6 border-t border-[#EEEEEE]">
                 {user ? (
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#FF4D4F] to-[#FF8C42] font-semibold text-white">
-                        {getInitials()}
+                  <div className="space-y-3">
+                    {user.role === "CLIENT" && (
+                      <Link
+                        href="/delivery-settings"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-red-50 hover:bg-red-100 transition-colors">
+                          <MapPin className="h-5 w-5 text-[#FF4D4F]" />
+                          <div>
+                            <p className="text-sm font-medium text-[#1F1F1F]">
+                              Adresy dostawy
+                            </p>
+                            <p className="text-xs text-[#8C8C8C]">
+                              Zarządzaj adresami
+                            </p>
+                          </div>
+                        </div>
+                      </Link>
+                    )}
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#FF4D4F] to-[#FF8C42] font-semibold text-white">
+                          {getInitials()}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-[#1F1F1F]">
+                            {getFullName()}
+                          </p>
+                          <p className="text-xs text-[#8C8C8C]">
+                            Przejdź do panelu
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-[#1F1F1F]">
-                          {getFullName()}
-                        </p>
-                        <p className="text-xs text-[#8C8C8C]">
-                          Przejdź do panelu
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
+                    </Link>
+                  </div>
                 ) : (
                   <div className="space-y-3">
                     <Link
