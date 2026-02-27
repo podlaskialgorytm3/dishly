@@ -68,6 +68,7 @@ enum TagType {
   CUISINE
   AMENITY
   DISH
+  CATEGORY
 }
 
 // ============================================

@@ -60,6 +60,7 @@ function TagTypeLabel(type: string) {
   if (type === "CUISINE") return "Kuchnia";
   if (type === "AMENITY") return "Udogodnienie";
   if (type === "DISH") return "Danie";
+  if (type === "CATEGORY") return "Kategoria menu";
   return type;
 }
 

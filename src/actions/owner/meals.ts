@@ -732,3 +732,51 @@ export async function createCategory(data: {
   revalidatePath("/dashboard/dictionaries");
   return { success: true, category };
 }
+
+// ============================================
+// ZGŁOSZENIA KATEGORII (dla właściciela)
+// ============================================
+
+export async function submitCategoryRequest(data: { name: string }) {
+  const session = await auth();
+  if (!session || session.user.role !== "OWNER") {
+    return { success: false, error: "Brak autoryzacji" };
+  }
+
+  if (!data.name?.trim()) {
+    return { success: false, error: "Nazwa kategorii jest wymagana" };
+  }
+
+  const slug = generateSlug(data.name);
+
+  // Sprawdź czy kategoria już istnieje
+  const existingCategory = await db.category.findUnique({ where: { slug } });
+  if (existingCategory) {
+    return { success: false, error: "Kategoria o takiej nazwie już istnieje" };
+  }
+
+  // Sprawdź czy już jest oczekujące zgłoszenie
+  const existingRequest = await db.tagRequest.findFirst({
+    where: {
+      name: { equals: data.name.trim(), mode: "insensitive" },
+      type: "CATEGORY",
+      status: "PENDING",
+    },
+  });
+  if (existingRequest) {
+    return {
+      success: false,
+      error: "Zgłoszenie takiej kategorii już oczekuje na rozpatrzenie",
+    };
+  }
+
+  await db.tagRequest.create({
+    data: {
+      name: data.name.trim(),
+      type: "CATEGORY",
+      requestedBy: session.user.id,
+    },
+  });
+
+  return { success: true };
+}

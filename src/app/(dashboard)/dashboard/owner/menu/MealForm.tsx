@@ -7,8 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   createMeal,
   updateMeal,
+  submitCategoryRequest,
   type MealInput,
   type MealVariantInput,
   type MealAddonInput,
@@ -143,6 +150,37 @@ export default function MealForm({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Stan dla popup'u zgłaszania kategorii
+  const [categoryRequestOpen, setCategoryRequestOpen] = useState(false);
+  const [categoryRequestName, setCategoryRequestName] = useState("");
+  const [categoryRequestLoading, setCategoryRequestLoading] = useState(false);
+
+  const handleCategoryRequest = async () => {
+    if (!categoryRequestName.trim()) {
+      toast.error("Podaj nazwę kategorii");
+      return;
+    }
+    setCategoryRequestLoading(true);
+    try {
+      const result = await submitCategoryRequest({
+        name: categoryRequestName.trim(),
+      });
+      if (result.success) {
+        toast.success(
+          "Zgłoszenie zostało wysłane. Administrator rozpatrzy Twoją propozycję.",
+        );
+        setCategoryRequestName("");
+        setCategoryRequestOpen(false);
+      } else {
+        toast.error(result.error || "Błąd podczas wysyłania zgłoszenia");
+      }
+    } catch {
+      toast.error("Wystąpił nieoczekiwany błąd");
+    } finally {
+      setCategoryRequestLoading(false);
+    }
+  };
 
   // Sekcje rozwijane
   const [expandedSections, setExpandedSections] = useState({
@@ -364,20 +402,42 @@ export default function MealForm({
                 <label className="text-sm font-medium text-[#1F1F1F]">
                   Kategoria *
                 </label>
-                <select
-                  name="categoryId"
-                  value={form.categoryId}
-                  onChange={handleChange}
-                  required
-                  className="w-full rounded-xl border border-[#EEEEEE] bg-white px-4 py-2 text-sm focus:border-[#FF4D4F] focus:outline-none"
-                >
-                  <option value="">Wybierz kategorię</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex gap-2">
+                  <select
+                    name="categoryId"
+                    value={form.categoryId}
+                    onChange={handleChange}
+                    required
+                    className="flex-1 rounded-xl border border-[#EEEEEE] bg-white px-4 py-2 text-sm focus:border-[#FF4D4F] focus:outline-none"
+                  >
+                    <option value="">Wybierz kategorię</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setCategoryRequestOpen(true)}
+                    className="rounded-xl border-[#EEEEEE] hover:border-[#FF4D4F] hover:text-[#FF4D4F]"
+                    title="Zaproponuj nową kategorię"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-[#8C8C8C]">
+                  Nie znalazłeś odpowiedniej kategorii?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setCategoryRequestOpen(true)}
+                    className="text-[#FF4D4F] hover:underline"
+                  >
+                    Zaproponuj nową
+                  </button>
+                </p>
               </div>
             </div>
 
@@ -1037,6 +1097,53 @@ export default function MealForm({
               : "Dodaj danie"}
         </Button>
       </div>
+
+      {/* Dialog zgłaszania nowej kategorii */}
+      <Dialog open={categoryRequestOpen} onOpenChange={setCategoryRequestOpen}>
+        <DialogContent className="rounded-[20px] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-[#1F1F1F]">
+              Zaproponuj nową kategorię
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-[#8C8C8C]">
+              Twoja propozycja zostanie przesłana do administratora, który
+              zdecyduje o jej dodaniu do systemu. Dzięki temu wszystkie
+              kategorie pozostają spójne.
+            </p>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-[#1F1F1F]">
+                Nazwa kategorii *
+              </label>
+              <Input
+                value={categoryRequestName}
+                onChange={(e) => setCategoryRequestName(e.target.value)}
+                placeholder="np. Desery, Napoje, Zupy"
+                className="rounded-xl border-[#EEEEEE]"
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setCategoryRequestOpen(false)}
+                className="rounded-xl"
+              >
+                Anuluj
+              </Button>
+              <Button
+                type="button"
+                onClick={handleCategoryRequest}
+                disabled={categoryRequestLoading || !categoryRequestName.trim()}
+                className="rounded-xl bg-[#FF4D4F] text-white hover:bg-[#FF3B30]"
+              >
+                {categoryRequestLoading ? "Wysyłanie..." : "Wyślij zgłoszenie"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </form>
   );
 }

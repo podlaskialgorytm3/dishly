@@ -253,6 +253,17 @@ export async function approveTagRequest(id: string) {
       await db.dishTag.create({
         data: { name: req.name, slug: toSlug(req.name) },
       });
+    } else if (req.type === "CATEGORY") {
+      const maxSortOrder = await db.category.aggregate({
+        _max: { sortOrder: true },
+      });
+      await db.category.create({
+        data: {
+          name: req.name,
+          slug: toSlug(req.name),
+          sortOrder: (maxSortOrder._max.sortOrder ?? 0) + 1,
+        },
+      });
     }
   } catch (e) {
     if (
