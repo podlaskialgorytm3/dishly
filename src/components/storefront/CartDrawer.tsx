@@ -297,458 +297,468 @@ export function CartDrawer() {
                 </div>
               </div>
 
-              {/* Items */}
-              <div className="flex-1 overflow-y-auto px-5 py-4">
-                {items.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="mb-4 text-5xl">🛒</div>
-                    <h3 className="mb-1 text-lg font-semibold text-[#1F1F1F]">
-                      Koszyk jest pusty
-                    </h3>
-                    <p className="text-sm text-[#8C8C8C]">
-                      Dodaj produkty, aby złożyć zamówienie
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {items.map((item) => {
-                      const addonTotal = item.addons.reduce(
-                        (sum, a) => sum + a.price * a.quantity,
-                        0,
-                      );
-                      const itemTotal =
-                        (item.basePrice +
-                          item.variantPriceModifier +
-                          addonTotal) *
-                        item.quantity;
-
-                      return (
-                        <motion.div
-                          key={item.id}
-                          layout
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          className="rounded-xl border border-[#EEEEEE] p-3"
-                        >
-                          <div className="flex gap-3">
-                            {/* Image */}
-                            <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-[#F5F5F5]">
-                              {item.mealImageUrl ? (
-                                <img
-                                  src={item.mealImageUrl}
-                                  alt={item.mealName}
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : (
-                                <div className="flex h-full items-center justify-center text-2xl">
-                                  🍽️
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Info */}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between">
-                                <div>
-                                  <h4 className="text-sm font-semibold text-[#1F1F1F] truncate">
-                                    {item.mealName}
-                                  </h4>
-                                  {item.variantName && (
-                                    <p className="text-xs text-[#8C8C8C]">
-                                      {item.variantName}
-                                    </p>
-                                  )}
-                                  {item.addons.length > 0 && (
-                                    <p className="text-xs text-[#8C8C8C]">
-                                      +{" "}
-                                      {item.addons
-                                        .map(
-                                          (a) =>
-                                            `${a.name}${a.quantity > 1 ? ` x${a.quantity}` : ""}`,
-                                        )
-                                        .join(", ")}
-                                    </p>
-                                  )}
-                                  {item.note && (
-                                    <p className="text-xs italic text-[#8C8C8C]">
-                                      &ldquo;{item.note}&rdquo;
-                                    </p>
-                                  )}
-                                </div>
-                                <button
-                                  onClick={() => removeItem(item.id)}
-                                  className="ml-2 flex-shrink-0 text-[#CCCCCC] hover:text-[#FF4D4F]"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              </div>
-
-                              <div className="mt-2 flex items-center justify-between">
-                                <div className="flex items-center gap-1.5">
-                                  <button
-                                    onClick={() =>
-                                      updateQuantity(item.id, item.quantity - 1)
-                                    }
-                                    className="flex h-6 w-6 items-center justify-center rounded-md border border-[#EEEEEE] text-[#8C8C8C] hover:border-[#FF4D4F] hover:text-[#FF4D4F]"
-                                  >
-                                    <Minus className="h-3 w-3" />
-                                  </button>
-                                  <span className="min-w-[20px] text-center text-sm font-semibold text-[#1F1F1F]">
-                                    {item.quantity}
-                                  </span>
-                                  <button
-                                    onClick={() =>
-                                      updateQuantity(item.id, item.quantity + 1)
-                                    }
-                                    className="flex h-6 w-6 items-center justify-center rounded-md border border-[#EEEEEE] text-[#8C8C8C] hover:border-[#FF4D4F] hover:text-[#FF4D4F]"
-                                  >
-                                    <Plus className="h-3 w-3" />
-                                  </button>
-                                </div>
-                                <span className="text-sm font-bold text-[#1F1F1F]">
-                                  {formatPrice(itemTotal)}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Footer / Summary */}
-              {items.length > 0 && (
-                <div className="border-t border-[#EEEEEE] px-5 py-4 space-y-3">
-                  {/* Discount code */}
-                  {!discountCode ? (
-                    <div>
-                      {!showDiscount ? (
-                        <button
-                          onClick={() => setShowDiscount(true)}
-                          className="flex items-center gap-2 text-sm text-[#FF4D4F] hover:underline"
-                        >
-                          <Tag className="h-4 w-4" />
-                          Masz kod rabatowy?
-                        </button>
-                      ) : (
-                        <div className="flex gap-2">
-                          <Input
-                            placeholder="Wpisz kod..."
-                            value={discountInput}
-                            onChange={(e) => setDiscountInput(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") handleApplyDiscount();
-                            }}
-                            className="rounded-xl border-[#EEEEEE] text-sm"
-                          />
-                          <Button
-                            onClick={handleApplyDiscount}
-                            variant="outline"
-                            className="rounded-xl border-[#FF4D4F] text-[#FF4D4F] hover:bg-[#FFF1F1]"
-                          >
-                            Zastosuj
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between rounded-xl bg-green-50 px-3 py-2">
-                      <div className="flex items-center gap-2">
-                        <Tag className="h-4 w-4 text-green-600" />
-                        <span className="text-sm font-medium text-green-700">
-                          {discountCode} (-{discountPercent}%)
-                        </span>
-                      </div>
-                      <button
-                        onClick={removeDiscountCode}
-                        className="text-green-600 hover:text-red-500"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Price breakdown */}
-                  <div className="space-y-1.5 text-sm">
-                    <div className="flex justify-between text-[#8C8C8C]">
-                      <span>Suma produktów</span>
-                      <span>{formatPrice(subtotal)}</span>
-                    </div>
-                    {discountCode && (
-                      <div className="flex justify-between text-green-600">
-                        <span>Rabat ({discountPercent}%)</span>
-                        <span>
-                          -{formatPrice(subtotal * (discountPercent / 100))}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex justify-between text-[#8C8C8C]">
-                      <span>Dostawa</span>
-                      <span>
-                        {deliveryFee === 0
-                          ? "Darmowa"
-                          : formatPrice(deliveryFee)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between border-t border-[#EEEEEE] pt-1.5 text-base font-bold text-[#1F1F1F]">
-                      <span>Razem</span>
-                      <span>{formatPrice(total)}</span>
-                    </div>
-                  </div>
-
-                  {/* Location info */}
-                  {location && (
-                    <div className="flex items-center gap-2 text-xs text-[#8C8C8C]">
-                      <MapPin className="h-3 w-3" />
-                      <span>
-                        Dostawa z: {location.name}, {location.city}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Min order warning */}
-                  {!meetsMinOrder && location && (
-                    <div className="flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-700">
-                      <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                      <span>
-                        Minimalna kwota zamówienia:{" "}
-                        {formatPrice(location.minOrderValue)}. Brakuje{" "}
-                        {formatPrice(location.minOrderValue - subtotal)}.
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Order button */}
-                  {!showCheckout ? (
-                    <Button
-                      disabled={!meetsMinOrder}
-                      onClick={() => setShowCheckout(true)}
-                      className="w-full gap-2 rounded-xl bg-[#FF4D4F] py-5 text-base font-semibold text-white transition-all hover:bg-[#FF3B30] disabled:opacity-50"
-                    >
-                      Zamów
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  ) : (
-                    <div className="space-y-3 rounded-xl border border-[#EEEEEE] p-3">
-                      <p className="text-sm font-semibold text-[#1F1F1F]">
-                        Dane dostawy
+              {/* Scrollable content area (items + footer combined) */}
+              <div className="flex-1 overflow-y-auto">
+                {/* Items */}
+                <div className="px-5 py-4">
+                  {items.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                      <div className="mb-4 text-5xl">🛒</div>
+                      <h3 className="mb-1 text-lg font-semibold text-[#1F1F1F]">
+                        Koszyk jest pusty
+                      </h3>
+                      <p className="text-sm text-[#8C8C8C]">
+                        Dodaj produkty, aby złożyć zamówienie
                       </p>
-                      <Input
-                        placeholder="Imię i nazwisko"
-                        value={guestName}
-                        onChange={(e) => setGuestName(e.target.value)}
-                        className="rounded-lg text-sm"
-                      />
-                      <Input
-                        placeholder="Numer telefonu"
-                        value={guestPhone}
-                        onChange={(e) => setGuestPhone(e.target.value)}
-                        className="rounded-lg text-sm"
-                      />
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {items.map((item) => {
+                        const addonTotal = item.addons.reduce(
+                          (sum, a) => sum + a.price * a.quantity,
+                          0,
+                        );
+                        const itemTotal =
+                          (item.basePrice +
+                            item.variantPriceModifier +
+                            addonTotal) *
+                          item.quantity;
 
-                      {/* Delivery address with geolocation + saved addresses */}
-                      <div className="space-y-2">
-                        <div className="relative">
-                          <Input
-                            placeholder="Adres dostawy"
-                            value={deliveryAddress}
-                            onChange={(e) => {
-                              setDeliveryAddress(e.target.value);
-                              // Clear coordinates when manually typing
-                              setCustomerLat(undefined);
-                              setCustomerLng(undefined);
-                            }}
-                            className="rounded-lg pr-10 text-sm"
-                          />
-                          {savedAddresses.length > 0 && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setShowAddressPicker(!showAddressPicker)
-                              }
-                              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-[#8C8C8C] hover:text-[#FF4D4F]"
-                            >
-                              <ChevronDown className="h-4 w-4" />
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Saved addresses dropdown */}
-                        <AnimatePresence>
-                          {showAddressPicker && savedAddresses.length > 0 && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: "auto" }}
-                              exit={{ opacity: 0, height: 0 }}
-                              className="overflow-hidden rounded-lg border border-[#EEEEEE]"
-                            >
-                              <div className="max-h-36 overflow-y-auto">
-                                {savedAddresses.map((addr) => (
-                                  <button
-                                    key={addr.id}
-                                    type="button"
-                                    onClick={() => selectSavedAddress(addr)}
-                                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-[#FFF1F1] transition-colors"
-                                  >
-                                    <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-[#FF4D4F]" />
-                                    <div className="flex-1 min-w-0">
-                                      <span className="font-medium text-[#1F1F1F] truncate block">
-                                        {addr.label && (
-                                          <span className="text-[#8C8C8C]">
-                                            {addr.label} –{" "}
-                                          </span>
-                                        )}
-                                        {addr.street}
-                                      </span>
-                                      <span className="text-[#8C8C8C] block">
-                                        {addr.postalCode} {addr.city}
-                                      </span>
-                                    </div>
-                                    {addr.isDefault && (
-                                      <Star className="h-3 w-3 flex-shrink-0 text-amber-400" />
-                                    )}
-                                  </button>
-                                ))}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-
-                        {/* Geolocation button */}
-                        <button
-                          type="button"
-                          onClick={handleManualGeolocate}
-                          disabled={geoLoading}
-                          className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#FF4D4F]/40 py-1.5 text-xs text-[#FF4D4F] transition-colors hover:bg-[#FFF1F1]"
-                        >
-                          {geoLoading ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <Navigation className="h-3.5 w-3.5" />
-                          )}
-                          {geoLoading
-                            ? "Pobieranie lokalizacji..."
-                            : "Użyj mojej lokalizacji"}
-                        </button>
-
-                        {/* Map preview */}
-                        {customerLat && customerLng && (
+                        return (
                           <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            className="overflow-hidden rounded-xl"
+                            key={item.id}
+                            layout
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="rounded-xl border border-[#EEEEEE] p-3"
                           >
-                            <CheckoutMap
-                              latitude={customerLat}
-                              longitude={customerLng}
-                              address={deliveryAddress}
-                            />
-                            <p className="mt-1 flex items-center gap-1 text-[10px] text-green-600">
-                              <MapPin className="h-3 w-3" />
-                              GPS: {customerLat.toFixed(4)},{" "}
-                              {customerLng.toFixed(4)}
-                            </p>
+                            <div className="flex gap-3">
+                              {/* Image */}
+                              <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-[#F5F5F5]">
+                                {item.mealImageUrl ? (
+                                  <img
+                                    src={item.mealImageUrl}
+                                    alt={item.mealName}
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="flex h-full items-center justify-center text-2xl">
+                                    🍽️
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Info */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between">
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-[#1F1F1F] truncate">
+                                      {item.mealName}
+                                    </h4>
+                                    {item.variantName && (
+                                      <p className="text-xs text-[#8C8C8C]">
+                                        {item.variantName}
+                                      </p>
+                                    )}
+                                    {item.addons.length > 0 && (
+                                      <p className="text-xs text-[#8C8C8C]">
+                                        +{" "}
+                                        {item.addons
+                                          .map(
+                                            (a) =>
+                                              `${a.name}${a.quantity > 1 ? ` x${a.quantity}` : ""}`,
+                                          )
+                                          .join(", ")}
+                                      </p>
+                                    )}
+                                    {item.note && (
+                                      <p className="text-xs italic text-[#8C8C8C]">
+                                        &ldquo;{item.note}&rdquo;
+                                      </p>
+                                    )}
+                                  </div>
+                                  <button
+                                    onClick={() => removeItem(item.id)}
+                                    className="ml-2 flex-shrink-0 text-[#CCCCCC] hover:text-[#FF4D4F]"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
+                                </div>
+
+                                <div className="mt-2 flex items-center justify-between">
+                                  <div className="flex items-center gap-1.5">
+                                    <button
+                                      onClick={() =>
+                                        updateQuantity(
+                                          item.id,
+                                          item.quantity - 1,
+                                        )
+                                      }
+                                      className="flex h-6 w-6 items-center justify-center rounded-md border border-[#EEEEEE] text-[#8C8C8C] hover:border-[#FF4D4F] hover:text-[#FF4D4F]"
+                                    >
+                                      <Minus className="h-3 w-3" />
+                                    </button>
+                                    <span className="min-w-[20px] text-center text-sm font-semibold text-[#1F1F1F]">
+                                      {item.quantity}
+                                    </span>
+                                    <button
+                                      onClick={() =>
+                                        updateQuantity(
+                                          item.id,
+                                          item.quantity + 1,
+                                        )
+                                      }
+                                      className="flex h-6 w-6 items-center justify-center rounded-md border border-[#EEEEEE] text-[#8C8C8C] hover:border-[#FF4D4F] hover:text-[#FF4D4F]"
+                                    >
+                                      <Plus className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                  <span className="text-sm font-bold text-[#1F1F1F]">
+                                    {formatPrice(itemTotal)}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
                           </motion.div>
-                        )}
-                      </div>
-
-                      <Input
-                        placeholder="Uwagi do zamówienia (opcjonalnie)"
-                        value={orderNotes}
-                        onChange={(e) => setOrderNotes(e.target.value)}
-                        className="rounded-lg text-sm"
-                      />
-                      {orderError && (
-                        <p className="text-xs text-red-500">{orderError}</p>
-                      )}
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setShowCheckout(false);
-                            setOrderError(null);
-                          }}
-                          className="flex-1 rounded-lg text-sm"
-                        >
-                          Wróć
-                        </Button>
-                        <Button
-                          disabled={
-                            isPending ||
-                            !deliveryAddress.trim() ||
-                            !guestName.trim()
-                          }
-                          onClick={() => {
-                            setOrderError(null);
-                            startTransition(async () => {
-                              try {
-                                const result = await placeOrder({
-                                  locationId: location!.id,
-                                  restaurantName:
-                                    restaurant?.name ?? "Restauracja",
-                                  restaurantSlug: restaurant?.slug ?? "",
-                                  items: items.map((item) => ({
-                                    mealId: item.mealId,
-                                    mealName: item.mealName,
-                                    variantId: item.variantId,
-                                    variantName: item.variantName,
-                                    basePrice: item.basePrice,
-                                    variantPriceModifier:
-                                      item.variantPriceModifier,
-                                    addons: item.addons.map((a) => ({
-                                      addonId: a.id,
-                                      name: a.name,
-                                      price: a.price,
-                                      quantity: a.quantity,
-                                    })),
-                                    quantity: item.quantity,
-                                    note: item.note,
-                                  })),
-                                  subtotal,
-                                  deliveryFee,
-                                  discountPercent: discountPercent,
-                                  totalPrice: total,
-                                  deliveryAddress: deliveryAddress.trim(),
-                                  customerLat,
-                                  customerLng,
-                                  guestName: guestName.trim(),
-                                  guestPhone: guestPhone.trim() || undefined,
-                                  notes: orderNotes.trim() || undefined,
-                                });
-
-                                if (result.success && result.orderId) {
-                                  clearCart();
-                                  setIsOpen(false);
-                                  setShowCheckout(false);
-                                  router.push(`/order/${result.orderId}`);
-                                } else {
-                                  setOrderError(
-                                    result.error ??
-                                      "Wystąpił błąd przy składaniu zamówienia",
-                                  );
-                                }
-                              } catch (err) {
-                                setOrderError(
-                                  "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.",
-                                );
-                              }
-                            });
-                          }}
-                          className="flex-1 gap-2 rounded-lg bg-[#FF4D4F] text-sm font-semibold text-white hover:bg-[#FF3B30]"
-                        >
-                          {isPending ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : null}
-                          Potwierdź zamówienie
-                        </Button>
-                      </div>
+                        );
+                      })}{" "}
                     </div>
                   )}
                 </div>
-              )}
+
+                {/* Footer / Summary */}
+                {items.length > 0 && (
+                  <div className="border-t border-[#EEEEEE] px-5 py-4 space-y-3">
+                    {/* Discount code */}
+                    {!discountCode ? (
+                      <div>
+                        {!showDiscount ? (
+                          <button
+                            onClick={() => setShowDiscount(true)}
+                            className="flex items-center gap-2 text-sm text-[#FF4D4F] hover:underline"
+                          >
+                            <Tag className="h-4 w-4" />
+                            Masz kod rabatowy?
+                          </button>
+                        ) : (
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Wpisz kod..."
+                              value={discountInput}
+                              onChange={(e) => setDiscountInput(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") handleApplyDiscount();
+                              }}
+                              className="rounded-xl border-[#EEEEEE] text-sm"
+                            />
+                            <Button
+                              onClick={handleApplyDiscount}
+                              variant="outline"
+                              className="rounded-xl border-[#FF4D4F] text-[#FF4D4F] hover:bg-[#FFF1F1]"
+                            >
+                              Zastosuj
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between rounded-xl bg-green-50 px-3 py-2">
+                        <div className="flex items-center gap-2">
+                          <Tag className="h-4 w-4 text-green-600" />
+                          <span className="text-sm font-medium text-green-700">
+                            {discountCode} (-{discountPercent}%)
+                          </span>
+                        </div>
+                        <button
+                          onClick={removeDiscountCode}
+                          className="text-green-600 hover:text-red-500"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Price breakdown */}
+                    <div className="space-y-1.5 text-sm">
+                      <div className="flex justify-between text-[#8C8C8C]">
+                        <span>Suma produktów</span>
+                        <span>{formatPrice(subtotal)}</span>
+                      </div>
+                      {discountCode && (
+                        <div className="flex justify-between text-green-600">
+                          <span>Rabat ({discountPercent}%)</span>
+                          <span>
+                            -{formatPrice(subtotal * (discountPercent / 100))}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-[#8C8C8C]">
+                        <span>Dostawa</span>
+                        <span>
+                          {deliveryFee === 0
+                            ? "Darmowa"
+                            : formatPrice(deliveryFee)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between border-t border-[#EEEEEE] pt-1.5 text-base font-bold text-[#1F1F1F]">
+                        <span>Razem</span>
+                        <span>{formatPrice(total)}</span>
+                      </div>
+                    </div>
+
+                    {/* Location info */}
+                    {location && (
+                      <div className="flex items-center gap-2 text-xs text-[#8C8C8C]">
+                        <MapPin className="h-3 w-3" />
+                        <span>
+                          Dostawa z: {location.name}, {location.city}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Min order warning */}
+                    {!meetsMinOrder && location && (
+                      <div className="flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                        <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                        <span>
+                          Minimalna kwota zamówienia:{" "}
+                          {formatPrice(location.minOrderValue)}. Brakuje{" "}
+                          {formatPrice(location.minOrderValue - subtotal)}.
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Order button */}
+                    {!showCheckout ? (
+                      <Button
+                        disabled={!meetsMinOrder}
+                        onClick={() => setShowCheckout(true)}
+                        className="w-full gap-2 rounded-xl bg-[#FF4D4F] py-5 text-base font-semibold text-white transition-all hover:bg-[#FF3B30] disabled:opacity-50"
+                      >
+                        Zamów
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <div className="space-y-3 rounded-xl border border-[#EEEEEE] p-3">
+                        <p className="text-sm font-semibold text-[#1F1F1F]">
+                          Dane dostawy
+                        </p>
+                        <Input
+                          placeholder="Imię i nazwisko"
+                          value={guestName}
+                          onChange={(e) => setGuestName(e.target.value)}
+                          className="rounded-lg text-sm"
+                        />
+                        <Input
+                          placeholder="Numer telefonu"
+                          value={guestPhone}
+                          onChange={(e) => setGuestPhone(e.target.value)}
+                          className="rounded-lg text-sm"
+                        />
+
+                        {/* Delivery address with geolocation + saved addresses */}
+                        <div className="space-y-2">
+                          <div className="relative">
+                            <Input
+                              placeholder="Adres dostawy"
+                              value={deliveryAddress}
+                              onChange={(e) => {
+                                setDeliveryAddress(e.target.value);
+                                // Clear coordinates when manually typing
+                                setCustomerLat(undefined);
+                                setCustomerLng(undefined);
+                              }}
+                              className="rounded-lg pr-10 text-sm"
+                            />
+                            {savedAddresses.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setShowAddressPicker(!showAddressPicker)
+                                }
+                                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-[#8C8C8C] hover:text-[#FF4D4F]"
+                              >
+                                <ChevronDown className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Saved addresses dropdown */}
+                          <AnimatePresence>
+                            {showAddressPicker && savedAddresses.length > 0 && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="overflow-hidden rounded-lg border border-[#EEEEEE]"
+                              >
+                                <div className="max-h-36 overflow-y-auto">
+                                  {savedAddresses.map((addr) => (
+                                    <button
+                                      key={addr.id}
+                                      type="button"
+                                      onClick={() => selectSavedAddress(addr)}
+                                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-[#FFF1F1] transition-colors"
+                                    >
+                                      <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-[#FF4D4F]" />
+                                      <div className="flex-1 min-w-0">
+                                        <span className="font-medium text-[#1F1F1F] truncate block">
+                                          {addr.label && (
+                                            <span className="text-[#8C8C8C]">
+                                              {addr.label} –{" "}
+                                            </span>
+                                          )}
+                                          {addr.street}
+                                        </span>
+                                        <span className="text-[#8C8C8C] block">
+                                          {addr.postalCode} {addr.city}
+                                        </span>
+                                      </div>
+                                      {addr.isDefault && (
+                                        <Star className="h-3 w-3 flex-shrink-0 text-amber-400" />
+                                      )}
+                                    </button>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+
+                          {/* Geolocation button */}
+                          <button
+                            type="button"
+                            onClick={handleManualGeolocate}
+                            disabled={geoLoading}
+                            className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#FF4D4F]/40 py-1.5 text-xs text-[#FF4D4F] transition-colors hover:bg-[#FFF1F1]"
+                          >
+                            {geoLoading ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Navigation className="h-3.5 w-3.5" />
+                            )}
+                            {geoLoading
+                              ? "Pobieranie lokalizacji..."
+                              : "Użyj mojej lokalizacji"}
+                          </button>
+
+                          {/* Map preview */}
+                          {customerLat && customerLng && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              className="overflow-hidden rounded-xl"
+                            >
+                              <CheckoutMap
+                                latitude={customerLat}
+                                longitude={customerLng}
+                                address={deliveryAddress}
+                              />
+                              <p className="mt-1 flex items-center gap-1 text-[10px] text-green-600">
+                                <MapPin className="h-3 w-3" />
+                                GPS: {customerLat.toFixed(4)},{" "}
+                                {customerLng.toFixed(4)}
+                              </p>
+                            </motion.div>
+                          )}
+                        </div>
+
+                        <Input
+                          placeholder="Uwagi do zamówienia (opcjonalnie)"
+                          value={orderNotes}
+                          onChange={(e) => setOrderNotes(e.target.value)}
+                          className="rounded-lg text-sm"
+                        />
+                        {orderError && (
+                          <p className="text-xs text-red-500">{orderError}</p>
+                        )}
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setShowCheckout(false);
+                              setOrderError(null);
+                            }}
+                            className="flex-1 rounded-lg text-sm"
+                          >
+                            Wróć
+                          </Button>
+                          <Button
+                            disabled={
+                              isPending ||
+                              !deliveryAddress.trim() ||
+                              !guestName.trim()
+                            }
+                            onClick={() => {
+                              setOrderError(null);
+                              startTransition(async () => {
+                                try {
+                                  const result = await placeOrder({
+                                    locationId: location!.id,
+                                    restaurantName:
+                                      restaurant?.name ?? "Restauracja",
+                                    restaurantSlug: restaurant?.slug ?? "",
+                                    items: items.map((item) => ({
+                                      mealId: item.mealId,
+                                      mealName: item.mealName,
+                                      variantId: item.variantId,
+                                      variantName: item.variantName,
+                                      basePrice: item.basePrice,
+                                      variantPriceModifier:
+                                        item.variantPriceModifier,
+                                      addons: item.addons.map((a) => ({
+                                        addonId: a.id,
+                                        name: a.name,
+                                        price: a.price,
+                                        quantity: a.quantity,
+                                      })),
+                                      quantity: item.quantity,
+                                      note: item.note,
+                                    })),
+                                    subtotal,
+                                    deliveryFee,
+                                    discountPercent: discountPercent,
+                                    totalPrice: total,
+                                    deliveryAddress: deliveryAddress.trim(),
+                                    customerLat,
+                                    customerLng,
+                                    guestName: guestName.trim(),
+                                    guestPhone: guestPhone.trim() || undefined,
+                                    notes: orderNotes.trim() || undefined,
+                                  });
+
+                                  if (result.success && result.orderId) {
+                                    clearCart();
+                                    setIsOpen(false);
+                                    setShowCheckout(false);
+                                    router.push(`/order/${result.orderId}`);
+                                  } else {
+                                    setOrderError(
+                                      result.error ??
+                                        "Wystąpił błąd przy składaniu zamówienia",
+                                    );
+                                  }
+                                } catch (err) {
+                                  setOrderError(
+                                    "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.",
+                                  );
+                                }
+                              });
+                            }}
+                            className="flex-1 gap-2 rounded-lg bg-[#FF4D4F] text-sm font-semibold text-white hover:bg-[#FF3B30]"
+                          >
+                            {isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : null}
+                            Potwierdź zamówienie
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              {/* End of scrollable content area */}
             </motion.div>
           </div>
         )}
