@@ -5,6 +5,33 @@ import { db } from "@/lib/db";
 import { hash } from "bcryptjs";
 import { revalidatePath } from "next/cache";
 
+// Funkcja generująca bezpieczne hasło
+function generatePassword(length: number = 12): string {
+  const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const lowercase = "abcdefghijklmnopqrstuvwxyz";
+  const numbers = "0123456789";
+  const symbols = "!@#$%^&*";
+  const allChars = uppercase + lowercase + numbers + symbols;
+
+  let password = "";
+  // Zagwarantuj co najmniej jeden znak z każdej kategorii
+  password += uppercase[Math.floor(Math.random() * uppercase.length)];
+  password += lowercase[Math.floor(Math.random() * lowercase.length)];
+  password += numbers[Math.floor(Math.random() * numbers.length)];
+  password += symbols[Math.floor(Math.random() * symbols.length)];
+
+  // Wypełnij resztę losowymi znakami
+  for (let i = password.length; i < length; i++) {
+    password += allChars[Math.floor(Math.random() * allChars.length)];
+  }
+
+  // Przemieszaj znaki
+  return password
+    .split("")
+    .sort(() => Math.random() - 0.5)
+    .join("");
+}
+
 async function getOwnerRestaurant() {
   const session = await auth();
   if (!session || session.user.role !== "OWNER") {
@@ -63,7 +90,7 @@ export async function createStaff(data: {
   email: string;
   role: "MANAGER" | "WORKER";
   locationId: string;
-  password: string;
+  password?: string; // Opcjonalne - jeśli nie podane, wygeneruje się automatycznie
 }) {
   const { restaurant } = await getOwnerRestaurant();
 
@@ -106,7 +133,9 @@ export async function createStaff(data: {
     throw new Error("Użytkownik z tym adresem email już istnieje");
   }
 
-  const passwordHash = await hash(data.password, 12);
+  // Generuj hasło jeśli nie zostało podane
+  const password = data.password || generatePassword(12);
+  const passwordHash = await hash(password, 12);
 
   const user = await db.user.create({
     data: {
@@ -121,7 +150,7 @@ export async function createStaff(data: {
   });
 
   revalidatePath("/dashboard/owner/staff");
-  return { success: true, user };
+  return { success: true, user, generatedPassword: password };
 }
 
 export async function updateStaff(
