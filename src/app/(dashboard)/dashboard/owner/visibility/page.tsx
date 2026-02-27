@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getVisibilitySettings, UI_PANELS } from "@/actions/owner/visibility";
+import { getVisibilitySettings } from "@/actions/owner/visibility";
+import { UI_PANELS } from "@/constants/visibility";
 import VisibilityClient from "./VisibilityClient";
 
 export default async function VisibilityPage() {
