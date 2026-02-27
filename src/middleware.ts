@@ -80,9 +80,16 @@ export default auth(async function middleware(request) {
       }
     }
 
-    // MANAGER i WORKER mają dostęp tylko do /dashboard i /dashboard/orders
+    // MANAGER i WORKER mają dostęp do określonych paneli
     if (session.user.role === "MANAGER" || session.user.role === "WORKER") {
-      const allowedForStaff = ["/dashboard", "/dashboard/orders"];
+      const allowedForStaff = [
+        "/dashboard",
+        "/dashboard/orders",
+        "/dashboard/statistics",
+        "/dashboard/reports",
+        "/dashboard/owner/menu",
+        "/dashboard/owner/locations",
+      ];
       const isAllowedForStaff = allowedForStaff.some(
         (p) => pathname === p || pathname.startsWith(p + "/"),
       );

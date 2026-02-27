@@ -9,10 +9,16 @@ export default async function EditLocationPage({
   params: Promise<{ id: string }>;
 }) {
   const session = await auth();
-  if (!session || session.user.role !== "OWNER") redirect("/dashboard");
+  if (
+    !session ||
+    (session.user.role !== "OWNER" && session.user.role !== "MANAGER")
+  )
+    redirect("/dashboard");
 
   const { id } = await params;
   const location = await getLocation(id);
+
+  const isOwner = session.user.role === "OWNER";
 
   return (
     <div className="min-h-screen">
@@ -26,7 +32,7 @@ export default async function EditLocationPage({
       </div>
       <div className="px-8 py-8">
         <div className="mx-auto max-w-3xl">
-          <LocationForm location={location} />
+          <LocationForm location={location} isOwner={isOwner} />
         </div>
       </div>
     </div>

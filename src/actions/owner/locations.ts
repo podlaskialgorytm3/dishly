@@ -32,34 +32,74 @@ const DEFAULT_OPENING_HOURS: OpeningHours = {
 
 async function getOwnerRestaurant() {
   const session = await auth();
-  if (!session || session.user.role !== "OWNER") {
+  if (
+    !session ||
+    (session.user.role !== "OWNER" && session.user.role !== "MANAGER")
+  ) {
     throw new Error("Unauthorized");
   }
 
-  const restaurant = await db.restaurant.findFirst({
-    where: { ownerId: session.user.id },
-    include: {
-      subscriptions: {
-        where: { isActive: true },
-        include: { plan: true },
-        orderBy: { createdAt: "desc" },
-        take: 1,
+  // OWNER - znajdź restaurację po ownerId
+  if (session.user.role === "OWNER") {
+    const restaurant = await db.restaurant.findFirst({
+      where: { ownerId: session.user.id },
+      include: {
+        subscriptions: {
+          where: { isActive: true },
+          include: { plan: true },
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
       },
-    },
-  });
+    });
 
-  if (!restaurant) {
-    throw new Error("Restaurant not found");
+    if (!restaurant) {
+      throw new Error("Restaurant not found");
+    }
+
+    return restaurant;
   }
 
-  return restaurant;
+  // MANAGER - znajdź restaurację przez locationId
+  if (session.user.role === "MANAGER" && session.user.locationId) {
+    const location = await db.location.findUnique({
+      where: { id: session.user.locationId },
+      include: {
+        restaurant: {
+          include: {
+            subscriptions: {
+              where: { isActive: true },
+              include: { plan: true },
+              orderBy: { createdAt: "desc" },
+              take: 1,
+            },
+          },
+        },
+      },
+    });
+
+    if (!location || !location.restaurant) {
+      throw new Error("Restaurant not found");
+    }
+
+    return location.restaurant;
+  }
+
+  throw new Error("Unauthorized - no restaurant assignment");
 }
 
 export async function getLocations() {
+  const session = await auth();
   const restaurant = await getOwnerRestaurant();
 
+  // Manager widzi tylko swoją lokalizację
+  const whereClause =
+    session?.user.role === "MANAGER" && session.user.locationId
+      ? { restaurantId: restaurant.id, id: session.user.locationId }
+      : { restaurantId: restaurant.id };
+
   const locations = await db.location.findMany({
-    where: { restaurantId: restaurant.id },
+    where: whereClause,
     include: {
       workers: {
         select: { id: true, firstName: true, lastName: true, role: true },
@@ -109,6 +149,11 @@ export async function createLocation(data: {
   isAllDay: boolean;
   openingHours?: OpeningHours;
 }) {
+  const session = await auth();
+  if (!session || session.user.role !== "OWNER") {
+    throw new Error("Only owners can create locations");
+  }
+
   const restaurant = await getOwnerRestaurant();
 
   // Sprawdź limit subskrypcji
@@ -163,7 +208,13 @@ export async function updateLocation(
     isActive?: boolean;
   },
 ) {
+  const session = await auth();
   const restaurant = await getOwnerRestaurant();
+
+  // Manager może edytować tylko swoją lokalizację
+  if (session?.user.role === "MANAGER" && session.user.locationId !== id) {
+    throw new Error("Managers can only edit their assigned location");
+  }
 
   await db.location.updateMany({
     where: { id, restaurantId: restaurant.id },
@@ -180,6 +231,11 @@ export async function updateLocation(
 }
 
 export async function deleteLocation(id: string) {
+  const session = await auth();
+  if (!session || session.user.role !== "OWNER") {
+    throw new Error("Only owners can delete locations");
+  }
+
   const restaurant = await getOwnerRestaurant();
 
   // Sprawdź czy lokalizacja nie ma pracowników

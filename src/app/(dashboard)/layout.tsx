@@ -158,12 +158,25 @@ export default async function DashboardLayout({
           panelKey: "orders",
         },
         {
+          name: "Menu",
+          href: "/dashboard/owner/menu",
+          icon: UtensilsCrossed,
+          roles: ["MANAGER"],
+          panelKey: "menu",
+        },
+        {
+          name: "Lokalizacje",
+          href: "/dashboard/owner/locations",
+          icon: MapPin,
+          roles: ["MANAGER"],
+          panelKey: "locations",
+        },
+        {
           name: "Statystyki",
           href: "/dashboard/statistics",
           icon: BarChart3,
           roles: ["MANAGER"],
           panelKey: "statistics",
-          disabled: true,
         },
         {
           name: "Raporty",
@@ -171,7 +184,6 @@ export default async function DashboardLayout({
           icon: ClipboardList,
           roles: ["MANAGER"],
           panelKey: "reports",
-          disabled: true,
         },
       ];
       // Filtruj wg ustawień widoczności (domyślnie widoczne)
@@ -189,6 +201,13 @@ export default async function DashboardLayout({
           icon: ShoppingBag,
           roles: ["WORKER"],
           panelKey: "orders",
+        },
+        {
+          name: "Menu",
+          href: "/dashboard/owner/menu",
+          icon: UtensilsCrossed,
+          roles: ["WORKER"],
+          panelKey: "menu",
         },
       ];
       // Filtruj wg ustawień widoczności (domyślnie widoczne)

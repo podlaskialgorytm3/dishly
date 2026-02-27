@@ -91,12 +91,14 @@ type MealsClientProps = {
   meals: Meal[];
   locations: Location[];
   canAddMore: boolean;
+  isOwner: boolean;
 };
 
 export default function MealsClient({
   meals: initialMeals,
   locations,
   canAddMore,
+  isOwner,
 }: MealsClientProps) {
   const [meals, setMeals] = useState(initialMeals);
   const [searchQuery, setSearchQuery] = useState("");
@@ -419,15 +421,17 @@ export default function MealsClient({
                       <Edit className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(meal.id)}
-                    disabled={isDeleting === meal.id}
-                    className="h-9 w-9 rounded-xl hover:bg-red-50 hover:text-red-600"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  {isOwner && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(meal.id)}
+                      disabled={isDeleting === meal.id}
+                      className="h-9 w-9 rounded-xl hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="icon"

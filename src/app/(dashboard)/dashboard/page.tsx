@@ -292,6 +292,13 @@ export default async function DashboardPage() {
           icon: ShoppingBag,
           color: "#FF4D4F",
         },
+        {
+          title: "Menu",
+          description: "Przeglądaj menu restauracji",
+          href: "/dashboard/owner/menu",
+          icon: Store,
+          color: "#FF8C42",
+        },
       ];
     }
 

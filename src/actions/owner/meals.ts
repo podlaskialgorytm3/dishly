@@ -10,31 +10,68 @@ import { revalidatePath } from "next/cache";
 
 async function getOwnerRestaurant() {
   const session = await auth();
-  if (!session || session.user.role !== "OWNER") {
+  if (
+    !session ||
+    (session.user.role !== "OWNER" && session.user.role !== "MANAGER")
+  ) {
     throw new Error("Unauthorized");
   }
 
-  const restaurant = await db.restaurant.findFirst({
-    where: { ownerId: session.user.id },
-    include: {
-      subscriptions: {
-        where: { isActive: true },
-        include: { plan: true },
-        orderBy: { createdAt: "desc" },
-        take: 1,
+  // Dla OWNER - znajdź restaurację po ownerId
+  if (session.user.role === "OWNER") {
+    const restaurant = await db.restaurant.findFirst({
+      where: { ownerId: session.user.id },
+      include: {
+        subscriptions: {
+          where: { isActive: true },
+          include: { plan: true },
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
+        locations: {
+          where: { isActive: true },
+          orderBy: { createdAt: "asc" },
+        },
       },
-      locations: {
-        where: { isActive: true },
-        orderBy: { createdAt: "asc" },
-      },
-    },
-  });
+    });
 
-  if (!restaurant) {
-    throw new Error("Restaurant not found");
+    if (!restaurant) {
+      throw new Error("Restaurant not found");
+    }
+
+    return restaurant;
   }
 
-  return restaurant;
+  // Dla MANAGER - znajdź restaurację przez locationId
+  if (session.user.role === "MANAGER" && session.user.locationId) {
+    const location = await db.location.findUnique({
+      where: { id: session.user.locationId },
+      include: {
+        restaurant: {
+          include: {
+            subscriptions: {
+              where: { isActive: true },
+              include: { plan: true },
+              orderBy: { createdAt: "desc" },
+              take: 1,
+            },
+            locations: {
+              where: { isActive: true },
+              orderBy: { createdAt: "asc" },
+            },
+          },
+        },
+      },
+    });
+
+    if (!location || !location.restaurant) {
+      throw new Error("Restaurant not found");
+    }
+
+    return location.restaurant;
+  }
+
+  throw new Error("Unauthorized - no restaurant access");
 }
 
 function generateSlug(name: string): string {
@@ -517,6 +554,11 @@ export async function toggleMealLocationAvailability(
 // ============================================
 
 export async function deleteMeal(id: string) {
+  const session = await auth();
+  if (!session || session.user.role !== "OWNER") {
+    throw new Error("Only owners can delete meals");
+  }
+
   const restaurant = await getOwnerRestaurant();
 
   // Sprawdź czy danie należy do restauracji

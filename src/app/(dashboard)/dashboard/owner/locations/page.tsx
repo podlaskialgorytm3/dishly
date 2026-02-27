@@ -19,8 +19,13 @@ import DeleteLocationButton from "./DeleteLocationButton";
 
 export default async function LocationsPage() {
   const session = await auth();
-  if (!session || session.user.role !== "OWNER") redirect("/dashboard");
+  if (
+    !session ||
+    (session.user.role !== "OWNER" && session.user.role !== "MANAGER")
+  )
+    redirect("/dashboard");
 
+  const isOwner = session.user.role === "OWNER";
   const { locations, restaurant } = await getLocations();
 
   const activeSub = (restaurant as any).subscriptions?.[0];
@@ -33,47 +38,54 @@ export default async function LocationsPage() {
         <div className="mx-auto max-w-7xl">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-[#1F1F1F]">Lokalizacje</h1>
+              <h1 className="text-2xl font-bold text-[#1F1F1F]">
+                {isOwner ? "Lokalizacje" : "Lokalizacja"}
+              </h1>
               <p className="mt-1 text-sm text-[#8C8C8C]">
-                {locations.length} / {maxLocations} lokalizacji w planie
+                {isOwner
+                  ? `${locations.length} / ${maxLocations} lokalizacji w planie`
+                  : "Zarządzaj godzinami otwarcia i ustawieniami lokalizacji"}
               </p>
             </div>
-            {locations.length < maxLocations ? (
-              <Link href="/dashboard/owner/locations/new">
-                <Button className="gap-2 rounded-xl bg-[#FF4D4F] text-white hover:bg-[#FF3B30]">
-                  <Plus className="h-4 w-4" />
-                  Dodaj lokalizację
-                </Button>
-              </Link>
-            ) : (
-              <div className="flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-4 py-2 text-sm text-orange-700">
-                <AlertCircle className="h-4 w-4" />
-                Osiągnięto limit planu
-              </div>
-            )}
+            {isOwner &&
+              (locations.length < maxLocations ? (
+                <Link href="/dashboard/owner/locations/new">
+                  <Button className="gap-2 rounded-xl bg-[#FF4D4F] text-white hover:bg-[#FF3B30]">
+                    <Plus className="h-4 w-4" />
+                    Dodaj lokalizację
+                  </Button>
+                </Link>
+              ) : (
+                <div className="flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-4 py-2 text-sm text-orange-700">
+                  <AlertCircle className="h-4 w-4" />
+                  Osiągnięto limit planu
+                </div>
+              ))}
           </div>
 
-          {/* Subscription limit bar */}
-          <div className="mt-4">
-            <div className="flex items-center justify-between text-xs text-[#8C8C8C] mb-1">
-              <span>Wykorzystanie planu</span>
-              <span>
-                {locations.length}/{maxLocations}
-              </span>
+          {/* Subscription limit bar - tylko dla OWNER */}
+          {isOwner && (
+            <div className="mt-4">
+              <div className="flex items-center justify-between text-xs text-[#8C8C8C] mb-1">
+                <span>Wykorzystanie planu</span>
+                <span>
+                  {locations.length}/{maxLocations}
+                </span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-[#EEEEEE]">
+                <div
+                  className={`h-2 rounded-full transition-all ${
+                    locations.length >= maxLocations
+                      ? "bg-[#FF4D4F]"
+                      : "bg-[#4CAF50]"
+                  }`}
+                  style={{
+                    width: `${Math.min((locations.length / maxLocations) * 100, 100)}%`,
+                  }}
+                />
+              </div>
             </div>
-            <div className="h-2 w-full rounded-full bg-[#EEEEEE]">
-              <div
-                className={`h-2 rounded-full transition-all ${
-                  locations.length >= maxLocations
-                    ? "bg-[#FF4D4F]"
-                    : "bg-[#4CAF50]"
-                }`}
-                style={{
-                  width: `${Math.min((locations.length / maxLocations) * 100, 100)}%`,
-                }}
-              />
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -89,15 +101,18 @@ export default async function LocationsPage() {
                 Brak lokalizacji
               </h3>
               <p className="mt-2 max-w-sm text-sm text-[#8C8C8C]">
-                Dodaj pierwszą lokalizację swojej restauracji, aby zacząć
-                przyjmować zamówienia.
+                {isOwner
+                  ? "Dodaj pierwszą lokalizację swojej restauracji, aby zacząć przyjmować zamówienia."
+                  : "Nie masz przypisanej lokalizacji. Skontaktuj się z właścicielem restauracji."}
               </p>
-              <Link href="/dashboard/owner/locations/new" className="mt-6">
-                <Button className="gap-2 rounded-xl bg-[#FF4D4F] text-white hover:bg-[#FF3B30]">
-                  <Plus className="h-4 w-4" />
-                  Dodaj pierwszą lokalizację
-                </Button>
-              </Link>
+              {isOwner && (
+                <Link href="/dashboard/owner/locations/new" className="mt-6">
+                  <Button className="gap-2 rounded-xl bg-[#FF4D4F] text-white hover:bg-[#FF3B30]">
+                    <Plus className="h-4 w-4" />
+                    Dodaj pierwszą lokalizację
+                  </Button>
+                </Link>
+              )}
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -149,7 +164,9 @@ export default async function LocationsPage() {
                             <Edit className="h-4 w-4" />
                           </Button>
                         </Link>
-                        <DeleteLocationButton id={loc.id} name={loc.name} />
+                        {isOwner && (
+                          <DeleteLocationButton id={loc.id} name={loc.name} />
+                        )}
                       </div>
                     </div>
 

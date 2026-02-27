@@ -69,8 +69,10 @@ type LocationData = {
 
 export default function LocationForm({
   location,
+  isOwner = true,
 }: {
   location?: LocationData;
+  isOwner?: boolean;
 }) {
   const router = useRouter();
   const isEdit = !!location;
@@ -121,18 +123,26 @@ export default function LocationForm({
     setError("");
 
     try {
-      const data = {
-        name: form.name,
-        address: form.address,
-        city: form.city,
-        postalCode: form.postalCode,
-        phone: form.phone,
-        deliveryRadius: Number(form.deliveryRadius),
-        deliveryFee: Number(form.deliveryFee),
-        minOrderValue: Number(form.minOrderValue),
-        isAllDay: form.isAllDay,
-        openingHours: form.isAllDay ? undefined : hours,
-      };
+      const data = isOwner
+        ? {
+            name: form.name,
+            address: form.address,
+            city: form.city,
+            postalCode: form.postalCode,
+            phone: form.phone,
+            deliveryRadius: Number(form.deliveryRadius),
+            deliveryFee: Number(form.deliveryFee),
+            minOrderValue: Number(form.minOrderValue),
+            isAllDay: form.isAllDay,
+            openingHours: form.isAllDay ? undefined : hours,
+          }
+        : {
+            // Manager może edytować tylko te pola
+            deliveryFee: Number(form.deliveryFee),
+            minOrderValue: Number(form.minOrderValue),
+            isAllDay: form.isAllDay,
+            openingHours: form.isAllDay ? undefined : hours,
+          };
 
       if (isEdit) {
         await updateLocation(location.id, data);
@@ -160,84 +170,86 @@ export default function LocationForm({
       )}
 
       {/* Dane podstawowe */}
-      <div className="rounded-[20px] border border-[#EEEEEE] bg-white p-6 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
-        <h2 className="mb-4 flex items-center gap-2 font-semibold text-[#1F1F1F]">
-          <MapPin className="h-5 w-5 text-[#FF4D4F]" />
-          Dane lokalizacji
-        </h2>
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[#1F1F1F]">
-              Nazwa oddziału *
-            </label>
-            <Input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="np. Centrum, Mokotów"
-              required
-              className="rounded-xl border-[#EEEEEE]"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[#1F1F1F]">
-              Adres *
-            </label>
-            <Input
-              name="address"
-              value={form.address}
-              onChange={handleChange}
-              placeholder="ul. Przykładowa 1"
-              required
-              className="rounded-xl border-[#EEEEEE]"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
+      {isOwner && (
+        <div className="rounded-[20px] border border-[#EEEEEE] bg-white p-6 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
+          <h2 className="mb-4 flex items-center gap-2 font-semibold text-[#1F1F1F]">
+            <MapPin className="h-5 w-5 text-[#FF4D4F]" />
+            Dane lokalizacji
+          </h2>
+          <div className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-[#1F1F1F]">
-                Miasto *
+                Nazwa oddziału *
               </label>
               <Input
-                name="city"
-                value={form.city}
+                name="name"
+                value={form.name}
                 onChange={handleChange}
-                placeholder="Warszawa"
+                placeholder="np. Centrum, Mokotów"
                 required
                 className="rounded-xl border-[#EEEEEE]"
               />
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-[#1F1F1F]">
-                Kod pocztowy *
+                Adres *
               </label>
               <Input
-                name="postalCode"
-                value={form.postalCode}
+                name="address"
+                value={form.address}
                 onChange={handleChange}
-                placeholder="00-001"
+                placeholder="ul. Przykładowa 1"
                 required
                 className="rounded-xl border-[#EEEEEE]"
               />
             </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[#1F1F1F]">
-              Telefon *
-            </label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                placeholder="+48 123 456 789"
-                required
-                className="rounded-xl border-[#EEEEEE] pl-10"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-[#1F1F1F]">
+                  Miasto *
+                </label>
+                <Input
+                  name="city"
+                  value={form.city}
+                  onChange={handleChange}
+                  placeholder="Warszawa"
+                  required
+                  className="rounded-xl border-[#EEEEEE]"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-[#1F1F1F]">
+                  Kod pocztowy *
+                </label>
+                <Input
+                  name="postalCode"
+                  value={form.postalCode}
+                  onChange={handleChange}
+                  placeholder="00-001"
+                  required
+                  className="rounded-xl border-[#EEEEEE]"
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-[#1F1F1F]">
+                Telefon *
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Input
+                  name="phone"
+                  value={form.phone}
+                  onChange={handleChange}
+                  placeholder="+48 123 456 789"
+                  required
+                  className="rounded-xl border-[#EEEEEE] pl-10"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Logistyka dostaw */}
       <div className="rounded-[20px] border border-[#EEEEEE] bg-white p-6 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
@@ -245,21 +257,25 @@ export default function LocationForm({
           <Truck className="h-5 w-5 text-[#FF4D4F]" />
           Finanse i dostawa
         </h2>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[#1F1F1F]">
-              Zasięg dostawy (km)
-            </label>
-            <Input
-              name="deliveryRadius"
-              type="number"
-              min="1"
-              max="100"
-              value={form.deliveryRadius}
-              onChange={handleChange}
-              className="rounded-xl border-[#EEEEEE]"
-            />
-          </div>
+        <div
+          className={`grid gap-4 ${isOwner ? "grid-cols-3" : "grid-cols-2"}`}
+        >
+          {isOwner && (
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-[#1F1F1F]">
+                Zasięg dostawy (km)
+              </label>
+              <Input
+                name="deliveryRadius"
+                type="number"
+                min="1"
+                max="100"
+                value={form.deliveryRadius}
+                onChange={handleChange}
+                className="rounded-xl border-[#EEEEEE]"
+              />
+            </div>
+          )}
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-[#1F1F1F]">
               Koszt dostawy (PLN)
