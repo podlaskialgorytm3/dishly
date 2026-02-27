@@ -11,8 +11,21 @@ import {
   Search,
   Zap,
   Scale,
+  Leaf,
+  Wheat,
+  SlidersHorizontal,
+  Dumbbell,
+  Droplets,
+  ChevronDown,
+  ChevronUp,
+  X,
+  ShoppingCart,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { MealConfiguratorModal } from "@/components/storefront/MealConfiguratorModal";
+import { CartDrawer } from "@/components/storefront/CartDrawer";
+import { motion, AnimatePresence } from "framer-motion";
 
 type MealVariant = {
   id: string;
@@ -54,6 +67,7 @@ type Meal = {
   isVegetarian: boolean;
   isVegan: boolean;
   isGlutenFree: boolean;
+  isAvailable: boolean;
   category: Category;
   variants: MealVariant[];
   addons: MealAddon[];
@@ -108,6 +122,18 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
   const [filterDietary, setFilterDietary] = useState<string | null>(null);
+  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
+  const [showNutritionalFilters, setShowNutritionalFilters] = useState(false);
+  // Nutritional filters
+  const [minProtein, setMinProtein] = useState<number | undefined>(undefined);
+  const [maxProtein, setMaxProtein] = useState<number | undefined>(undefined);
+  const [minCalories, setMinCalories] = useState<number | undefined>(undefined);
+  const [maxCalories, setMaxCalories] = useState<number | undefined>(undefined);
+  const [minCarbs, setMinCarbs] = useState<number | undefined>(undefined);
+  const [maxCarbs, setMaxCarbs] = useState<number | undefined>(undefined);
+  const [minFat, setMinFat] = useState<number | undefined>(undefined);
+  const [maxFat, setMaxFat] = useState<number | undefined>(undefined);
+  const [maxSpice, setMaxSpice] = useState<number | undefined>(undefined);
 
   // Pobierz unikalne kategorie z dań
   const categories = useMemo(() => {
@@ -152,6 +178,43 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
       if (filterDietary === "vegan" && !meal.isVegan) return false;
       if (filterDietary === "glutenFree" && !meal.isGlutenFree) return false;
 
+      // Nutritional filters
+      if (
+        minProtein !== undefined &&
+        (meal.protein === null || meal.protein < minProtein)
+      )
+        return false;
+      if (
+        maxProtein !== undefined &&
+        (meal.protein === null || meal.protein > maxProtein)
+      )
+        return false;
+      if (
+        minCalories !== undefined &&
+        (meal.calories === null || meal.calories < minCalories)
+      )
+        return false;
+      if (
+        maxCalories !== undefined &&
+        (meal.calories === null || meal.calories > maxCalories)
+      )
+        return false;
+      if (
+        minCarbs !== undefined &&
+        (meal.carbs === null || meal.carbs < minCarbs)
+      )
+        return false;
+      if (
+        maxCarbs !== undefined &&
+        (meal.carbs === null || meal.carbs > maxCarbs)
+      )
+        return false;
+      if (minFat !== undefined && (meal.fat === null || meal.fat < minFat))
+        return false;
+      if (maxFat !== undefined && (meal.fat === null || meal.fat > maxFat))
+        return false;
+      if (maxSpice !== undefined && meal.spiceLevel > maxSpice) return false;
+
       return true;
     });
   }, [
@@ -160,6 +223,15 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
     searchQuery,
     filterCategory,
     filterDietary,
+    minProtein,
+    maxProtein,
+    minCalories,
+    maxCalories,
+    minCarbs,
+    maxCarbs,
+    minFat,
+    maxFat,
+    maxSpice,
   ]);
 
   // Grupuj dania po kategoriach
@@ -393,7 +465,230 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
             <option value="vegan">Wegańskie</option>
             <option value="glutenFree">Bezglutenowe</option>
           </select>
+
+          <Button
+            variant="outline"
+            onClick={() => setShowNutritionalFilters(!showNutritionalFilters)}
+            className={`gap-2 rounded-xl border-[#EEEEEE] text-sm ${
+              showNutritionalFilters ? "border-[#FF4D4F] text-[#FF4D4F]" : ""
+            }`}
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            Odżywcze
+            {showNutritionalFilters ? (
+              <ChevronUp className="h-3 w-3" />
+            ) : (
+              <ChevronDown className="h-3 w-3" />
+            )}
+          </Button>
         </div>
+
+        {/* Nutritional Filters Panel */}
+        <AnimatePresence>
+          {showNutritionalFilters && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <div
+                className="mb-6 rounded-[20px] bg-white p-6"
+                style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.04)" }}
+              >
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-[#1F1F1F]">
+                    Filtry odżywcze (na 100g)
+                  </h3>
+                  <button
+                    onClick={() => {
+                      setMinProtein(undefined);
+                      setMaxProtein(undefined);
+                      setMinCalories(undefined);
+                      setMaxCalories(undefined);
+                      setMinCarbs(undefined);
+                      setMaxCarbs(undefined);
+                      setMinFat(undefined);
+                      setMaxFat(undefined);
+                      setMaxSpice(undefined);
+                    }}
+                    className="text-xs text-[#8C8C8C] hover:text-[#FF4D4F]"
+                  >
+                    Wyczyść
+                  </button>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="rounded-xl bg-[#FAFAFA] p-3">
+                    <div className="mb-2 flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-orange-500" />
+                      <span className="text-xs font-medium">
+                        Kalorie [kcal]
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        placeholder="Od"
+                        value={minCalories ?? ""}
+                        onChange={(e) =>
+                          setMinCalories(
+                            e.target.value
+                              ? parseInt(e.target.value)
+                              : undefined,
+                          )
+                        }
+                        className="w-full rounded-lg border border-[#EEEEEE] bg-white px-2 py-1.5 text-xs focus:border-[#FF4D4F] focus:outline-none"
+                      />
+                      <span className="text-xs text-[#8C8C8C]">–</span>
+                      <input
+                        type="number"
+                        placeholder="Do"
+                        value={maxCalories ?? ""}
+                        onChange={(e) =>
+                          setMaxCalories(
+                            e.target.value
+                              ? parseInt(e.target.value)
+                              : undefined,
+                          )
+                        }
+                        className="w-full rounded-lg border border-[#EEEEEE] bg-white px-2 py-1.5 text-xs focus:border-[#FF4D4F] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="rounded-xl bg-[#FAFAFA] p-3">
+                    <div className="mb-2 flex items-center gap-2">
+                      <Dumbbell className="h-4 w-4 text-red-500" />
+                      <span className="text-xs font-medium">Białko [g]</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        placeholder="Od"
+                        value={minProtein ?? ""}
+                        onChange={(e) =>
+                          setMinProtein(
+                            e.target.value
+                              ? parseInt(e.target.value)
+                              : undefined,
+                          )
+                        }
+                        className="w-full rounded-lg border border-[#EEEEEE] bg-white px-2 py-1.5 text-xs focus:border-[#FF4D4F] focus:outline-none"
+                      />
+                      <span className="text-xs text-[#8C8C8C]">–</span>
+                      <input
+                        type="number"
+                        placeholder="Do"
+                        value={maxProtein ?? ""}
+                        onChange={(e) =>
+                          setMaxProtein(
+                            e.target.value
+                              ? parseInt(e.target.value)
+                              : undefined,
+                          )
+                        }
+                        className="w-full rounded-lg border border-[#EEEEEE] bg-white px-2 py-1.5 text-xs focus:border-[#FF4D4F] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="rounded-xl bg-[#FAFAFA] p-3">
+                    <div className="mb-2 flex items-center gap-2">
+                      <Wheat className="h-4 w-4 text-amber-600" />
+                      <span className="text-xs font-medium">
+                        Węglowodany [g]
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        placeholder="Od"
+                        value={minCarbs ?? ""}
+                        onChange={(e) =>
+                          setMinCarbs(
+                            e.target.value
+                              ? parseInt(e.target.value)
+                              : undefined,
+                          )
+                        }
+                        className="w-full rounded-lg border border-[#EEEEEE] bg-white px-2 py-1.5 text-xs focus:border-[#FF4D4F] focus:outline-none"
+                      />
+                      <span className="text-xs text-[#8C8C8C]">–</span>
+                      <input
+                        type="number"
+                        placeholder="Do"
+                        value={maxCarbs ?? ""}
+                        onChange={(e) =>
+                          setMaxCarbs(
+                            e.target.value
+                              ? parseInt(e.target.value)
+                              : undefined,
+                          )
+                        }
+                        className="w-full rounded-lg border border-[#EEEEEE] bg-white px-2 py-1.5 text-xs focus:border-[#FF4D4F] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="rounded-xl bg-[#FAFAFA] p-3">
+                    <div className="mb-2 flex items-center gap-2">
+                      <Droplets className="h-4 w-4 text-blue-500" />
+                      <span className="text-xs font-medium">Tłuszcze [g]</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        placeholder="Od"
+                        value={minFat ?? ""}
+                        onChange={(e) =>
+                          setMinFat(
+                            e.target.value
+                              ? parseInt(e.target.value)
+                              : undefined,
+                          )
+                        }
+                        className="w-full rounded-lg border border-[#EEEEEE] bg-white px-2 py-1.5 text-xs focus:border-[#FF4D4F] focus:outline-none"
+                      />
+                      <span className="text-xs text-[#8C8C8C]">–</span>
+                      <input
+                        type="number"
+                        placeholder="Do"
+                        value={maxFat ?? ""}
+                        onChange={(e) =>
+                          setMaxFat(
+                            e.target.value
+                              ? parseInt(e.target.value)
+                              : undefined,
+                          )
+                        }
+                        className="w-full rounded-lg border border-[#EEEEEE] bg-white px-2 py-1.5 text-xs focus:border-[#FF4D4F] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+                {/* Spice Level Filter */}
+                <div className="mt-4">
+                  <div className="flex items-center gap-3">
+                    <Flame className="h-4 w-4 text-[#FF4D4F]" />
+                    <span className="text-xs font-medium">Max. ostrość</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="9"
+                      value={maxSpice ?? 9}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        setMaxSpice(val === 9 ? undefined : val);
+                      }}
+                      className="flex-1 h-2 cursor-pointer appearance-none rounded-full bg-gradient-to-r from-yellow-300 via-orange-400 to-red-600 accent-[#FF4D4F]"
+                    />
+                    <span className="text-xs font-medium text-[#1F1F1F] w-20 text-right">
+                      {maxSpice !== undefined ? `${maxSpice}/9` : "Bez limitu"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Lista dań pogrupowanych po kategoriach */}
         {filteredMeals.length === 0 ? (
@@ -414,12 +709,27 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
                   </h2>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {mealsByCategory.get(category.id)?.map((meal) => (
-                      <Link
+                      <div
                         key={meal.id}
-                        href={`/${restaurant.slug}/${meal.slug}`}
-                        className="group cursor-pointer rounded-[20px] bg-white p-4 transition-all duration-200 hover:-translate-y-1 block"
+                        onClick={() =>
+                          meal.isAvailable && setSelectedMeal(meal)
+                        }
+                        className={`group cursor-pointer rounded-[20px] bg-white p-4 transition-all duration-200 block relative ${
+                          meal.isAvailable
+                            ? "hover:-translate-y-1"
+                            : "opacity-70"
+                        }`}
                         style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.04)" }}
                       >
+                        {/* Unavailable overlay */}
+                        {!meal.isAvailable && (
+                          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[20px] bg-white/60">
+                            <span className="rounded-full bg-[#1F1F1F] px-4 py-1.5 text-sm font-semibold text-white">
+                              Niedostępne
+                            </span>
+                          </div>
+                        )}
+
                         {/* Obrazek */}
                         <div className="mb-3 h-40 overflow-hidden rounded-xl bg-[#F5F5F5]">
                           {meal.imageUrl ? (
@@ -506,7 +816,21 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
                             </span>
                           )}
                         </div>
-                      </Link>
+
+                        {/* Add to cart button */}
+                        {meal.isAvailable && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedMeal(meal);
+                            }}
+                            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF4D4F] py-2 text-sm font-medium text-white transition-all hover:bg-[#FF3B30]"
+                          >
+                            <ShoppingCart className="h-4 w-4" />
+                            Dodaj do koszyka
+                          </button>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -514,6 +838,33 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
           </div>
         )}
       </div>
+
+      {/* Meal Configurator Modal */}
+      {selectedMeal && currentLocation && (
+        <MealConfiguratorModal
+          meal={selectedMeal}
+          restaurant={{
+            id: restaurant.id,
+            name: restaurant.name,
+            slug: restaurant.slug,
+            logoUrl: restaurant.logoUrl,
+          }}
+          location={{
+            id: currentLocation.id,
+            name: currentLocation.name,
+            city: currentLocation.city,
+            address: currentLocation.address,
+            deliveryFee: currentLocation.deliveryFee,
+            minOrderValue: currentLocation.minOrderValue,
+            deliveryRadius: currentLocation.deliveryRadius,
+          }}
+          isOpen={!!selectedMeal}
+          onClose={() => setSelectedMeal(null)}
+        />
+      )}
+
+      {/* Cart Drawer */}
+      <CartDrawer />
     </div>
   );
 }

@@ -64,20 +64,16 @@ export default async function DynamicPage({ params }: PageProps) {
         },
       },
       meals: {
-        where: { isAvailable: true },
         include: {
           category: true,
           variants: {
-            where: { isAvailable: true },
             orderBy: { priceModifier: "asc" },
           },
           addons: {
-            where: { isAvailable: true },
             orderBy: { price: "asc" },
           },
           locations: {
-            where: { isAvailable: true },
-            select: { locationId: true },
+            select: { locationId: true, isAvailable: true },
           },
         },
         orderBy: [{ category: { sortOrder: "asc" } }, { name: "asc" }],
@@ -102,6 +98,7 @@ export default async function DynamicPage({ params }: PageProps) {
         protein: meal.protein ? Number(meal.protein) : null,
         carbs: meal.carbs ? Number(meal.carbs) : null,
         fat: meal.fat ? Number(meal.fat) : null,
+        isAvailable: meal.isAvailable,
         variants: meal.variants.map((v) => ({
           ...v,
           priceModifier: Number(v.priceModifier),
