@@ -142,19 +142,26 @@ export default async function DynamicPage({ params }: PageProps) {
 
 // Generuj statyczne ścieżki dla opublikowanych stron i zatwierdzonych restauracji
 export async function generateStaticParams() {
-  const [pages, restaurants] = await Promise.all([
-    db.page.findMany({
-      where: { isPublished: true },
-      select: { slug: true },
-    }),
-    db.restaurant.findMany({
-      where: { status: "APPROVED", isActive: true },
-      select: { slug: true },
-    }),
-  ]);
+  try {
+    const [pages, restaurants] = await Promise.all([
+      db.page.findMany({
+        where: { isPublished: true },
+        select: { slug: true },
+      }),
+      db.restaurant.findMany({
+        where: { status: "APPROVED", isActive: true },
+        select: { slug: true },
+      }),
+    ]);
 
-  return [
-    ...pages.map((page) => ({ slug: page.slug })),
-    ...restaurants.map((restaurant) => ({ slug: restaurant.slug })),
-  ];
+    return [
+      ...pages.map((page) => ({ slug: page.slug })),
+      ...restaurants.map((restaurant) => ({ slug: restaurant.slug })),
+    ];
+  } catch (error) {
+    // W przypadku błędu połączenia z bazą, zwróć pustą tablicę
+    // Strony będą generowane dynamicznie
+    console.warn("Could not generate static params:", error);
+    return [];
+  }
 }

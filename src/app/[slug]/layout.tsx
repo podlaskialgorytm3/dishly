@@ -28,7 +28,7 @@ export default async function PageLayout({
   return (
     <>
       <MainHeader user={session?.user} navigationPages={navigationPages} />
-      <main className="min-h-screen bg-[#FAFAFA]">{children}</main>
+      <main className="min-h-screen bg-[#FAFAFA] pt-0">{children}</main>
       <Footer />
     </>
   );

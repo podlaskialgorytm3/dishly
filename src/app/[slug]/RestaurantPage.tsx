@@ -201,23 +201,36 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       {/* Header z cover image */}
-      <div className="relative h-48 md:h-64 lg:h-80 bg-gradient-to-r from-[#FF4D4F] to-[#FF8C00]">
-        {restaurant.coverImageUrl && (
+      <div
+        className="relative h-[400px] md:h-[450px] bg-gradient-to-r from-[#FF4D4F] to-[#FF8C00] overflow-hidden"
+        style={{ boxShadow: "0 12px 30px rgba(0,0,0,0.08)" }}
+      >
+        {restaurant.coverImageUrl ? (
           <img
             src={restaurant.coverImageUrl}
             alt={restaurant.name}
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover object-center"
           />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-9xl opacity-20">🍽️</span>
+          </div>
         )}
-        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30" />
       </div>
 
       {/* Info restauracji */}
-      <div className="container mx-auto -mt-16 px-4 md:px-8">
-        <div className="rounded-[20px] bg-white p-6 shadow-lg">
+      <div className="container mx-auto -mt-16 px-4 md:px-8 relative z-10">
+        <div
+          className="rounded-[20px] bg-white p-6"
+          style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.04)" }}
+        >
           <div className="flex flex-col md:flex-row md:items-start gap-6">
             {/* Logo */}
-            <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-md">
+            <div
+              className="flex h-[120px] w-[120px] flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-white border-4 border-white relative z-20"
+              style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.15)" }}
+            >
               {restaurant.logoUrl ? (
                 <img
                   src={restaurant.logoUrl}
@@ -231,32 +244,43 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
 
             {/* Info */}
             <div className="flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold text-[#1F1F1F]">
+              <h1 className="text-[30px] md:text-[34px] font-bold text-[#1F1F1F] mt-6">
                 {restaurant.name}
               </h1>
 
-              {/* Tagi */}
-              <div className="mt-2 flex flex-wrap gap-2">
-                {restaurant.cuisineTypes.map((cuisine) => (
-                  <span
-                    key={cuisine.id}
-                    className="rounded-full bg-[#FFF1F1] px-3 py-1 text-xs font-medium text-[#FF4D4F]"
-                  >
-                    {cuisine.name}
-                  </span>
-                ))}
-                {restaurant.tags.slice(0, 3).map((tag) => (
-                  <span
-                    key={tag.id}
-                    className="rounded-full bg-[#F5F5F5] px-3 py-1 text-xs font-medium text-[#8C8C8C]"
-                  >
-                    {tag.name}
-                  </span>
-                ))}
-              </div>
+              {/* Rodzaj Kuchni - Chipy */}
+              {restaurant.cuisineTypes.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-3">
+                  {restaurant.cuisineTypes.map((cuisine) => (
+                    <span
+                      key={cuisine.id}
+                      className="rounded-[20px] bg-[#FFF1F1] border border-[#FF4D4F] px-4 py-2 text-sm font-medium text-[#FF4D4F] transition-all duration-200 hover:bg-[#FF4D4F] hover:text-white cursor-pointer"
+                    >
+                      {cuisine.name}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Etykiety - Udogodnienia */}
+              {restaurant.tags.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {restaurant.tags.slice(0, 5).map((tag) => (
+                    <span
+                      key={tag.id}
+                      className="rounded-[16px] bg-[#F5F5F5] px-[14px] py-[6px] text-[13px] font-medium text-[#1F1F1F]"
+                    >
+                      {tag.name}
+                    </span>
+                  ))}
+                </div>
+              )}
 
               {restaurant.bio && (
-                <p className="mt-3 text-sm text-[#8C8C8C] line-clamp-2">
+                <p
+                  className="mt-4 text-sm text-[#8C8C8C] leading-relaxed max-w-[700px]"
+                  style={{ lineHeight: "1.6" }}
+                >
                   {restaurant.bio}
                 </p>
               )}
@@ -269,7 +293,7 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
                   <select
                     value={selectedLocation || ""}
                     onChange={(e) => setSelectedLocation(e.target.value)}
-                    className="mb-2 rounded-xl border border-[#EEEEEE] bg-white px-4 py-2 text-sm focus:border-[#FF4D4F] focus:outline-none"
+                    className="mb-2 rounded-xl border border-[#EEEEEE] bg-white px-4 py-2 text-sm focus:border-[#FF4D4F] focus:outline-none transition-all duration-200"
                   >
                     {restaurant.locations.map((loc) => (
                       <option key={loc.id} value={loc.id}>
@@ -320,7 +344,10 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
       {/* Menu */}
       <div className="container mx-auto px-4 py-8 md:px-8">
         {/* Filtry */}
-        <div className="mb-6 flex flex-wrap items-center gap-4 rounded-[16px] bg-white p-4 shadow-sm">
+        <div
+          className="mb-6 flex flex-wrap items-center gap-4 rounded-[20px] bg-white p-6"
+          style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.04)" }}
+        >
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8C8C8C]" />
             <Input
@@ -334,7 +361,7 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
           <select
             value={filterCategory || ""}
             onChange={(e) => setFilterCategory(e.target.value || null)}
-            className="rounded-xl border border-[#EEEEEE] bg-white px-4 py-2 text-sm focus:border-[#FF4D4F] focus:outline-none"
+            className="rounded-xl border border-[#EEEEEE] bg-white px-4 py-2 text-sm focus:border-[#FF4D4F] focus:outline-none transition-all duration-200"
           >
             <option value="">Wszystkie kategorie</option>
             {categories.map((cat) => (
@@ -347,7 +374,7 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
           <select
             value={filterDietary || ""}
             onChange={(e) => setFilterDietary(e.target.value || null)}
-            className="rounded-xl border border-[#EEEEEE] bg-white px-4 py-2 text-sm focus:border-[#FF4D4F] focus:outline-none"
+            className="rounded-xl border border-[#EEEEEE] bg-white px-4 py-2 text-sm focus:border-[#FF4D4F] focus:outline-none transition-all duration-200"
           >
             <option value="">Wszystkie</option>
             <option value="vegetarian">Wegetariańskie</option>
@@ -358,7 +385,10 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
 
         {/* Lista dań pogrupowanych po kategoriach */}
         {filteredMeals.length === 0 ? (
-          <div className="rounded-[20px] bg-white p-8 text-center shadow-sm">
+          <div
+            className="rounded-[20px] bg-white p-8 text-center"
+            style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.04)" }}
+          >
             <p className="text-[#8C8C8C]">Brak dań spełniających kryteria</p>
           </div>
         ) : (
@@ -375,7 +405,8 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
                       <Link
                         key={meal.id}
                         href={`/${restaurant.slug}/${meal.slug}`}
-                        className="group cursor-pointer rounded-[16px] bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md block"
+                        className="group cursor-pointer rounded-[20px] bg-white p-4 transition-all duration-200 hover:-translate-y-1 block"
+                        style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.04)" }}
                       >
                         {/* Obrazek */}
                         <div className="mb-3 h-40 overflow-hidden rounded-xl bg-[#F5F5F5]">

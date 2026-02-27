@@ -140,25 +140,31 @@ export default async function MealPage({ params }: PageProps) {
 
 // Generuj statyczne ścieżki dla posiłków
 export async function generateStaticParams() {
-  const meals = await db.meal.findMany({
-    where: {
-      isAvailable: true,
-    },
-    select: {
-      slug: true,
-      restaurant: {
-        select: { slug: true, status: true, isActive: true },
+  try {
+    const meals = await db.meal.findMany({
+      where: {
+        isAvailable: true,
       },
-    },
-  });
+      select: {
+        slug: true,
+        restaurant: {
+          select: { slug: true, status: true, isActive: true },
+        },
+      },
+    });
 
-  return meals
-    .filter(
-      (meal) =>
-        meal.restaurant.status === "APPROVED" && meal.restaurant.isActive,
-    )
-    .map((meal) => ({
-      slug: meal.restaurant.slug,
-      mealSlug: meal.slug,
-    }));
+    return meals
+      .filter(
+        (meal) =>
+          meal.restaurant.status === "APPROVED" && meal.restaurant.isActive,
+      )
+      .map((meal) => ({
+        slug: meal.restaurant.slug,
+        mealSlug: meal.slug,
+      }));
+  } catch (error) {
+    // W przypadku błędu połączenia z bazą, zwróć pustą tablicę
+    console.warn("Could not generate static params for meals:", error);
+    return [];
+  }
 }
