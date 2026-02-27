@@ -117,6 +117,7 @@ export default async function Home() {
             <RestaurantCard
               key={restaurant.id}
               id={restaurant.id}
+              slug={restaurant.slug}
               name={restaurant.name}
               imageUrl={restaurant.logoUrl || ""}
               rating={4.5 + Math.random() * 0.5} // Mock rating
