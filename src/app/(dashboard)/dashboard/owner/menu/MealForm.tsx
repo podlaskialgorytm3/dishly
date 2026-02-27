@@ -312,7 +312,7 @@ export default function MealForm({
       protein: form.protein ? parseFloat(form.protein) : undefined,
       carbs: form.carbs ? parseFloat(form.carbs) : undefined,
       fat: form.fat ? parseFloat(form.fat) : undefined,
-      spiceLevel: form.spiceLevel,
+      spiceLevel: Number(form.spiceLevel),
       isAvailable: form.isAvailable,
       isVegetarian: form.isVegetarian,
       isVegan: form.isVegan,
