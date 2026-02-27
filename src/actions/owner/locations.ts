@@ -68,7 +68,14 @@ export async function getLocations() {
     orderBy: { createdAt: "asc" },
   });
 
-  return { locations, restaurant };
+  // Konwertuj Decimal na number dla kompatybilności z Client Components
+  const serializedLocations = locations.map((loc) => ({
+    ...loc,
+    deliveryFee: Number(loc.deliveryFee),
+    minOrderValue: Number(loc.minOrderValue),
+  }));
+
+  return { locations: serializedLocations, restaurant };
 }
 
 export async function getLocation(id: string) {
@@ -82,7 +89,12 @@ export async function getLocation(id: string) {
     throw new Error("Location not found");
   }
 
-  return location;
+  // Konwertuj Decimal na number dla kompatybilności z Client Components
+  return {
+    ...location,
+    deliveryFee: Number(location.deliveryFee),
+    minOrderValue: Number(location.minOrderValue),
+  };
 }
 
 export async function createLocation(data: {
