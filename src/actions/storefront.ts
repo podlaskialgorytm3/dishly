@@ -169,9 +169,14 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
           },
         },
       },
-      take: 50,
+      take: 100,
       orderBy: { createdAt: "desc" },
     });
+
+    console.log(
+      `[Storefront] Found ${restaurants.length} restaurants with filters:`,
+      JSON.stringify(filters || "none"),
+    );
 
     // Calculate average rating and apply rating filter
     let processedRestaurants = restaurants.map((restaurant) => {

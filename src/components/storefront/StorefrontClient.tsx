@@ -189,7 +189,8 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
           isVegetarian: newFilters.isVegetarian || undefined,
           isVegan: newFilters.isVegan || undefined,
           maxSpiceLevel: newFilters.maxSpiceLevel,
-          city: userLocation?.city || undefined,
+          // Don't filter by city - show all restaurants
+          city: undefined,
         };
 
         const result = await getStorefrontData(apiFilters);
