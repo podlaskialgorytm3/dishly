@@ -19,9 +19,16 @@ import {
   UtensilsCrossed,
   Timer,
   AlertCircle,
+  Plus,
+  Minus,
+  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { updateOrderStatus, getLocationOrders } from "@/actions/orders";
+import {
+  updateOrderStatus,
+  getLocationOrders,
+  updateEstimatedTime,
+} from "@/actions/orders";
 
 // ============================================
 // TYPES
@@ -42,6 +49,7 @@ type OrderData = {
   orderNumber: string;
   status: string;
   type: string;
+  paymentStatus: string;
   subtotal: number;
   deliveryFee: number;
   totalPrice: number;
@@ -172,6 +180,9 @@ function OrderCard({
 }) {
   const [expanded, setExpanded] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [showTimeEditor, setShowTimeEditor] = useState(false);
+  const [editedTime, setEditedTime] = useState(order.estimatedTime ?? 30);
+  const [isTimePending, startTimeTransition] = useTransition();
   const config = STATUS_CONFIG[order.status] || STATUS_CONFIG.PENDING;
 
   const formatPrice = (price: number) =>
@@ -228,6 +239,24 @@ function OrderCard({
           <span className="font-mono text-xs text-[#8C8C8C]">
             {order.orderNumber}
           </span>
+          {order.paymentStatus === "PAID" && (
+            <span className="flex items-center gap-0.5 rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-700">
+              <CreditCard className="h-2.5 w-2.5" />
+              Opłacone
+            </span>
+          )}
+          {order.paymentStatus === "PENDING" && (
+            <span className="flex items-center gap-0.5 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
+              <Clock className="h-2.5 w-2.5" />
+              Oczekuje
+            </span>
+          )}
+          {order.type === "PICKUP" && (
+            <span className="flex items-center gap-0.5 rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
+              <Package className="h-2.5 w-2.5" />
+              Odbiór
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-1 text-xs text-[#8C8C8C]">
@@ -326,10 +355,17 @@ function OrderCard({
             <span className="text-lg font-bold text-[#1F1F1F]">
               {formatPrice(order.totalPrice)}
             </span>
-            {order.estimatedTime && (
-              <span className="flex items-center gap-1 text-xs text-[#8C8C8C]">
+            {order.estimatedTime && !showTimeEditor && (
+              <button
+                onClick={() => {
+                  setEditedTime(order.estimatedTime ?? 30);
+                  setShowTimeEditor(true);
+                }}
+                className="flex items-center gap-1 rounded-full bg-[#F5F5F5] px-2 py-1 text-xs text-[#8C8C8C] transition-colors hover:bg-[#EEEEEE] hover:text-[#1F1F1F]"
+                title="Kliknij, aby zmienić czas realizacji"
+              >
                 <Timer className="h-3 w-3" />~{order.estimatedTime} min
-              </span>
+              </button>
             )}
           </div>
           <button
@@ -347,6 +383,93 @@ function OrderCard({
             )}
           </button>
         </div>
+
+        {/* Estimated time editor */}
+        {showTimeEditor &&
+          !["DELIVERED", "CANCELLED"].includes(order.status) && (
+            <div className="mt-3 rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] p-3">
+              <p className="mb-2 text-xs font-semibold text-[#1F1F1F]">
+                Zmień szacowany czas realizacji
+              </p>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setEditedTime((t) => Math.max(5, t - 5))}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#EEEEEE] text-[#8C8C8C] hover:border-[#FF4D4F] hover:text-[#FF4D4F]"
+                >
+                  <Minus className="h-4 w-4" />
+                </button>
+                <div className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    value={editedTime}
+                    onChange={(e) => {
+                      const v = parseInt(e.target.value);
+                      if (!isNaN(v) && v >= 5 && v <= 180) setEditedTime(v);
+                    }}
+                    className="w-14 rounded-lg border border-[#EEEEEE] py-1 text-center text-sm font-bold text-[#1F1F1F] focus:border-[#FF4D4F] focus:outline-none"
+                    min={5}
+                    max={180}
+                  />
+                  <span className="text-xs text-[#8C8C8C]">min</span>
+                </div>
+                <button
+                  onClick={() => setEditedTime((t) => Math.min(180, t + 5))}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#EEEEEE] text-[#8C8C8C] hover:border-[#FF4D4F] hover:text-[#FF4D4F]"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+
+                {/* Quick presets */}
+                <div className="flex gap-1">
+                  {[15, 30, 45, 60].map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setEditedTime(t)}
+                      className={`rounded-md px-2 py-1 text-xs transition-colors ${
+                        editedTime === t
+                          ? "bg-[#FF4D4F] text-white"
+                          : "bg-white border border-[#EEEEEE] text-[#8C8C8C] hover:border-[#FF4D4F] hover:text-[#FF4D4F]"
+                      }`}
+                    >
+                      {t}m
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-2 flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowTimeEditor(false)}
+                  className="h-8 rounded-lg text-xs"
+                  disabled={isTimePending}
+                >
+                  Anuluj
+                </Button>
+                <Button
+                  onClick={() => {
+                    startTimeTransition(async () => {
+                      const result = await updateEstimatedTime(
+                        order.id,
+                        editedTime,
+                      );
+                      if (result.success) {
+                        setShowTimeEditor(false);
+                        onStatusUpdate();
+                      }
+                    });
+                  }}
+                  disabled={isTimePending}
+                  className="h-8 rounded-lg bg-[#FF4D4F] text-xs text-white hover:bg-[#FF3B30]"
+                >
+                  {isTimePending ? (
+                    <RefreshCw className="h-3 w-3 animate-spin" />
+                  ) : (
+                    "Zapisz"
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
 
         {/* Expanded details */}
         {expanded && (

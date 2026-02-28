@@ -17,12 +17,15 @@ import {
   Navigation,
   ChevronDown,
   Star,
+  CreditCard,
+  Package,
+  Truck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCartStore } from "@/stores/cart-store";
-import { placeOrder } from "@/actions/orders";
+import { verifyCartAvailability } from "@/actions/orders";
 import { getClientAddresses, reverseGeocode } from "@/actions/client/addresses";
 
 type CheckoutMapProps = {
@@ -62,10 +65,12 @@ export function CartDrawer() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [orderNotes, setOrderNotes] = useState("");
   const [orderError, setOrderError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [orderType, setOrderType] = useState<"DELIVERY" | "PICKUP">("DELIVERY");
 
   // Geolocation & saved addresses state
   const [customerLat, setCustomerLat] = useState<number | undefined>();
@@ -544,7 +549,39 @@ export function CartDrawer() {
                     ) : (
                       <div className="space-y-3 rounded-xl border border-[#EEEEEE] p-3">
                         <p className="text-sm font-semibold text-[#1F1F1F]">
-                          Dane dostawy
+                          Finalizacja zamówienia
+                        </p>
+
+                        {/* Delivery / Pickup toggle */}
+                        <div className="flex rounded-lg border border-[#EEEEEE] overflow-hidden">
+                          <button
+                            type="button"
+                            onClick={() => setOrderType("DELIVERY")}
+                            className={`flex flex-1 items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors ${
+                              orderType === "DELIVERY"
+                                ? "bg-[#FF4D4F] text-white"
+                                : "bg-white text-[#8C8C8C] hover:bg-[#F5F5F5]"
+                            }`}
+                          >
+                            <Truck className="h-3.5 w-3.5" />
+                            Dostawa
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setOrderType("PICKUP")}
+                            className={`flex flex-1 items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors ${
+                              orderType === "PICKUP"
+                                ? "bg-[#FF4D4F] text-white"
+                                : "bg-white text-[#8C8C8C] hover:bg-[#F5F5F5]"
+                            }`}
+                          >
+                            <Package className="h-3.5 w-3.5" />
+                            Odbiór osobisty
+                          </button>
+                        </div>
+
+                        <p className="text-xs font-medium text-[#8C8C8C]">
+                          Dane kontaktowe
                         </p>
                         <Input
                           placeholder="Imię i nazwisko"
@@ -558,115 +595,145 @@ export function CartDrawer() {
                           onChange={(e) => setGuestPhone(e.target.value)}
                           className="rounded-lg text-sm"
                         />
+                        <Input
+                          placeholder="E-mail (opcjonalnie, dla potwierdzenia)"
+                          value={guestEmail}
+                          onChange={(e) => setGuestEmail(e.target.value)}
+                          className="rounded-lg text-sm"
+                          type="email"
+                        />
 
-                        {/* Delivery address with geolocation + saved addresses */}
-                        <div className="space-y-2">
-                          <div className="relative">
-                            <Input
-                              placeholder="Adres dostawy"
-                              value={deliveryAddress}
-                              onChange={(e) => {
-                                setDeliveryAddress(e.target.value);
-                                // Clear coordinates when manually typing
-                                setCustomerLat(undefined);
-                                setCustomerLng(undefined);
-                              }}
-                              className="rounded-lg pr-10 text-sm"
-                            />
-                            {savedAddresses.length > 0 && (
+                        {/* Address section — only for DELIVERY */}
+                        {orderType === "DELIVERY" && (
+                          <>
+                            <p className="text-xs font-medium text-[#8C8C8C]">
+                              Adres dostawy
+                            </p>
+                            {/* Delivery address with geolocation + saved addresses */}
+                            <div className="space-y-2">
+                              <div className="relative">
+                                <Input
+                                  placeholder="Adres dostawy"
+                                  value={deliveryAddress}
+                                  onChange={(e) => {
+                                    setDeliveryAddress(e.target.value);
+                                    setCustomerLat(undefined);
+                                    setCustomerLng(undefined);
+                                  }}
+                                  className="rounded-lg pr-10 text-sm"
+                                />
+                                {savedAddresses.length > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setShowAddressPicker(!showAddressPicker)
+                                    }
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-[#8C8C8C] hover:text-[#FF4D4F]"
+                                  >
+                                    <ChevronDown className="h-4 w-4" />
+                                  </button>
+                                )}
+                              </div>
+
+                              {/* Saved addresses dropdown */}
+                              <AnimatePresence>
+                                {showAddressPicker &&
+                                  savedAddresses.length > 0 && (
+                                    <motion.div
+                                      initial={{ opacity: 0, height: 0 }}
+                                      animate={{ opacity: 1, height: "auto" }}
+                                      exit={{ opacity: 0, height: 0 }}
+                                      className="overflow-hidden rounded-lg border border-[#EEEEEE]"
+                                    >
+                                      <div className="max-h-36 overflow-y-auto">
+                                        {savedAddresses.map((addr) => (
+                                          <button
+                                            key={addr.id}
+                                            type="button"
+                                            onClick={() =>
+                                              selectSavedAddress(addr)
+                                            }
+                                            className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-[#FFF1F1] transition-colors"
+                                          >
+                                            <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-[#FF4D4F]" />
+                                            <div className="flex-1 min-w-0">
+                                              <span className="font-medium text-[#1F1F1F] truncate block">
+                                                {addr.label && (
+                                                  <span className="text-[#8C8C8C]">
+                                                    {addr.label} –{" "}
+                                                  </span>
+                                                )}
+                                                {addr.street}
+                                              </span>
+                                              <span className="text-[#8C8C8C] block">
+                                                {addr.postalCode} {addr.city}
+                                              </span>
+                                            </div>
+                                            {addr.isDefault && (
+                                              <Star className="h-3 w-3 flex-shrink-0 text-amber-400" />
+                                            )}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </motion.div>
+                                  )}
+                              </AnimatePresence>
+
+                              {/* Geolocation button */}
                               <button
                                 type="button"
-                                onClick={() =>
-                                  setShowAddressPicker(!showAddressPicker)
-                                }
-                                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-[#8C8C8C] hover:text-[#FF4D4F]"
+                                onClick={handleManualGeolocate}
+                                disabled={geoLoading}
+                                className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#FF4D4F]/40 py-1.5 text-xs text-[#FF4D4F] transition-colors hover:bg-[#FFF1F1]"
                               >
-                                <ChevronDown className="h-4 w-4" />
+                                {geoLoading ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Navigation className="h-3.5 w-3.5" />
+                                )}
+                                {geoLoading
+                                  ? "Pobieranie lokalizacji..."
+                                  : "Użyj mojej lokalizacji"}
                               </button>
-                            )}
+
+                              {/* Map preview */}
+                              {customerLat && customerLng && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  className="overflow-hidden rounded-xl"
+                                >
+                                  <CheckoutMap
+                                    latitude={customerLat}
+                                    longitude={customerLng}
+                                    address={deliveryAddress}
+                                  />
+                                  <p className="mt-1 flex items-center gap-1 text-[10px] text-green-600">
+                                    <MapPin className="h-3 w-3" />
+                                    GPS: {customerLat.toFixed(4)},{" "}
+                                    {customerLng.toFixed(4)}
+                                  </p>
+                                </motion.div>
+                              )}
+                            </div>
+                          </>
+                        )}
+
+                        {/* Pickup info */}
+                        {orderType === "PICKUP" && location && (
+                          <div className="rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-700">
+                            <div className="flex items-center gap-1.5 font-medium">
+                              <MapPin className="h-3.5 w-3.5" />
+                              Punkt odbioru
+                            </div>
+                            <p className="mt-1">
+                              {location.name}, {location.city}
+                            </p>
                           </div>
-
-                          {/* Saved addresses dropdown */}
-                          <AnimatePresence>
-                            {showAddressPicker && savedAddresses.length > 0 && (
-                              <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: "auto" }}
-                                exit={{ opacity: 0, height: 0 }}
-                                className="overflow-hidden rounded-lg border border-[#EEEEEE]"
-                              >
-                                <div className="max-h-36 overflow-y-auto">
-                                  {savedAddresses.map((addr) => (
-                                    <button
-                                      key={addr.id}
-                                      type="button"
-                                      onClick={() => selectSavedAddress(addr)}
-                                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-[#FFF1F1] transition-colors"
-                                    >
-                                      <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-[#FF4D4F]" />
-                                      <div className="flex-1 min-w-0">
-                                        <span className="font-medium text-[#1F1F1F] truncate block">
-                                          {addr.label && (
-                                            <span className="text-[#8C8C8C]">
-                                              {addr.label} –{" "}
-                                            </span>
-                                          )}
-                                          {addr.street}
-                                        </span>
-                                        <span className="text-[#8C8C8C] block">
-                                          {addr.postalCode} {addr.city}
-                                        </span>
-                                      </div>
-                                      {addr.isDefault && (
-                                        <Star className="h-3 w-3 flex-shrink-0 text-amber-400" />
-                                      )}
-                                    </button>
-                                  ))}
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-
-                          {/* Geolocation button */}
-                          <button
-                            type="button"
-                            onClick={handleManualGeolocate}
-                            disabled={geoLoading}
-                            className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#FF4D4F]/40 py-1.5 text-xs text-[#FF4D4F] transition-colors hover:bg-[#FFF1F1]"
-                          >
-                            {geoLoading ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Navigation className="h-3.5 w-3.5" />
-                            )}
-                            {geoLoading
-                              ? "Pobieranie lokalizacji..."
-                              : "Użyj mojej lokalizacji"}
-                          </button>
-
-                          {/* Map preview */}
-                          {customerLat && customerLng && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: "auto" }}
-                              className="overflow-hidden rounded-xl"
-                            >
-                              <CheckoutMap
-                                latitude={customerLat}
-                                longitude={customerLng}
-                                address={deliveryAddress}
-                              />
-                              <p className="mt-1 flex items-center gap-1 text-[10px] text-green-600">
-                                <MapPin className="h-3 w-3" />
-                                GPS: {customerLat.toFixed(4)},{" "}
-                                {customerLng.toFixed(4)}
-                              </p>
-                            </motion.div>
-                          )}
-                        </div>
+                        )}
 
                         <Input
-                          placeholder="Uwagi do zamówienia (opcjonalnie)"
+                          placeholder="Notatka do zamówienia (np. kod do domofonu, bez sztućców...)"
                           value={orderNotes}
                           onChange={(e) => setOrderNotes(e.target.value)}
                           className="rounded-lg text-sm"
@@ -674,6 +741,16 @@ export function CartDrawer() {
                         {orderError && (
                           <p className="text-xs text-red-500">{orderError}</p>
                         )}
+
+                        {/* Payment info notice */}
+                        <div className="flex items-center gap-2 rounded-lg bg-[#F5F5F5] px-3 py-2 text-xs text-[#8C8C8C]">
+                          <CreditCard className="h-3.5 w-3.5 flex-shrink-0" />
+                          <span>
+                            Po kliknięciu zostaniesz przekierowany na bezpieczną
+                            stronę płatności Stripe
+                          </span>
+                        </div>
+
                         <div className="flex gap-2">
                           <Button
                             variant="outline"
@@ -688,56 +765,104 @@ export function CartDrawer() {
                           <Button
                             disabled={
                               isPending ||
-                              !deliveryAddress.trim() ||
+                              (orderType === "DELIVERY" &&
+                                !deliveryAddress.trim()) ||
                               !guestName.trim()
                             }
                             onClick={() => {
                               setOrderError(null);
                               startTransition(async () => {
                                 try {
-                                  const result = await placeOrder({
-                                    locationId: location!.id,
-                                    restaurantName:
-                                      restaurant?.name ?? "Restauracja",
-                                    restaurantSlug: restaurant?.slug ?? "",
-                                    items: items.map((item) => ({
+                                  // 1. Server-side check: restaurant open + items available
+                                  const check = await verifyCartAvailability(
+                                    location!.id,
+                                    items.map((item) => ({
                                       mealId: item.mealId,
-                                      mealName: item.mealName,
                                       variantId: item.variantId,
-                                      variantName: item.variantName,
-                                      basePrice: item.basePrice,
-                                      variantPriceModifier:
-                                        item.variantPriceModifier,
-                                      addons: item.addons.map((a) => ({
-                                        addonId: a.id,
-                                        name: a.name,
-                                        price: a.price,
-                                        quantity: a.quantity,
-                                      })),
-                                      quantity: item.quantity,
-                                      note: item.note,
+                                      addonIds: item.addons.map((a) => a.id),
                                     })),
-                                    subtotal,
-                                    deliveryFee,
-                                    discountPercent: discountPercent,
-                                    totalPrice: total,
-                                    deliveryAddress: deliveryAddress.trim(),
-                                    customerLat,
-                                    customerLng,
-                                    guestName: guestName.trim(),
-                                    guestPhone: guestPhone.trim() || undefined,
-                                    notes: orderNotes.trim() || undefined,
+                                  );
+
+                                  if (!check.available) {
+                                    setOrderError(
+                                      check.error ??
+                                        "Koszyk uległ zmianie. Odśwież stronę.",
+                                    );
+                                    return;
+                                  }
+
+                                  // 2. Create Stripe Checkout Session via API
+                                  const res = await fetch("/api/checkout", {
+                                    method: "POST",
+                                    headers: {
+                                      "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                      locationId: location!.id,
+                                      restaurantName:
+                                        restaurant?.name ?? "Restauracja",
+                                      restaurantSlug: restaurant?.slug ?? "",
+                                      items: items.map((item) => ({
+                                        mealId: item.mealId,
+                                        mealName: item.mealName,
+                                        variantId: item.variantId,
+                                        variantName: item.variantName,
+                                        basePrice: item.basePrice,
+                                        variantPriceModifier:
+                                          item.variantPriceModifier,
+                                        addons: item.addons.map((a) => ({
+                                          addonId: a.id,
+                                          name: a.name,
+                                          price: a.price,
+                                          quantity: a.quantity,
+                                        })),
+                                        quantity: item.quantity,
+                                        note: item.note,
+                                      })),
+                                      subtotal,
+                                      deliveryFee,
+                                      discountPercent,
+                                      totalPrice: total,
+                                      deliveryAddress:
+                                        orderType === "DELIVERY"
+                                          ? deliveryAddress.trim()
+                                          : null,
+                                      customerLat:
+                                        orderType === "DELIVERY"
+                                          ? customerLat
+                                          : undefined,
+                                      customerLng:
+                                        orderType === "DELIVERY"
+                                          ? customerLng
+                                          : undefined,
+                                      guestName: guestName.trim(),
+                                      guestEmail:
+                                        guestEmail.trim() || undefined,
+                                      guestPhone:
+                                        guestPhone.trim() || undefined,
+                                      notes: orderNotes.trim() || undefined,
+                                      orderType,
+                                    }),
                                   });
 
-                                  if (result.success && result.orderId) {
+                                  const data = await res.json();
+
+                                  if (!res.ok || data.error) {
+                                    setOrderError(
+                                      data.error ??
+                                        "Nie udało się utworzyć sesji płatności",
+                                    );
+                                    return;
+                                  }
+
+                                  // 3. Redirect to Stripe Checkout
+                                  if (data.sessionUrl) {
+                                    // Stripe Checkout URL redirect (recommended)
                                     clearCart();
-                                    closeDrawer();
-                                    setShowCheckout(false);
-                                    router.push(`/order/${result.orderId}`);
+                                    window.location.href = data.sessionUrl;
                                   } else {
                                     setOrderError(
-                                      result.error ??
-                                        "Wystąpił błąd przy składaniu zamówienia",
+                                      "Nie udało się uzyskać URL płatności. Spróbuj ponownie.",
                                     );
                                   }
                                 } catch (err) {
@@ -751,8 +876,10 @@ export function CartDrawer() {
                           >
                             {isPending ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : null}
-                            Potwierdź zamówienie
+                            ) : (
+                              <CreditCard className="h-4 w-4" />
+                            )}
+                            Zapłać i zamów
                           </Button>
                         </div>
                       </div>

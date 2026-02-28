@@ -42,6 +42,7 @@ export type PlaceOrderInput = {
   guestEmail?: string;
   guestPhone?: string;
   notes?: string;
+  orderType?: "DELIVERY" | "PICKUP";
 };
 
 // ============================================
@@ -367,6 +368,7 @@ export async function getLocationOrders(locationId?: string) {
     orderNumber: order.orderNumber,
     status: order.status,
     type: order.type,
+    paymentStatus: order.paymentStatus,
     subtotal: Number(order.subtotal),
     deliveryFee: Number(order.deliveryFee),
     totalPrice: Number(order.totalPrice),
@@ -549,4 +551,183 @@ export async function getClientOrders() {
       quantity: item.quantity,
     })),
   }));
+}
+
+// ============================================
+// UPDATE ESTIMATED TIME (restaurant staff)
+// ============================================
+
+export async function updateEstimatedTime(
+  orderId: string,
+  newEstimatedMinutes: number,
+) {
+  const session = await auth();
+  if (!session) return { success: false, error: "Brak autoryzacji" };
+
+  const { role } = session.user;
+  if (!["OWNER", "MANAGER", "WORKER", "ADMIN"].includes(role)) {
+    return { success: false, error: "Brak uprawnień" };
+  }
+
+  const order = await db.order.findUnique({
+    where: { id: orderId },
+    select: {
+      id: true,
+      status: true,
+      locationId: true,
+      createdAt: true,
+      location: {
+        select: {
+          restaurant: { select: { ownerId: true } },
+        },
+      },
+    },
+  });
+
+  if (!order) return { success: false, error: "Zamówienie nie istnieje" };
+
+  // Verify ownership
+  if (role !== "ADMIN") {
+    if (role === "OWNER") {
+      if (order.location.restaurant.ownerId !== session.user.id) {
+        return { success: false, error: "Brak uprawnień do tego zamówienia" };
+      }
+    } else {
+      const user = await db.user.findUnique({
+        where: { id: session.user.id },
+        select: { locationId: true },
+      });
+      if (user?.locationId !== order.locationId) {
+        return { success: false, error: "Brak uprawnień do tego zamówienia" };
+      }
+    }
+  }
+
+  // Only allow changes to active orders
+  if (["DELIVERED", "CANCELLED"].includes(order.status)) {
+    return {
+      success: false,
+      error: "Nie można zmienić czasu zakończonego zamówienia",
+    };
+  }
+
+  if (newEstimatedMinutes < 5 || newEstimatedMinutes > 180) {
+    return {
+      success: false,
+      error: "Czas musi wynosić od 5 do 180 minut",
+    };
+  }
+
+  const estimatedDeliveryAt = new Date(
+    order.createdAt.getTime() + newEstimatedMinutes * 60 * 1000,
+  );
+
+  await db.order.update({
+    where: { id: orderId },
+    data: {
+      estimatedTime: newEstimatedMinutes,
+      estimatedDeliveryAt,
+    },
+  });
+
+  revalidatePath("/dashboard/orders");
+  revalidatePath(`/order/${orderId}`);
+
+  return { success: true };
+}
+
+// ============================================
+// GET ORDER PAYMENT STATUS (for polling after payment)
+// ============================================
+
+export async function getOrderPaymentStatus(orderId: string) {
+  const order = await db.order.findUnique({
+    where: { id: orderId },
+    select: {
+      id: true,
+      paymentStatus: true,
+      status: true,
+      orderNumber: true,
+    },
+  });
+
+  if (!order) return null;
+
+  return {
+    id: order.id,
+    paymentStatus: order.paymentStatus,
+    status: order.status,
+    orderNumber: order.orderNumber,
+  };
+}
+
+// ============================================
+// VERIFY CART AVAILABILITY (server-side check before checkout)
+// ============================================
+
+export async function verifyCartAvailability(
+  locationId: string,
+  items: { mealId: string; variantId: string | null; addonIds: string[] }[],
+) {
+  const location = await db.location.findUnique({
+    where: { id: locationId, isActive: true },
+    select: { id: true, openingHours: true, isAllDay: true },
+  });
+
+  if (!location) {
+    return { available: false, error: "Lokalizacja jest niedostępna" };
+  }
+
+  // Check opening hours
+  if (!location.isAllDay && location.openingHours) {
+    const now = new Date();
+    const days = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+    const dayKey = days[now.getDay()];
+    const hours = (location.openingHours as any)[dayKey];
+
+    if (hours?.closed) {
+      return {
+        available: false,
+        error: "Restauracja jest obecnie zamknięta",
+      };
+    }
+
+    if (hours?.open && hours?.close) {
+      const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+      if (currentTime < hours.open || currentTime > hours.close) {
+        return {
+          available: false,
+          error: `Restauracja jest otwarta ${hours.open} - ${hours.close}`,
+        };
+      }
+    }
+  }
+
+  // Check meal availability
+  const mealIds = items.map((i) => i.mealId);
+  const meals = await db.meal.findMany({
+    where: {
+      id: { in: mealIds },
+      isAvailable: true,
+      approvalStatus: "APPROVED",
+    },
+    select: { id: true },
+  });
+
+  if (meals.length !== mealIds.length) {
+    return {
+      available: false,
+      error: "Niektóre dania nie są już dostępne",
+    };
+  }
+
+  return { available: true };
 }

@@ -753,9 +753,27 @@ export default function OrderTrackingClient({ order }: { order: OrderData }) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[#8C8C8C]">Płatność</span>
-                  <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-                    Opłacone (symulacja)
-                  </span>
+                  {data.paymentStatus === "PAID" ? (
+                    <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+                      Opłacone
+                    </span>
+                  ) : data.paymentStatus === "PENDING" ? (
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                      Oczekuje na płatność
+                    </span>
+                  ) : data.paymentStatus === "FAILED" ? (
+                    <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                      Płatność nieudana
+                    </span>
+                  ) : data.paymentStatus === "REFUNDED" ? (
+                    <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">
+                      Zwrócone
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+                      {data.paymentStatus}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
