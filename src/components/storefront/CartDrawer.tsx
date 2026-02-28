@@ -56,7 +56,6 @@ type SavedAddress = {
 
 export function CartDrawer() {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
   const [discountInput, setDiscountInput] = useState("");
   const [showDiscount, setShowDiscount] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -87,6 +86,9 @@ export function CartDrawer() {
   const meetsMinOrder = useCartStore((s) => s.meetsMinOrder);
   const discountCode = useCartStore((s) => s.discountCode);
   const discountPercent = useCartStore((s) => s.discountPercent);
+  const isOpen = useCartStore((s) => s.isDrawerOpen);
+  const openDrawer = useCartStore((s) => s.openDrawer);
+  const closeDrawer = useCartStore((s) => s.closeDrawer);
   const removeItem = useCartStore((s) => s.removeItem);
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const clearCart = useCartStore((s) => s.clearCart);
@@ -232,7 +234,7 @@ export function CartDrawer() {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           exit={{ scale: 0 }}
-          onClick={() => setIsOpen(true)}
+          onClick={openDrawer}
           className="fixed bottom-6 right-6 z-40 flex h-14 items-center gap-2 rounded-full bg-[#FF4D4F] px-5 text-white shadow-xl transition-transform hover:scale-105 active:scale-95"
         >
           <ShoppingCart className="h-5 w-5" />
@@ -253,7 +255,7 @@ export function CartDrawer() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="absolute inset-0 bg-black/40"
-              onClick={() => setIsOpen(false)}
+              onClick={closeDrawer}
             />
 
             {/* Panel */}
@@ -289,7 +291,7 @@ export function CartDrawer() {
                     </button>
                   )}
                   <button
-                    onClick={() => setIsOpen(false)}
+                    onClick={closeDrawer}
                     className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-[#F5F5F5]"
                   >
                     <X className="h-5 w-5 text-[#1F1F1F]" />
@@ -729,7 +731,7 @@ export function CartDrawer() {
 
                                   if (result.success && result.orderId) {
                                     clearCart();
-                                    setIsOpen(false);
+                                    closeDrawer();
                                     setShowCheckout(false);
                                     router.push(`/order/${result.orderId}`);
                                   } else {

@@ -51,6 +51,7 @@ export type CartState = {
   location: CartLocation | null;
   discountCode: string | null;
   discountPercent: number;
+  isDrawerOpen: boolean;
   // Computed
   itemCount: number;
   subtotal: number;
@@ -77,6 +78,9 @@ export type CartActions = {
   setLocation: (location: CartLocation) => void;
   applyDiscountCode: (code: string, percent: number) => void;
   removeDiscountCode: () => void;
+  openDrawer: () => void;
+  closeDrawer: () => void;
+  toggleDrawer: () => void;
   _pendingItem: {
     restaurant: CartRestaurant;
     location: CartLocation;
@@ -133,6 +137,7 @@ export const useCartStore = create<CartState & CartActions>()(
       location: null,
       discountCode: null,
       discountPercent: 0,
+      isDrawerOpen: false,
       _pendingItem: null,
 
       // Computed (initially empty)
@@ -288,6 +293,11 @@ export const useCartStore = create<CartState & CartActions>()(
         const derived = computeDerivedState(state.items, state.location, 0);
         set({ discountCode: null, discountPercent: 0, ...derived });
       },
+
+      openDrawer: () => set({ isDrawerOpen: true }),
+      closeDrawer: () => set({ isDrawerOpen: false }),
+      toggleDrawer: () =>
+        set((state) => ({ isDrawerOpen: !state.isDrawerOpen })),
     }),
     {
       name: "dishly-cart",

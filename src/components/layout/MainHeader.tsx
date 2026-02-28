@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useCartStore } from "@/stores/cart-store";
 
 interface NavigationPage {
   title: string;
@@ -30,6 +31,8 @@ interface MainHeaderProps {
 
 export function MainHeader({ user, navigationPages = [] }: MainHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const openDrawer = useCartStore((s) => s.openDrawer);
+  const itemCount = useCartStore((s) => s.itemCount);
 
   const getInitials = () => {
     if (user?.firstName && user?.lastName) {
@@ -110,12 +113,15 @@ export function MainHeader({ user, navigationPages = [] }: MainHeaderProps) {
                     <Button
                       variant="ghost"
                       size="icon"
+                      onClick={openDrawer}
                       className="relative rounded-full hover:bg-transparent transition-all duration-200 hover:scale-105 group"
                     >
                       <ShoppingCart className="h-5 w-5 text-[#1F1F1F] group-hover:text-[#FF4D4F] transition-colors duration-200" />
-                      <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF4D4F] text-[10px] font-bold text-white">
-                        2
-                      </span>
+                      {itemCount > 0 && (
+                        <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF4D4F] text-[10px] font-bold text-white">
+                          {itemCount}
+                        </span>
+                      )}
                     </Button>
                   )}
 
