@@ -25,7 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCartStore } from "@/stores/cart-store";
-import { verifyCartAvailability } from "@/actions/orders";
+import { placeOrder, verifyCartAvailability } from "@/actions/orders";
 import { getClientAddresses, reverseGeocode } from "@/actions/client/addresses";
 
 type CheckoutMapProps = {
@@ -742,15 +742,6 @@ export function CartDrawer() {
                           <p className="text-xs text-red-500">{orderError}</p>
                         )}
 
-                        {/* Payment info notice */}
-                        <div className="flex items-center gap-2 rounded-lg bg-[#F5F5F5] px-3 py-2 text-xs text-[#8C8C8C]">
-                          <CreditCard className="h-3.5 w-3.5 flex-shrink-0" />
-                          <span>
-                            Po kliknięciu zostaniesz przekierowany na bezpieczną
-                            stronę płatności Stripe
-                          </span>
-                        </div>
-
                         <div className="flex gap-2">
                           <Button
                             variant="outline"
@@ -773,7 +764,7 @@ export function CartDrawer() {
                               setOrderError(null);
                               startTransition(async () => {
                                 try {
-                                  // 1. Server-side check: restaurant open + items available
+                                  // Server-side check: restaurant open + items available
                                   const check = await verifyCartAvailability(
                                     location!.id,
                                     items.map((item) => ({
@@ -791,78 +782,59 @@ export function CartDrawer() {
                                     return;
                                   }
 
-                                  // 2. Create Stripe Checkout Session via API
-                                  const res = await fetch("/api/checkout", {
-                                    method: "POST",
-                                    headers: {
-                                      "Content-Type": "application/json",
-                                    },
-                                    body: JSON.stringify({
-                                      locationId: location!.id,
-                                      restaurantName:
-                                        restaurant?.name ?? "Restauracja",
-                                      restaurantSlug: restaurant?.slug ?? "",
-                                      items: items.map((item) => ({
-                                        mealId: item.mealId,
-                                        mealName: item.mealName,
-                                        variantId: item.variantId,
-                                        variantName: item.variantName,
-                                        basePrice: item.basePrice,
-                                        variantPriceModifier:
-                                          item.variantPriceModifier,
-                                        addons: item.addons.map((a) => ({
-                                          addonId: a.id,
-                                          name: a.name,
-                                          price: a.price,
-                                          quantity: a.quantity,
-                                        })),
-                                        quantity: item.quantity,
-                                        note: item.note,
+                                  const result = await placeOrder({
+                                    locationId: location!.id,
+                                    restaurantName:
+                                      restaurant?.name ?? "Restauracja",
+                                    restaurantSlug: restaurant?.slug ?? "",
+                                    items: items.map((item) => ({
+                                      mealId: item.mealId,
+                                      mealName: item.mealName,
+                                      variantId: item.variantId,
+                                      variantName: item.variantName,
+                                      basePrice: item.basePrice,
+                                      variantPriceModifier:
+                                        item.variantPriceModifier,
+                                      addons: item.addons.map((a) => ({
+                                        addonId: a.id,
+                                        name: a.name,
+                                        price: a.price,
+                                        quantity: a.quantity,
                                       })),
-                                      subtotal,
-                                      deliveryFee,
-                                      discountPercent,
-                                      totalPrice: total,
-                                      deliveryAddress:
-                                        orderType === "DELIVERY"
-                                          ? deliveryAddress.trim()
-                                          : null,
-                                      customerLat:
-                                        orderType === "DELIVERY"
-                                          ? customerLat
-                                          : undefined,
-                                      customerLng:
-                                        orderType === "DELIVERY"
-                                          ? customerLng
-                                          : undefined,
-                                      guestName: guestName.trim(),
-                                      guestEmail:
-                                        guestEmail.trim() || undefined,
-                                      guestPhone:
-                                        guestPhone.trim() || undefined,
-                                      notes: orderNotes.trim() || undefined,
-                                      orderType,
-                                    }),
+                                      quantity: item.quantity,
+                                      note: item.note,
+                                    })),
+                                    subtotal,
+                                    deliveryFee,
+                                    discountPercent: discountPercent,
+                                    totalPrice: total,
+                                    deliveryAddress:
+                                      orderType === "DELIVERY"
+                                        ? deliveryAddress.trim()
+                                        : "",
+                                    customerLat:
+                                      orderType === "DELIVERY"
+                                        ? customerLat
+                                        : undefined,
+                                    customerLng:
+                                      orderType === "DELIVERY"
+                                        ? customerLng
+                                        : undefined,
+                                    guestName: guestName.trim(),
+                                    guestPhone: guestPhone.trim() || undefined,
+                                    notes: orderNotes.trim() || undefined,
+                                    orderType,
                                   });
 
-                                  const data = await res.json();
-
-                                  if (!res.ok || data.error) {
-                                    setOrderError(
-                                      data.error ??
-                                        "Nie udało się utworzyć sesji płatności",
-                                    );
-                                    return;
-                                  }
-
-                                  // 3. Redirect to Stripe Checkout
-                                  if (data.sessionUrl) {
-                                    // Stripe Checkout URL redirect (recommended)
+                                  if (result.success && result.orderId) {
                                     clearCart();
-                                    window.location.href = data.sessionUrl;
+                                    closeDrawer();
+                                    setShowCheckout(false);
+                                    router.push(`/order/${result.orderId}`);
                                   } else {
                                     setOrderError(
-                                      "Nie udało się uzyskać URL płatności. Spróbuj ponownie.",
+                                      result.error ??
+                                        "Wystąpił błąd przy składaniu zamówienia",
                                     );
                                   }
                                 } catch (err) {
@@ -876,10 +848,8 @@ export function CartDrawer() {
                           >
                             {isPending ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <CreditCard className="h-4 w-4" />
-                            )}
-                            Zapłać i zamów
+                            ) : null}
+                            Potwierdź zamówienie
                           </Button>
                         </div>
                       </div>
