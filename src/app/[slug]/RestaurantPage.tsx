@@ -133,7 +133,6 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
   const [maxCarbs, setMaxCarbs] = useState<number | undefined>(undefined);
   const [minFat, setMinFat] = useState<number | undefined>(undefined);
   const [maxFat, setMaxFat] = useState<number | undefined>(undefined);
-  const [maxSpice, setMaxSpice] = useState<number | undefined>(undefined);
 
   // Pobierz unikalne kategorie z dań
   const categories = useMemo(() => {
@@ -213,7 +212,6 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
         return false;
       if (maxFat !== undefined && (meal.fat === null || meal.fat > maxFat))
         return false;
-      if (maxSpice !== undefined && meal.spiceLevel > maxSpice) return false;
 
       return true;
     });
@@ -231,7 +229,6 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
     maxCarbs,
     minFat,
     maxFat,
-    maxSpice,
   ]);
 
   // Grupuj dania po kategoriach
@@ -662,27 +659,6 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
                         className="w-full rounded-lg border border-[#EEEEEE] bg-white px-2 py-1.5 text-xs focus:border-[#FF4D4F] focus:outline-none"
                       />
                     </div>
-                  </div>
-                </div>
-                {/* Spice Level Filter */}
-                <div className="mt-4">
-                  <div className="flex items-center gap-3">
-                    <Flame className="h-4 w-4 text-[#FF4D4F]" />
-                    <span className="text-xs font-medium">Max. ostrość</span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="9"
-                      value={maxSpice ?? 9}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value);
-                        setMaxSpice(val === 9 ? undefined : val);
-                      }}
-                      className="flex-1 h-2 cursor-pointer appearance-none rounded-full bg-gradient-to-r from-yellow-300 via-orange-400 to-red-600 accent-[#FF4D4F]"
-                    />
-                    <span className="text-xs font-medium text-[#1F1F1F] w-20 text-right">
-                      {maxSpice !== undefined ? `${maxSpice}/9` : "Bez limitu"}
-                    </span>
                   </div>
                 </div>
               </div>

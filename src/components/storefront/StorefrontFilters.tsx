@@ -293,35 +293,6 @@ export function StorefrontFilters({
                 </div>
               </div>
 
-              {/* Spice Level */}
-              <div>
-                <p className="mb-2 text-xs font-semibold text-[#8C8C8C] uppercase tracking-wide">
-                  Max. poziom ostrości
-                </p>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="range"
-                    min="0"
-                    max="9"
-                    value={currentFilters.maxSpiceLevel ?? 9}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value);
-                      updateFilter(
-                        "maxSpiceLevel",
-                        val === 9 ? undefined : val,
-                      );
-                    }}
-                    className="h-2 flex-1 cursor-pointer appearance-none rounded-full bg-gradient-to-r from-yellow-300 via-orange-400 to-red-600 accent-[#FF4D4F]"
-                  />
-                  <div className="flex items-center gap-1 text-sm font-medium text-[#1F1F1F]">
-                    <Flame className="h-4 w-4 text-[#FF4D4F]" />
-                    {currentFilters.maxSpiceLevel !== undefined
-                      ? currentFilters.maxSpiceLevel
-                      : "Bez limitu"}
-                  </div>
-                </div>
-              </div>
-
               {/* Macronutrient Sliders */}
               <div>
                 <p className="mb-3 text-xs font-semibold text-[#8C8C8C] uppercase tracking-wide">
