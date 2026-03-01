@@ -24,6 +24,7 @@ import {
   BarChart3,
   ClipboardList,
   Clock,
+  Monitor,
   type LucideIcon,
 } from "lucide-react";
 
@@ -115,6 +116,12 @@ export default async function DashboardLayout({
       return [
         ...baseItems,
         {
+          name: "Zamówienia",
+          href: "/dashboard/orders",
+          icon: ShoppingBag,
+          roles: ["OWNER"],
+        },
+        {
           name: "Lokalizacje",
           href: "/dashboard/owner/locations",
           icon: MapPin,
@@ -142,6 +149,12 @@ export default async function DashboardLayout({
           name: "Widoczność paneli",
           href: "/dashboard/owner/visibility",
           icon: Eye,
+          roles: ["OWNER"],
+        },
+        {
+          name: "Statystyki",
+          href: "/dashboard/statistics",
+          icon: BarChart3,
           roles: ["OWNER"],
         },
       ];

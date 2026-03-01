@@ -14,7 +14,7 @@ export default auth(async function middleware(request) {
   const protectedPaths = ["/dashboard", "/orders"];
 
   // Publiczne ścieżki - nie wymagają autoryzacji
-  const publicPaths = ["/order/"]; // /order/[id] tracking page
+  const publicPaths = ["/order/", "/status-board/"]; // /order/[id] tracking page, /status-board/[locationId]
 
   // Sprawdź publiczne ścieżki
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));

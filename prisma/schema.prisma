@@ -106,6 +106,7 @@ model User {
   tagRequests      TagRequest[]
   createdMeals     Meal[]       @relation("MealCreator")
   approvedMeals    Meal[]       @relation("MealApprover")
+  statusLogs       OrderStatusLog[]
 
   @@index([email])
   @@index([role])
@@ -258,6 +259,7 @@ model Location {
   workers         User[]     @relation("LocationWorker")
   mealLocations   MealLocation[]
   orders          Order[]
+  settings        LocationSettings?
 
   @@index([restaurantId])
   @@index([city])
@@ -435,6 +437,7 @@ model Order {
   location        Location      @relation(fields: [locationId], references: [id])
   address         Address?      @relation(fields: [addressId], references: [id])
   items           OrderItem[]
+  statusLogs      OrderStatusLog[]
 
   @@index([userId])
   @@index([locationId])
@@ -537,6 +540,42 @@ model TagRequest {
 
   @@index([status])
   @@index([type])
+}
+
+// ============================================
+// LOGI ZMIAN STATUSÓW ZAMÓWIEŃ
+// ============================================
+
+model OrderStatusLog {
+  id        String      @id @default(cuid())
+  orderId   String
+  fromStatus OrderStatus?
+  toStatus  OrderStatus
+  changedBy String?     // ID użytkownika który zmienił status
+  note      String?     @db.Text
+  createdAt DateTime    @default(now())
+
+  // Relacje
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user      User?       @relation(fields: [changedBy], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([createdAt])
+}
+
+// ============================================
+// USTAWIENIA LOKALIZACJI (ETA Override)
+// ============================================
+
+model LocationSettings {
+  id              String   @id @default(cuid())
+  locationId      String   @unique
+  etaOffsetMinutes Int     @default(0) // Manualny narzut czasu (+/- minuty)
+  updatedBy       String?  // ID użytkownika który ostatnio zmienił
+  updatedAt       DateTime @updatedAt
+
+  // Relacje
+  location        Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
 }
 
 // ============================================

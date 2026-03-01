@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { calculateOrderETA } from "@/actions/kitchen";
 
 export async function POST(request: NextRequest) {
   try {
@@ -78,16 +79,14 @@ export async function POST(request: NextRequest) {
     const random = Math.random().toString(36).slice(2, 8).toUpperCase();
     const orderNumber = `DSH-${date}-${random}`;
 
-    // Estimate delivery time
-    const totalItems = items.reduce(
-      (sum: number, item: any) => sum + item.quantity,
-      0,
-    );
-    const basePrep = 15;
-    const perItem = 3;
+    // Estimate delivery time using ETA Engine
+    const etaItems = items.map((item: any) => ({
+      mealId: item.mealId,
+      quantity: item.quantity,
+    }));
     const deliveryTime = orderType === "PICKUP" ? 0 : 20;
-    const estimatedMinutes =
-      basePrep + Math.min(totalItems * perItem, 30) + deliveryTime;
+    const basePrepETA = await calculateOrderETA(locationId, etaItems);
+    const estimatedMinutes = basePrepETA + deliveryTime;
     const estimatedDeliveryAt = new Date(
       Date.now() + estimatedMinutes * 60 * 1000,
     );

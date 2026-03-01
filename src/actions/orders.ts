@@ -495,10 +495,21 @@ export async function updateOrderStatus(
     updateData[timestampField] = new Date();
   }
 
-  await db.order.update({
-    where: { id: orderId },
-    data: updateData,
-  });
+  // Use transaction to update order and create status log
+  await db.$transaction([
+    db.order.update({
+      where: { id: orderId },
+      data: updateData,
+    }),
+    db.orderStatusLog.create({
+      data: {
+        orderId,
+        fromStatus: order.status,
+        toStatus: newStatus,
+        changedBy: session.user.id,
+      },
+    }),
+  ]);
 
   revalidatePath("/dashboard/orders");
   revalidatePath(`/order/${orderId}`);

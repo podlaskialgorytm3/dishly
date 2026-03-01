@@ -1,7 +1,11 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getLocationOrders } from "@/actions/orders";
-import OrdersDashboardClient from "./OrdersDashboardClient";
+import {
+  getKitchenOrders,
+  getLocationETASettings,
+  getUserLocationId,
+} from "@/actions/kitchen";
+import LiveKitchenPanel from "./LiveKitchenPanel";
 
 export default async function OrdersPage() {
   const session = await auth();
@@ -21,7 +25,17 @@ export default async function OrdersPage() {
     redirect("/dashboard");
   }
 
-  const orders = await getLocationOrders();
+  const locationId = await getUserLocationId();
+  const orders = await getKitchenOrders(locationId ?? undefined);
+  const etaSettings = locationId
+    ? await getLocationETASettings(locationId)
+    : null;
 
-  return <OrdersDashboardClient initialOrders={orders} />;
+  return (
+    <LiveKitchenPanel
+      initialOrders={orders}
+      locationId={locationId}
+      etaOffset={etaSettings?.etaOffsetMinutes ?? 0}
+    />
+  );
 }
