@@ -419,7 +419,7 @@ export async function getStatusBoardOrders(locationId: string) {
       locationId,
       createdAt: { gte: today },
       paymentStatus: "PAID",
-      status: { in: ["PREPARING", "READY"] },
+      status: { in: ["ACCEPTED", "PREPARING", "READY"] },
     },
     select: {
       id: true,
@@ -428,6 +428,8 @@ export async function getStatusBoardOrders(locationId: string) {
       type: true,
       createdAt: true,
       estimatedDeliveryAt: true,
+      acceptedAt: true,
+      preparingAt: true,
     },
     orderBy: { createdAt: "asc" },
   });
@@ -447,6 +449,8 @@ export async function getStatusBoardOrders(locationId: string) {
       type: o.type,
       createdAt: o.createdAt.toISOString(),
       estimatedDeliveryAt: o.estimatedDeliveryAt?.toISOString() ?? null,
+      acceptedAt: o.acceptedAt?.toISOString() ?? null,
+      preparingAt: o.preparingAt?.toISOString() ?? null,
     })),
   };
 }
