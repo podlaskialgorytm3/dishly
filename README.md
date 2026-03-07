@@ -5,8 +5,8 @@ Aplikacja SaaS umożliwiająca restauracjom przyjmowanie zamówień online i kli
 ## 🚀 Getting Started
 
 ### Wymagania
-
-- Node.js 20.16+
+ 
+- Node.js 20.16+  
 - PostgreSQL database (rekomendowane: Neon.tech lub Supabase)
 
 ### Instalacja
