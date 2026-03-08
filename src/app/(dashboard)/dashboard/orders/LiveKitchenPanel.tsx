@@ -637,10 +637,27 @@ export default function LiveKitchenPanel({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [showETAPanel, setShowETAPanel] = useState(false);
+  const [showMonitorLink, setShowMonitorLink] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const [currentETAOffset, setCurrentETAOffset] = useState(etaOffset);
   const prevPendingCountRef = useRef(
     initialOrders.filter((o) => o.status === "PENDING").length,
   );
+
+  const monitorUrl = locationId
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}/status-board/${locationId}`
+    : null;
+
+  const handleCopyLink = async () => {
+    if (!monitorUrl) return;
+    try {
+      await navigator.clipboard.writeText(monitorUrl);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      // Fallback: select input text
+    }
+  };
 
   const { playNotification, requestNotificationPermission } =
     useOrderNotification();
@@ -772,6 +789,21 @@ export default function LiveKitchenPanel({
                 )}
               </button>
 
+              {/* Monitor link button */}
+              {locationId && (
+                <button
+                  onClick={() => setShowMonitorLink(!showMonitorLink)}
+                  className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
+                    showMonitorLink
+                      ? "bg-indigo-600 text-white"
+                      : "bg-[#F5F5F5] text-[#8C8C8C] hover:bg-[#EEEEEE]"
+                  }`}
+                >
+                  <Monitor className="h-4 w-4" />
+                  Tablica na monitor
+                </button>
+              )}
+
               {/* ETA settings toggle */}
               <button
                 onClick={() => setShowETAPanel(!showETAPanel)}
@@ -804,6 +836,47 @@ export default function LiveKitchenPanel({
               </button>
             </div>
           </div>
+
+          {/* Monitor Link Panel (collapsible) */}
+          {showMonitorLink && monitorUrl && (
+            <div className="mt-4 rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
+              <div className="mb-2 flex items-center gap-2">
+                <Monitor className="h-5 w-5 text-indigo-600" />
+                <h3 className="text-sm font-bold text-[#1F1F1F]">
+                  Tablica zamówień na monitor
+                </h3>
+              </div>
+              <p className="mb-3 text-xs text-[#8C8C8C]">
+                Otwórz ten link na monitorze w restauracji. Tablica pokazuje
+                aktualnie przygotowywane zamówienia, zamówienia do odbioru
+                osobistego i do odbioru przez kuriera — odświeża się
+                automatycznie co 10 sekund.
+              </p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={monitorUrl}
+                  className="flex-1 rounded-lg border border-indigo-200 bg-white px-3 py-2 text-sm text-[#1F1F1F] focus:outline-none"
+                  onClick={(e) => (e.target as HTMLInputElement).select()}
+                />
+                <Button
+                  onClick={handleCopyLink}
+                  className="rounded-lg bg-indigo-600 px-4 text-sm text-white hover:bg-indigo-700"
+                >
+                  {linkCopied ? "Skopiowano!" : "Kopiuj link"}
+                </Button>
+                <a
+                  href={monitorUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg border border-indigo-200 bg-white px-4 py-2 text-sm font-medium text-indigo-600 transition-colors hover:bg-indigo-50"
+                >
+                  Otwórz
+                </a>
+              </div>
+            </div>
+          )}
 
           {/* ETA Offset Panel (collapsible) */}
           {showETAPanel && locationId && (
