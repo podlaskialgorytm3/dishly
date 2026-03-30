@@ -53,7 +53,8 @@ export default async function RestaurantsMapPage() {
           </h1>
           <p className="mt-2 text-sm text-[#6B7280] md:text-base">
             Sprawdź restauracje w Twojej okolicy, zobacz czy są otwarte i
-            przejdź do ich strony.
+            przejdź do ich strony. Możesz przybliżać, przejść w pełny ekran i
+            wrócić do swojej lokalizacji.
           </p>
         </div>
 

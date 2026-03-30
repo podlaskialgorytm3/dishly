@@ -1,9 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
+import {
+  LocateFixed,
+  Maximize2,
+  Minimize2,
+  Plus,
+  Minus,
+  ScanSearch,
+} from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import type { RestaurantMapLocation } from "@/actions/storefront";
 
@@ -41,6 +49,21 @@ const closedPinIcon = new L.DivIcon({
   popupAnchor: [0, -14],
 });
 
+const userPinIcon = new L.DivIcon({
+  className: "dishly-map-user-pin",
+  html: `<div style="
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    border: 3px solid white;
+    background: #2563EB;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.28);
+  "></div>`,
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
+  popupAnchor: [0, -12],
+});
+
 function FitMapToMarkers({ points }: { points: Array<[number, number]> }) {
   const map = useMap();
 
@@ -55,7 +78,25 @@ function FitMapToMarkers({ points }: { points: Array<[number, number]> }) {
   return null;
 }
 
+function CaptureMapInstance({ onReady }: { onReady: (map: L.Map) => void }) {
+  const map = useMap();
+
+  useEffect(() => {
+    onReady(map);
+  }, [map, onReady]);
+
+  return null;
+}
+
 export function RestaurantsMapClient({ locations }: RestaurantsMapClientProps) {
+  const mapRef = useRef<L.Map | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
+  const [userPosition, setUserPosition] = useState<[number, number] | null>(
+    null,
+  );
+
   const markerPoints = useMemo(
     () =>
       locations.map(
@@ -64,6 +105,77 @@ export function RestaurantsMapClient({ locations }: RestaurantsMapClientProps) {
       ),
     [locations],
   );
+
+  const fitAllMarkers = () => {
+    if (!mapRef.current || markerPoints.length === 0) {
+      return;
+    }
+    const bounds = L.latLngBounds(markerPoints);
+    mapRef.current.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+  };
+
+  const toggleFullscreen = async () => {
+    const element = mapContainerRef.current;
+    if (!element) {
+      return;
+    }
+
+    try {
+      if (!document.fullscreenElement) {
+        await element.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch {
+      // Ignore fullscreen errors silently.
+    }
+  };
+
+  const goToUserLocation = () => {
+    if (!navigator.geolocation || !mapRef.current) {
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const nextPosition: [number, number] = [
+          position.coords.latitude,
+          position.coords.longitude,
+        ];
+        setUserPosition(nextPosition);
+        mapRef.current?.flyTo(nextPosition, 14, {
+          animate: true,
+          duration: 1.2,
+        });
+        setIsLocating(false);
+      },
+      () => {
+        setIsLocating(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000,
+      },
+    );
+  };
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      const fullscreenOn =
+        document.fullscreenElement === mapContainerRef.current;
+      setIsFullscreen(fullscreenOn);
+      setTimeout(() => {
+        mapRef.current?.invalidateSize();
+      }, 200);
+    };
+
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+    };
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -87,18 +199,83 @@ export function RestaurantsMapClient({ locations }: RestaurantsMapClientProps) {
         </div>
       </div>
 
-      <div className="h-[65vh] min-h-[420px] overflow-hidden rounded-2xl border border-[#EEEEEE] shadow-sm">
+      <div
+        ref={mapContainerRef}
+        className="relative h-[65vh] min-h-[420px] overflow-hidden rounded-2xl border border-[#EEEEEE] bg-white shadow-sm"
+      >
+        <div className="absolute right-3 top-3 z-[1000] flex flex-col gap-2">
+          <button
+            onClick={() => mapRef.current?.zoomIn()}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#111827] shadow-md hover:bg-[#F9FAFB]"
+            aria-label="Przybliż mapę"
+            type="button"
+          >
+            <Plus className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => mapRef.current?.zoomOut()}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#111827] shadow-md hover:bg-[#F9FAFB]"
+            aria-label="Oddal mapę"
+            type="button"
+          >
+            <Minus className="h-5 w-5" />
+          </button>
+          <button
+            onClick={fitAllMarkers}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#111827] shadow-md hover:bg-[#F9FAFB]"
+            aria-label="Dopasuj wszystkie punkty"
+            type="button"
+          >
+            <ScanSearch className="h-5 w-5" />
+          </button>
+          <button
+            onClick={goToUserLocation}
+            disabled={isLocating}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#111827] shadow-md hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
+            aria-label="Wróć do mojej lokalizacji"
+            type="button"
+          >
+            <LocateFixed className="h-5 w-5" />
+          </button>
+          <button
+            onClick={toggleFullscreen}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#111827] shadow-md hover:bg-[#F9FAFB]"
+            aria-label={isFullscreen ? "Wyjdź z pełnego ekranu" : "Pełny ekran"}
+            type="button"
+          >
+            {isFullscreen ? (
+              <Minimize2 className="h-5 w-5" />
+            ) : (
+              <Maximize2 className="h-5 w-5" />
+            )}
+          </button>
+        </div>
+
         <MapContainer
           center={[52.23196, 21.00672]}
           zoom={11}
           scrollWheelZoom
+          zoomControl={false}
           style={{ height: "100%", width: "100%" }}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+          <CaptureMapInstance
+            onReady={(map) => {
+              mapRef.current = map;
+            }}
+          />
           <FitMapToMarkers points={markerPoints} />
+
+          {userPosition && (
+            <Marker position={userPosition} icon={userPinIcon}>
+              <Popup>
+                <p className="text-xs font-semibold">Twoja lokalizacja</p>
+              </Popup>
+            </Marker>
+          )}
 
           {locations.map((location) => (
             <Marker
