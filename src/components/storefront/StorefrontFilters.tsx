@@ -520,9 +520,7 @@ export function StorefrontFilters({
                     Cena dania [PLN]
                   </p>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <NutrientSlider
-                      icon={<Zap className="h-4 w-4 text-[#FF4D4F]" />}
-                      label="Cena"
+                    <PriceRangeSlider
                       min={0}
                       max={200}
                       step={1}
@@ -703,6 +701,82 @@ export function StorefrontFilters({
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function PriceRangeSlider({
+  min,
+  max,
+  step,
+  valueMin,
+  valueMax,
+  onChangeMin,
+  onChangeMax,
+}: {
+  min: number;
+  max: number;
+  step: number;
+  valueMin: number | undefined;
+  valueMax: number | undefined;
+  onChangeMin: (value: number | undefined) => void;
+  onChangeMax: (value: number | undefined) => void;
+}) {
+  const currentMin = valueMin ?? min;
+  const currentMax = valueMax ?? max;
+  const range = max - min;
+
+  const leftPercent = ((currentMin - min) / range) * 100;
+  const rightPercent = ((currentMax - min) / range) * 100;
+
+  return (
+    <div className="rounded-xl bg-[#FAFAFA] p-3">
+      <div className="mb-2 flex items-center gap-2">
+        <Zap className="h-4 w-4 text-[#FF4D4F]" />
+        <span className="text-xs font-medium text-[#1F1F1F]">Cena</span>
+      </div>
+
+      <div className="mb-3 flex items-center justify-between text-xs text-[#8C8C8C]">
+        <span>{currentMin} PLN</span>
+        <span>{currentMax} PLN</span>
+      </div>
+
+      <div className="relative h-8">
+        <div className="absolute top-1/2 h-1 w-full -translate-y-1/2 rounded-full bg-[#E8E8E8]" />
+        <div
+          className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-[#FF4D4F]"
+          style={{
+            left: `${leftPercent}%`,
+            width: `${Math.max(0, rightPercent - leftPercent)}%`,
+          }}
+        />
+
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={currentMin}
+          onChange={(e) => {
+            const next = Math.min(Number(e.target.value), currentMax);
+            onChangeMin(next);
+          }}
+          className="pointer-events-none absolute left-0 top-0 h-8 w-full appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#FF4D4F] [&::-webkit-slider-thumb]:bg-white"
+        />
+
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={currentMax}
+          onChange={(e) => {
+            const next = Math.max(Number(e.target.value), currentMin);
+            onChangeMax(next);
+          }}
+          className="pointer-events-none absolute left-0 top-0 h-8 w-full appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#FF4D4F] [&::-webkit-slider-thumb]:bg-white"
+        />
+      </div>
     </div>
   );
 }
