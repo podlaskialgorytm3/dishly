@@ -38,11 +38,24 @@ export default async function Home() {
           restaurants: [],
           cuisineTypes: [],
           restaurantTags: [],
+          mealCategories: [],
           recentOrders: [],
           userAddresses: [],
           trendingMeals: [],
           searchMeals: [],
           mode: "restaurants",
+          restaurantPagination: {
+            page: 1,
+            perPage: 24,
+            total: 0,
+            totalPages: 1,
+          },
+          mealPagination: {
+            page: 1,
+            perPage: 24,
+            total: 0,
+            totalPages: 1,
+          },
           isLoggedIn: false,
         };
 

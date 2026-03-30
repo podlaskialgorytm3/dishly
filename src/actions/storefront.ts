@@ -9,6 +9,8 @@ import { auth } from "@/lib/auth";
 
 export type RestaurantFilters = {
   mode?: "restaurants" | "meals";
+  page?: number;
+  perPage?: number;
   sortBy?: string;
   query?: string;
   city?: string;
@@ -46,6 +48,8 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
   try {
     const session = await auth();
     const mode = filters?.mode ?? "restaurants";
+    const page = Math.max(1, Number(filters?.page ?? 1));
+    const perPage = Math.min(100, Math.max(1, Number(filters?.perPage ?? 24)));
 
     // Build meal filter conditions for nutritional search
     const mealWhere: any = {
@@ -221,7 +225,6 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
           },
         },
       },
-      take: 100,
       orderBy: { createdAt: "desc" },
     });
 
@@ -377,6 +380,18 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
         break;
     }
 
+    const restaurantsTotal = processedRestaurants.length;
+    const restaurantsTotalPages = Math.max(
+      1,
+      Math.ceil(restaurantsTotal / perPage),
+    );
+    const restaurantsPage = Math.min(page, restaurantsTotalPages);
+    const restaurantsStart = (restaurantsPage - 1) * perPage;
+    const paginatedRestaurants = processedRestaurants.slice(
+      restaurantsStart,
+      restaurantsStart + perPage,
+    );
+
     // Global meals search (independent of restaurant listing mode).
     const mealSearchWhere: any = {
       ...mealWhere,
@@ -421,7 +436,6 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
         },
       },
       orderBy: { createdAt: "desc" },
-      take: 200,
     });
 
     const sortedSearchMeals = [...searchMeals];
@@ -462,6 +476,15 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
         // Keep newest by createdAt from DB query.
         break;
     }
+
+    const mealsTotal = sortedSearchMeals.length;
+    const mealsTotalPages = Math.max(1, Math.ceil(mealsTotal / perPage));
+    const mealsPage = Math.min(page, mealsTotalPages);
+    const mealsStart = (mealsPage - 1) * perPage;
+    const paginatedSearchMeals = sortedSearchMeals.slice(
+      mealsStart,
+      mealsStart + perPage,
+    );
 
     // Fetch cuisine types for filter options
     const cuisineTypes = await db.cuisineType.findMany({
@@ -541,7 +564,7 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
     return {
       success: true,
       data: {
-        restaurants: processedRestaurants,
+        restaurants: paginatedRestaurants,
         cuisineTypes,
         restaurantTags,
         mealCategories,
@@ -580,7 +603,7 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
           restaurantName: meal.restaurant.name,
           restaurantSlug: meal.restaurant.slug,
         })),
-        searchMeals: sortedSearchMeals.map((meal) => ({
+        searchMeals: paginatedSearchMeals.map((meal) => ({
           id: meal.id,
           name: meal.name,
           slug: meal.slug,
@@ -599,6 +622,18 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
           restaurantSlug: meal.restaurant.slug,
           locations: meal.restaurant.locations,
         })),
+        restaurantPagination: {
+          page: restaurantsPage,
+          perPage,
+          total: restaurantsTotal,
+          totalPages: restaurantsTotalPages,
+        },
+        mealPagination: {
+          page: mealsPage,
+          perPage,
+          total: mealsTotal,
+          totalPages: mealsTotalPages,
+        },
         mode,
         isLoggedIn: !!session?.user,
       },

@@ -31,15 +31,27 @@ type RestaurantTag = {
   slug: string;
 };
 
+type MealCategory = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
 export type FilterValues = {
   mode: "restaurants" | "meals";
+  page: number;
+  perPage: number;
+  sortBy: string;
   query: string;
   city: string;
   minRating: number;
   maxDeliveryFee: number | undefined;
   maxMinOrderValue: number | undefined;
+  freeDeliveryOnly: boolean;
+  multiLocationOnly: boolean;
   cuisineTypeIds: string[];
   tagIds: string[];
+  categoryIds: string[];
   minPrice: number | undefined;
   maxPrice: number | undefined;
   // Nutritional
@@ -53,18 +65,25 @@ export type FilterValues = {
   maxFat: number | undefined;
   isVegetarian: boolean;
   isVegan: boolean;
+  isGlutenFree: boolean;
   maxSpiceLevel: number | undefined;
 };
 
 export const defaultFilters: FilterValues = {
   mode: "restaurants",
+  page: 1,
+  perPage: 24,
+  sortBy: "rating_desc",
   query: "",
   city: "",
   minRating: 0,
   maxDeliveryFee: undefined,
   maxMinOrderValue: undefined,
+  freeDeliveryOnly: false,
+  multiLocationOnly: false,
   cuisineTypeIds: [],
   tagIds: [],
+  categoryIds: [],
   minPrice: undefined,
   maxPrice: undefined,
   minCalories: undefined,
@@ -77,12 +96,14 @@ export const defaultFilters: FilterValues = {
   maxFat: undefined,
   isVegetarian: false,
   isVegan: false,
+  isGlutenFree: false,
   maxSpiceLevel: undefined,
 };
 
 type StorefrontFiltersProps = {
   cuisineTypes: CuisineType[];
   restaurantTags: RestaurantTag[];
+  mealCategories: MealCategory[];
   onFiltersChange: (filters: FilterValues) => void;
   currentFilters: FilterValues;
 };
@@ -90,6 +111,7 @@ type StorefrontFiltersProps = {
 export function StorefrontFilters({
   cuisineTypes,
   restaurantTags,
+  mealCategories,
   onFiltersChange,
   currentFilters,
 }: StorefrontFiltersProps) {
@@ -100,8 +122,11 @@ export function StorefrontFilters({
     currentFilters.city.trim().length > 0,
     currentFilters.maxDeliveryFee !== undefined,
     currentFilters.maxMinOrderValue !== undefined,
+    currentFilters.freeDeliveryOnly,
+    currentFilters.multiLocationOnly,
     currentFilters.cuisineTypeIds.length > 0,
     currentFilters.tagIds.length > 0,
+    currentFilters.categoryIds.length > 0,
     currentFilters.minPrice !== undefined ||
       currentFilters.maxPrice !== undefined,
     currentFilters.minCalories !== undefined ||
@@ -113,6 +138,7 @@ export function StorefrontFilters({
     currentFilters.minFat !== undefined || currentFilters.maxFat !== undefined,
     currentFilters.isVegetarian,
     currentFilters.isVegan,
+    currentFilters.isGlutenFree,
     currentFilters.maxSpiceLevel !== undefined,
   ].filter(Boolean).length;
 
@@ -120,7 +146,12 @@ export function StorefrontFilters({
     key: K,
     value: FilterValues[K],
   ) => {
-    onFiltersChange({ ...currentFilters, [key]: value });
+    const shouldResetPage = key !== "page" && key !== "perPage";
+    onFiltersChange({
+      ...currentFilters,
+      [key]: value,
+      ...(shouldResetPage ? { page: 1 } : {}),
+    });
   };
 
   const resetFilters = () => {
@@ -142,6 +173,33 @@ export function StorefrontFilters({
       : [...current, id];
     updateFilter("tagIds", updated);
   };
+
+  const toggleCategory = (id: string) => {
+    const current = currentFilters.categoryIds;
+    const updated = current.includes(id)
+      ? current.filter((t) => t !== id)
+      : [...current, id];
+    updateFilter("categoryIds", updated);
+  };
+
+  const restaurantSortOptions = [
+    { value: "rating_desc", label: "Najlepiej oceniane" },
+    { value: "rating_asc", label: "Najniżej oceniane" },
+    { value: "name_asc", label: "Nazwa A-Z" },
+    { value: "delivery_fee_asc", label: "Najtańsza dostawa" },
+    { value: "min_order_asc", label: "Najniższe minimum" },
+    { value: "locations_desc", label: "Najwięcej lokalizacji" },
+  ];
+
+  const mealSortOptions = [
+    { value: "newest", label: "Najnowsze" },
+    { value: "price_asc", label: "Cena: od najtańszego" },
+    { value: "price_desc", label: "Cena: od najdroższego" },
+    { value: "calories_asc", label: "Najmniej kalorii" },
+    { value: "calories_desc", label: "Najwięcej kalorii" },
+    { value: "protein_desc", label: "Najwięcej białka" },
+    { value: "name_asc", label: "Nazwa A-Z" },
+  ];
 
   return (
     <div
@@ -208,7 +266,10 @@ export function StorefrontFilters({
             onFiltersChange({
               ...defaultFilters,
               mode: "restaurants",
+              sortBy: "rating_desc",
               query: currentFilters.query,
+              perPage: currentFilters.perPage,
+              page: 1,
             })
           }
           className={`rounded-full px-4 py-1.5 text-xs font-medium transition-all ${
@@ -224,7 +285,10 @@ export function StorefrontFilters({
             onFiltersChange({
               ...defaultFilters,
               mode: "meals",
+              sortBy: "newest",
               query: currentFilters.query,
+              perPage: currentFilters.perPage,
+              page: 1,
             })
           }
           className={`rounded-full px-4 py-1.5 text-xs font-medium transition-all ${
@@ -293,6 +357,47 @@ export function StorefrontFilters({
             className="overflow-hidden"
           >
             <div className="mt-4 space-y-4 border-t border-[#EEEEEE] pt-4">
+              {/* Sort */}
+              <div>
+                <p className="mb-1 text-xs font-semibold text-[#8C8C8C] uppercase tracking-wide">
+                  Sortowanie
+                </p>
+                <select
+                  value={currentFilters.sortBy}
+                  onChange={(e) => updateFilter("sortBy", e.target.value)}
+                  className="w-full rounded-xl border border-[#EEEEEE] bg-white px-3 py-2 text-sm text-[#1F1F1F] focus:border-[#FF4D4F] focus:outline-none"
+                >
+                  {(currentFilters.mode === "restaurants"
+                    ? restaurantSortOptions
+                    : mealSortOptions
+                  ).map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <p className="mb-1 text-xs font-semibold text-[#8C8C8C] uppercase tracking-wide">
+                  Elementów na stronę
+                </p>
+                <Input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={currentFilters.perPage}
+                  onChange={(e) => {
+                    const raw = parseInt(e.target.value || "", 10);
+                    const safe = Number.isFinite(raw)
+                      ? Math.min(100, Math.max(1, raw))
+                      : 24;
+                    updateFilter("perPage", safe);
+                  }}
+                  className="rounded-xl border-[#EEEEEE] text-sm"
+                />
+              </div>
+
               {/* Amenity Tags */}
               {currentFilters.mode === "restaurants" &&
                 restaurantTags.length > 0 && (
@@ -373,6 +478,41 @@ export function StorefrontFilters({
                 </div>
               )}
 
+              {currentFilters.mode === "restaurants" && (
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() =>
+                      updateFilter(
+                        "freeDeliveryOnly",
+                        !currentFilters.freeDeliveryOnly,
+                      )
+                    }
+                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                      currentFilters.freeDeliveryOnly
+                        ? "bg-[#1F1F1F] text-white"
+                        : "bg-[#F5F5F5] text-[#1F1F1F] hover:bg-[#E8E8E8]"
+                    }`}
+                  >
+                    Tylko darmowa dostawa
+                  </button>
+                  <button
+                    onClick={() =>
+                      updateFilter(
+                        "multiLocationOnly",
+                        !currentFilters.multiLocationOnly,
+                      )
+                    }
+                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                      currentFilters.multiLocationOnly
+                        ? "bg-[#1F1F1F] text-white"
+                        : "bg-[#F5F5F5] text-[#1F1F1F] hover:bg-[#E8E8E8]"
+                    }`}
+                  >
+                    Tylko sieci (2+ lokalizacje)
+                  </button>
+                </div>
+              )}
+
               {/* Meal-specific controls */}
               {currentFilters.mode === "meals" && (
                 <div>
@@ -419,6 +559,29 @@ export function StorefrontFilters({
                 </div>
               )}
 
+              {currentFilters.mode === "meals" && mealCategories.length > 0 && (
+                <div>
+                  <p className="mb-2 text-xs font-semibold text-[#8C8C8C] uppercase tracking-wide">
+                    Kategorie dań
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {mealCategories.map((category) => (
+                      <button
+                        key={category.id}
+                        onClick={() => toggleCategory(category.id)}
+                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                          currentFilters.categoryIds.includes(category.id)
+                            ? "bg-[#FF4D4F] text-white"
+                            : "bg-[#FFF1F1] text-[#FF4D4F] border border-[#FF4D4F]/20 hover:bg-[#FF4D4F]/10"
+                        }`}
+                      >
+                        {category.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Dietary Preferences */}
               {currentFilters.mode === "meals" && (
                 <div>
@@ -454,6 +617,22 @@ export function StorefrontFilters({
                     >
                       <Leaf className="h-3 w-3" />
                       Wegańskie
+                    </button>
+                    <button
+                      onClick={() =>
+                        updateFilter(
+                          "isGlutenFree",
+                          !currentFilters.isGlutenFree,
+                        )
+                      }
+                      className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                        currentFilters.isGlutenFree
+                          ? "bg-blue-600 text-white"
+                          : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+                      }`}
+                    >
+                      <Wheat className="h-3 w-3" />
+                      Bezglutenowe
                     </button>
                   </div>
                 </div>

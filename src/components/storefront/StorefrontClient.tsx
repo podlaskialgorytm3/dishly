@@ -45,6 +45,12 @@ type RestaurantTag = {
   slug: string;
 };
 
+type MealCategory = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
 type LocationData = {
   id: string;
   name: string;
@@ -141,11 +147,24 @@ type StorefrontClientProps = {
     restaurants: Restaurant[];
     cuisineTypes: CuisineType[];
     restaurantTags: RestaurantTag[];
+    mealCategories: MealCategory[];
     recentOrders: RecentOrder[];
     userAddresses: SavedAddress[];
     trendingMeals: TrendingMeal[];
     searchMeals: SearchMeal[];
     mode: "restaurants" | "meals";
+    restaurantPagination: {
+      page: number;
+      perPage: number;
+      total: number;
+      totalPages: number;
+    };
+    mealPagination: {
+      page: number;
+      perPage: number;
+      total: number;
+      totalPages: number;
+    };
     isLoggedIn: boolean;
   };
 };
@@ -169,9 +188,23 @@ const quickCategories = [
 export function StorefrontClient({ initialData }: StorefrontClientProps) {
   const [restaurants, setRestaurants] = useState(initialData.restaurants);
   const [searchMeals, setSearchMeals] = useState(initialData.searchMeals);
+  const [restaurantPagination, setRestaurantPagination] = useState(
+    initialData.restaurantPagination,
+  );
+  const [mealPagination, setMealPagination] = useState(
+    initialData.mealPagination,
+  );
   const [filters, setFilters] = useState<FilterValues>({
     ...defaultFilters,
     mode: initialData.mode,
+    page:
+      initialData.mode === "restaurants"
+        ? initialData.restaurantPagination.page
+        : initialData.mealPagination.page,
+    perPage:
+      initialData.mode === "restaurants"
+        ? initialData.restaurantPagination.perPage
+        : initialData.mealPagination.perPage,
   });
   const [isPending, startTransition] = useTransition();
   const userLocation = useLocationStore((s) => s.userLocation);
@@ -210,16 +243,24 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
     startTransition(async () => {
       const apiFilters: RestaurantFilters = {
         mode: newFilters.mode,
+        page: newFilters.page,
+        perPage: newFilters.perPage,
         query: newFilters.query || undefined,
         city: newFilters.city || undefined,
         minRating: newFilters.minRating || undefined,
         maxDeliveryFee: newFilters.maxDeliveryFee,
         maxMinOrderValue: newFilters.maxMinOrderValue,
+        freeDeliveryOnly: newFilters.freeDeliveryOnly || undefined,
+        multiLocationOnly: newFilters.multiLocationOnly || undefined,
         cuisineTypeIds:
           newFilters.cuisineTypeIds.length > 0
             ? newFilters.cuisineTypeIds
             : undefined,
         tagIds: newFilters.tagIds.length > 0 ? newFilters.tagIds : undefined,
+        categoryIds:
+          newFilters.categoryIds.length > 0
+            ? newFilters.categoryIds
+            : undefined,
         minPrice: newFilters.minPrice,
         maxPrice: newFilters.maxPrice,
         minCalories: newFilters.minCalories,
@@ -232,20 +273,42 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
         maxFat: newFilters.maxFat,
         isVegetarian: newFilters.isVegetarian || undefined,
         isVegan: newFilters.isVegan || undefined,
+        isGlutenFree: newFilters.isGlutenFree || undefined,
         maxSpiceLevel: newFilters.maxSpiceLevel,
+        sortBy: newFilters.sortBy,
       };
 
       const result = await getStorefrontData(apiFilters);
       if (result.success && result.data) {
         setRestaurants(result.data.restaurants);
         setSearchMeals(result.data.searchMeals);
+        setRestaurantPagination(result.data.restaurantPagination);
+        setMealPagination(result.data.mealPagination);
       }
     });
   }, []);
 
+  const pagination =
+    filters.mode === "restaurants" ? restaurantPagination : mealPagination;
+
+  const goToPage = (nextPage: number) => {
+    const clamped = Math.min(
+      Math.max(1, nextPage),
+      Math.max(1, pagination.totalPages),
+    );
+    if (clamped === filters.page) {
+      return;
+    }
+    applyFilters({ ...filters, page: clamped });
+  };
+
   // Quick category search
   const handleQuickCategory = (label: string) => {
-    const newFilters = { ...defaultFilters, query: label };
+    const newFilters = {
+      ...defaultFilters,
+      query: label,
+      sortBy: filters.mode === "meals" ? "newest" : "rating_desc",
+    };
     applyFilters(newFilters);
   };
 
@@ -351,6 +414,7 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
           <StorefrontFilters
             cuisineTypes={initialData.cuisineTypes}
             restaurantTags={initialData.restaurantTags}
+            mealCategories={initialData.mealCategories}
             onFiltersChange={applyFilters}
             currentFilters={filters}
           />
@@ -369,8 +433,8 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
             </h2>
             <span className="text-sm text-[#8C8C8C]">
               {filters.mode === "restaurants"
-                ? restaurants.length
-                : searchMeals.length}{" "}
+                ? restaurantPagination.total
+                : mealPagination.total}{" "}
               wyników
             </span>
           </div>
@@ -487,6 +551,30 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
               />
             )}
           </AnimatePresence>
+
+          {pagination.totalPages > 1 && (
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+              <button
+                onClick={() => goToPage(filters.page - 1)}
+                disabled={filters.page <= 1 || isPending}
+                className="rounded-full border border-[#EEEEEE] px-4 py-2 text-sm text-[#1F1F1F] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Poprzednia
+              </button>
+
+              <span className="px-2 text-sm text-[#8C8C8C]">
+                Strona {pagination.page} z {pagination.totalPages}
+              </span>
+
+              <button
+                onClick={() => goToPage(filters.page + 1)}
+                disabled={filters.page >= pagination.totalPages || isPending}
+                className="rounded-full border border-[#EEEEEE] px-4 py-2 text-sm text-[#1F1F1F] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Następna
+              </button>
+            </div>
+          )}
         </section>
 
         {/* Trending meals */}
