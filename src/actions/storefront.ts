@@ -40,6 +40,23 @@ export type RestaurantFilters = {
   maxSpiceLevel?: number;
 };
 
+export type RestaurantMapLocation = {
+  id: string;
+  name: string;
+  city: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  isOpenNow: boolean;
+  statusLabel: string;
+  restaurant: {
+    id: string;
+    name: string;
+    slug: string;
+    logoUrl: string | null;
+  };
+};
+
 // ============================================
 // GET STOREFRONT DATA
 // ============================================
@@ -757,5 +774,127 @@ export async function getFilteredMeals(
   } catch (error) {
     console.error("Error fetching filtered meals:", error);
     return { success: false, error: "Nie udało się pobrać dań" };
+  }
+}
+
+type DayHours = {
+  open?: string;
+  close?: string;
+  closed?: boolean;
+};
+
+function getOpenStatus(
+  isAllDay: boolean,
+  openingHours: unknown,
+): { isOpenNow: boolean; statusLabel: string } {
+  if (isAllDay) {
+    return { isOpenNow: true, statusLabel: "Otwarte 24h" };
+  }
+
+  if (!openingHours || typeof openingHours !== "object") {
+    return { isOpenNow: false, statusLabel: "Brak danych o godzinach" };
+  }
+
+  const now = new Date();
+  const days = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ] as const;
+  const dayKey = days[now.getDay()];
+  const todaysHours = (openingHours as Record<string, DayHours | undefined>)[
+    dayKey
+  ];
+
+  if (!todaysHours) {
+    return { isOpenNow: false, statusLabel: "Brak danych o godzinach" };
+  }
+
+  if (todaysHours.closed) {
+    return { isOpenNow: false, statusLabel: "Dziś zamknięte" };
+  }
+
+  if (!todaysHours.open || !todaysHours.close) {
+    return { isOpenNow: false, statusLabel: "Brak danych o godzinach" };
+  }
+
+  const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now
+    .getMinutes()
+    .toString()
+    .padStart(2, "0")}`;
+  const isOpenNow =
+    currentTime >= todaysHours.open && currentTime <= todaysHours.close;
+
+  return {
+    isOpenNow,
+    statusLabel: isOpenNow
+      ? `Otwarte do ${todaysHours.close}`
+      : `Dziś: ${todaysHours.open}-${todaysHours.close}`,
+  };
+}
+
+export async function getRestaurantMapData(): Promise<{
+  success: boolean;
+  data?: RestaurantMapLocation[];
+  error?: string;
+}> {
+  try {
+    const locations = await db.location.findMany({
+      where: {
+        isActive: true,
+        latitude: { not: null },
+        longitude: { not: null },
+        restaurant: {
+          isActive: true,
+          status: "APPROVED",
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        city: true,
+        address: true,
+        latitude: true,
+        longitude: true,
+        isAllDay: true,
+        openingHours: true,
+        restaurant: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            logoUrl: true,
+          },
+        },
+      },
+      orderBy: [{ city: "asc" }, { name: "asc" }],
+    });
+
+    const data: RestaurantMapLocation[] = locations.map((location) => {
+      const status = getOpenStatus(location.isAllDay, location.openingHours);
+      return {
+        id: location.id,
+        name: location.name,
+        city: location.city,
+        address: location.address,
+        latitude: location.latitude as number,
+        longitude: location.longitude as number,
+        isOpenNow: status.isOpenNow,
+        statusLabel: status.statusLabel,
+        restaurant: location.restaurant,
+      };
+    });
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error fetching restaurant map data:", error);
+    return {
+      success: false,
+      error: "Nie udało się pobrać danych mapy restauracji",
+    };
   }
 }

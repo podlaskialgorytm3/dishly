@@ -26,8 +26,10 @@ import { CartDrawer } from "@/components/storefront/CartDrawer";
 import {
   getStorefrontData,
   type RestaurantFilters,
+  type RestaurantMapLocation,
 } from "@/actions/storefront";
 import { useLocationStore } from "@/stores/location-store";
+import { HeroMapBackground } from "@/components/storefront/HeroMapBackground";
 
 // ============================================
 // TYPES
@@ -152,6 +154,7 @@ type StorefrontClientProps = {
     userAddresses: SavedAddress[];
     trendingMeals: TrendingMeal[];
     searchMeals: SearchMeal[];
+    mapLocations: RestaurantMapLocation[];
     mode: "restaurants" | "meals";
     restaurantPagination: {
       page: number;
@@ -315,8 +318,15 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       {/* Hero Section with Location Picker */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#FF4D4F] to-[#FF8C42] px-4 py-12 md:py-16">
-        <div className="mx-auto max-w-4xl text-center">
+      <section className="relative overflow-hidden px-4 py-12 md:py-16">
+        <HeroMapBackground locations={initialData.mapLocations} />
+        <Link
+          href="/mapa"
+          aria-label="Przejdź do interaktywnej mapy restauracji"
+          className="absolute inset-0 z-10"
+        />
+        <div className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-br from-[#1F1F1F]/45 via-[#1F1F1F]/30 to-[#FF4D4F]/35" />
+        <div className="relative z-30 mx-auto max-w-4xl text-center">
           <h1 className="mb-4 text-3xl font-bold text-white md:text-5xl lg:text-6xl">
             Zamów coś pysznego 🍕
           </h1>
@@ -344,6 +354,16 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
                 {cat.label}
               </button>
             ))}
+          </div>
+
+          <div className="mt-6">
+            <Link
+              href="/mapa"
+              className="inline-flex items-center gap-2 rounded-full bg-white/90 px-6 py-2.5 text-sm font-semibold text-[#1F1F1F] shadow-sm transition hover:scale-[1.02] hover:bg-white"
+            >
+              Otwórz interaktywną mapę restauracji
+              <MapPin className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>

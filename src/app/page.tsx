@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { MainHeader } from "@/components/layout/MainHeader";
 import { Footer } from "@/components/layout/Footer";
 import { StorefrontClient } from "@/components/storefront/StorefrontClient";
-import { getStorefrontData } from "@/actions/storefront";
+import { getRestaurantMapData, getStorefrontData } from "@/actions/storefront";
 
 export default async function Home() {
   const session = await auth();
@@ -30,6 +30,7 @@ export default async function Home() {
 
   // Fetch storefront data via server action
   const storefrontResult = await getStorefrontData();
+  const mapResult = await getRestaurantMapData();
 
   const initialData =
     storefrontResult.success && storefrontResult.data
@@ -43,6 +44,7 @@ export default async function Home() {
           userAddresses: [],
           trendingMeals: [],
           searchMeals: [],
+          mapLocations: [],
           mode: "restaurants",
           restaurantPagination: {
             page: 1,
@@ -58,6 +60,10 @@ export default async function Home() {
           },
           isLoggedIn: false,
         };
+
+  if (storefrontResult.success && storefrontResult.data) {
+    initialData.mapLocations = mapResult.success ? (mapResult.data ?? []) : [];
+  }
 
   return (
     <div className="min-h-screen bg-[var(--dishly-background)]">
