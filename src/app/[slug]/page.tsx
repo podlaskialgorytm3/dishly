@@ -61,6 +61,8 @@ export default async function DynamicPage({ params }: PageProps) {
           deliveryRadius: true,
           deliveryFee: true,
           minOrderValue: true,
+          latitude: true,
+          longitude: true,
         },
       },
       meals: {

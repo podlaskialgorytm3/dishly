@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   MapPin,
@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { MealConfiguratorModal } from "@/components/storefront/MealConfiguratorModal";
 import { CartDrawer } from "@/components/storefront/CartDrawer";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocationStore } from "@/stores/location-store";
 
 type MealVariant = {
   id: string;
@@ -84,6 +85,8 @@ type Location = {
   deliveryRadius: number;
   deliveryFee: number;
   minOrderValue: number;
+  latitude?: number | null;
+  longitude?: number | null;
 };
 
 type CuisineType = {
@@ -116,9 +119,8 @@ type RestaurantPageProps = {
 };
 
 export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
-  const [selectedLocation, setSelectedLocation] = useState<string | null>(
-    restaurant.locations[0]?.id || null,
-  );
+  const userLocation = useLocationStore((s) => s.userLocation);
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
   const [filterDietary, setFilterDietary] = useState<string | null>(null);
@@ -133,6 +135,69 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
   const [maxCarbs, setMaxCarbs] = useState<number | undefined>(undefined);
   const [minFat, setMinFat] = useState<number | undefined>(undefined);
   const [maxFat, setMaxFat] = useState<number | undefined>(undefined);
+
+  const getDistanceKm = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ) => {
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
+
+  const referencePoint =
+    userLocation &&
+    Math.abs(userLocation.latitude) > 0.001 &&
+    Math.abs(userLocation.longitude) > 0.001
+      ? { lat: userLocation.latitude, lng: userLocation.longitude }
+      : { lat: 52.23196, lng: 21.00672 }; // PKiN
+
+  useEffect(() => {
+    if (restaurant.locations.length === 0) {
+      setSelectedLocation(null);
+      return;
+    }
+
+    const withCoords = restaurant.locations.filter(
+      (loc) => loc.latitude !== null && loc.longitude !== null,
+    );
+
+    const nearest =
+      withCoords.length > 0
+        ? withCoords.reduce((best, loc) => {
+            if (!best) {
+              return loc;
+            }
+
+            const bestDistance = getDistanceKm(
+              referencePoint.lat,
+              referencePoint.lng,
+              best.latitude as number,
+              best.longitude as number,
+            );
+            const currentDistance = getDistanceKm(
+              referencePoint.lat,
+              referencePoint.lng,
+              loc.latitude as number,
+              loc.longitude as number,
+            );
+
+            return currentDistance < bestDistance ? loc : best;
+          }, withCoords[0])
+        : restaurant.locations[0];
+
+    setSelectedLocation(nearest?.id ?? restaurant.locations[0]?.id ?? null);
+  }, [restaurant.locations, referencePoint.lat, referencePoint.lng]);
 
   // Pobierz unikalne kategorie z dań
   const categories = useMemo(() => {

@@ -8,12 +8,17 @@ import { auth } from "@/lib/auth";
 // ============================================
 
 export type RestaurantFilters = {
+  mode?: "restaurants" | "meals";
   query?: string;
   city?: string;
   minRating?: number;
   maxAvgPrice?: number;
+  maxDeliveryFee?: number;
+  maxMinOrderValue?: number;
   cuisineTypeIds?: string[];
   tagIds?: string[];
+  minPrice?: number;
+  maxPrice?: number;
   // Nutritional filters
   minProtein?: number;
   maxProtein?: number;
@@ -35,6 +40,7 @@ export type RestaurantFilters = {
 export async function getStorefrontData(filters?: RestaurantFilters) {
   try {
     const session = await auth();
+    const mode = filters?.mode ?? "restaurants";
 
     // Build meal filter conditions for nutritional search
     const mealWhere: any = {
@@ -89,6 +95,13 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
       filters?.isVegan ||
       filters?.maxSpiceLevel !== undefined;
 
+    if (filters?.minPrice !== undefined) {
+      mealWhere.basePrice = { ...mealWhere.basePrice, gte: filters.minPrice };
+    }
+    if (filters?.maxPrice !== undefined) {
+      mealWhere.basePrice = { ...mealWhere.basePrice, lte: filters.maxPrice };
+    }
+
     // Build restaurant where clause
     const restaurantWhere: any = {
       isActive: true,
@@ -130,12 +143,27 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
       };
     }
 
-    // If nutritional filters are active, only include restaurants that have matching meals
-    if (hasNutritionalFilters) {
-      restaurantWhere.meals = {
-        some: mealWhere,
+    if (filters?.maxDeliveryFee !== undefined) {
+      restaurantWhere.locations = {
+        some: {
+          ...(restaurantWhere.locations?.some ?? {}),
+          deliveryFee: { lte: filters.maxDeliveryFee },
+          isActive: true,
+        },
       };
     }
+
+    if (filters?.maxMinOrderValue !== undefined) {
+      restaurantWhere.locations = {
+        some: {
+          ...(restaurantWhere.locations?.some ?? {}),
+          minOrderValue: { lte: filters.maxMinOrderValue },
+          isActive: true,
+        },
+      };
+    }
+
+    // Restaurant mode should be driven by restaurant/location attributes only.
 
     // Fetch restaurants
     const restaurants = await db.restaurant.findMany({
@@ -151,6 +179,8 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
             deliveryRadius: true,
             deliveryFee: true,
             minOrderValue: true,
+            latitude: true,
+            longitude: true,
           },
         },
         cuisineTypes: {
@@ -178,8 +208,8 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
       JSON.stringify(filters || "none"),
     );
 
-    // Calculate average rating and apply rating filter
-    let processedRestaurants = restaurants.map((restaurant) => {
+    // Calculate average rating per restaurant row
+    const restaurantRows = restaurants.map((restaurant) => {
       const avgRating =
         restaurant.reviews.length > 0
           ? restaurant.reviews.reduce((sum, r) => sum + r.rating, 0) /
@@ -205,12 +235,122 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
       };
     });
 
+    const normalizeRestaurantName = (name: string) =>
+      name
+        .toLowerCase()
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+
+    // Merge chain duplicates by normalized name (e.g. many "McDonald's" -> one row).
+    const groupedRestaurantsMap = new Map<
+      string,
+      (typeof restaurantRows)[number]
+    >();
+    for (const row of restaurantRows) {
+      const key = normalizeRestaurantName(row.name);
+      const existing = groupedRestaurantsMap.get(key);
+
+      if (!existing) {
+        groupedRestaurantsMap.set(key, row);
+        continue;
+      }
+
+      const mergedLocations = [
+        ...existing.locations,
+        ...row.locations.filter(
+          (loc) => !existing.locations.some((eLoc) => eLoc.id === loc.id),
+        ),
+      ];
+
+      const mergedCuisineTypes = [
+        ...existing.cuisineTypes,
+        ...row.cuisineTypes.filter(
+          (c) => !existing.cuisineTypes.some((e) => e.id === c.id),
+        ),
+      ];
+
+      const mergedTags = [
+        ...existing.tags,
+        ...row.tags.filter((t) => !existing.tags.some((e) => e.id === t.id)),
+      ];
+
+      const totalReviews = existing.reviewCount + row.reviewCount;
+      const avgRating =
+        totalReviews > 0
+          ? (existing.avgRating * existing.reviewCount +
+              row.avgRating * row.reviewCount) /
+            totalReviews
+          : 0;
+
+      groupedRestaurantsMap.set(key, {
+        ...existing,
+        logoUrl: existing.logoUrl ?? row.logoUrl,
+        coverImageUrl: existing.coverImageUrl ?? row.coverImageUrl,
+        locations: mergedLocations,
+        cuisineTypes: mergedCuisineTypes,
+        tags: mergedTags,
+        avgRating: Math.round(avgRating * 10) / 10,
+        reviewCount: totalReviews,
+      });
+    }
+
+    let processedRestaurants = [...groupedRestaurantsMap.values()];
+
     // Filter by rating
     if (filters?.minRating && filters.minRating > 0) {
       processedRestaurants = processedRestaurants.filter(
         (r) => r.avgRating >= filters.minRating!,
       );
     }
+
+    // Global meals search (independent of restaurant listing mode).
+    const mealSearchWhere: any = {
+      ...mealWhere,
+      restaurant: {
+        isActive: true,
+        status: "APPROVED",
+      },
+    };
+
+    if (filters?.query) {
+      mealSearchWhere.OR = [
+        { name: { contains: filters.query, mode: "insensitive" } },
+        { description: { contains: filters.query, mode: "insensitive" } },
+        {
+          restaurant: {
+            name: { contains: filters.query, mode: "insensitive" },
+          },
+        },
+      ];
+    }
+
+    const searchMeals = await db.meal.findMany({
+      where: mealSearchWhere,
+      include: {
+        restaurant: {
+          include: {
+            locations: {
+              where: { isActive: true },
+              select: {
+                id: true,
+                name: true,
+                city: true,
+                address: true,
+                latitude: true,
+                longitude: true,
+              },
+            },
+          },
+        },
+        category: {
+          select: { id: true, name: true, slug: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    });
 
     // Fetch cuisine types for filter options
     const cuisineTypes = await db.cuisineType.findMany({
@@ -323,6 +463,26 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
           restaurantName: meal.restaurant.name,
           restaurantSlug: meal.restaurant.slug,
         })),
+        searchMeals: searchMeals.map((meal) => ({
+          id: meal.id,
+          name: meal.name,
+          slug: meal.slug,
+          description: meal.description,
+          imageUrl: meal.imageUrl,
+          basePrice: Number(meal.basePrice),
+          calories: meal.calories,
+          protein: meal.protein ? Number(meal.protein) : null,
+          carbs: meal.carbs ? Number(meal.carbs) : null,
+          fat: meal.fat ? Number(meal.fat) : null,
+          isVegetarian: meal.isVegetarian,
+          isVegan: meal.isVegan,
+          spiceLevel: meal.spiceLevel,
+          category: meal.category,
+          restaurantName: meal.restaurant.name,
+          restaurantSlug: meal.restaurant.slug,
+          locations: meal.restaurant.locations,
+        })),
+        mode,
         isLoggedIn: !!session?.user,
       },
     };

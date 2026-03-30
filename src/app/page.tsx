@@ -41,6 +41,8 @@ export default async function Home() {
           recentOrders: [],
           userAddresses: [],
           trendingMeals: [],
+          searchMeals: [],
+          mode: "restaurants",
           isLoggedIn: false,
         };
 

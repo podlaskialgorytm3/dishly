@@ -53,6 +53,8 @@ type LocationData = {
   deliveryRadius: number;
   deliveryFee: number;
   minOrderValue: number;
+  latitude: number | null;
+  longitude: number | null;
 };
 
 type Restaurant = {
@@ -95,6 +97,37 @@ type TrendingMeal = {
   restaurantSlug: string;
 };
 
+type SearchMeal = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  imageUrl: string | null;
+  basePrice: number;
+  calories: number | null;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+  isVegetarian: boolean;
+  isVegan: boolean;
+  spiceLevel: number;
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  restaurantName: string;
+  restaurantSlug: string;
+  locations: {
+    id: string;
+    name: string;
+    city: string;
+    address: string;
+    latitude: number | null;
+    longitude: number | null;
+  }[];
+};
+
 type SavedAddress = {
   id: string;
   street: string;
@@ -111,6 +144,8 @@ type StorefrontClientProps = {
     recentOrders: RecentOrder[];
     userAddresses: SavedAddress[];
     trendingMeals: TrendingMeal[];
+    searchMeals: SearchMeal[];
+    mode: "restaurants" | "meals";
     isLoggedIn: boolean;
   };
 };
@@ -133,7 +168,11 @@ const quickCategories = [
 
 export function StorefrontClient({ initialData }: StorefrontClientProps) {
   const [restaurants, setRestaurants] = useState(initialData.restaurants);
-  const [filters, setFilters] = useState<FilterValues>(defaultFilters);
+  const [searchMeals, setSearchMeals] = useState(initialData.searchMeals);
+  const [filters, setFilters] = useState<FilterValues>({
+    ...defaultFilters,
+    mode: initialData.mode,
+  });
   const [isPending, startTransition] = useTransition();
   const userLocation = useLocationStore((s) => s.userLocation);
 
@@ -165,42 +204,44 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
   }, [initialData.isLoggedIn, initialData.userAddresses, userLocation]);
 
   // Fetch filtered restaurants
-  const applyFilters = useCallback(
-    (newFilters: FilterValues) => {
-      setFilters(newFilters);
+  const applyFilters = useCallback((newFilters: FilterValues) => {
+    setFilters(newFilters);
 
-      startTransition(async () => {
-        const apiFilters: RestaurantFilters = {
-          query: newFilters.query || undefined,
-          minRating: newFilters.minRating || undefined,
-          cuisineTypeIds:
-            newFilters.cuisineTypeIds.length > 0
-              ? newFilters.cuisineTypeIds
-              : undefined,
-          tagIds: newFilters.tagIds.length > 0 ? newFilters.tagIds : undefined,
-          minCalories: newFilters.minCalories,
-          maxCalories: newFilters.maxCalories,
-          minProtein: newFilters.minProtein,
-          maxProtein: newFilters.maxProtein,
-          minCarbs: newFilters.minCarbs,
-          maxCarbs: newFilters.maxCarbs,
-          minFat: newFilters.minFat,
-          maxFat: newFilters.maxFat,
-          isVegetarian: newFilters.isVegetarian || undefined,
-          isVegan: newFilters.isVegan || undefined,
-          maxSpiceLevel: newFilters.maxSpiceLevel,
-          // Don't filter by city - show all restaurants
-          city: undefined,
-        };
+    startTransition(async () => {
+      const apiFilters: RestaurantFilters = {
+        mode: newFilters.mode,
+        query: newFilters.query || undefined,
+        city: newFilters.city || undefined,
+        minRating: newFilters.minRating || undefined,
+        maxDeliveryFee: newFilters.maxDeliveryFee,
+        maxMinOrderValue: newFilters.maxMinOrderValue,
+        cuisineTypeIds:
+          newFilters.cuisineTypeIds.length > 0
+            ? newFilters.cuisineTypeIds
+            : undefined,
+        tagIds: newFilters.tagIds.length > 0 ? newFilters.tagIds : undefined,
+        minPrice: newFilters.minPrice,
+        maxPrice: newFilters.maxPrice,
+        minCalories: newFilters.minCalories,
+        maxCalories: newFilters.maxCalories,
+        minProtein: newFilters.minProtein,
+        maxProtein: newFilters.maxProtein,
+        minCarbs: newFilters.minCarbs,
+        maxCarbs: newFilters.maxCarbs,
+        minFat: newFilters.minFat,
+        maxFat: newFilters.maxFat,
+        isVegetarian: newFilters.isVegetarian || undefined,
+        isVegan: newFilters.isVegan || undefined,
+        maxSpiceLevel: newFilters.maxSpiceLevel,
+      };
 
-        const result = await getStorefrontData(apiFilters);
-        if (result.success && result.data) {
-          setRestaurants(result.data.restaurants);
-        }
-      });
-    },
-    [userLocation],
-  );
+      const result = await getStorefrontData(apiFilters);
+      if (result.success && result.data) {
+        setRestaurants(result.data.restaurants);
+        setSearchMeals(result.data.searchMeals);
+      }
+    });
+  }, []);
 
   // Quick category search
   const handleQuickCategory = (label: string) => {
@@ -315,62 +356,135 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
           />
         </section>
 
-        {/* Restaurants Grid */}
+        {/* Results */}
         <section>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-bold text-[#1F1F1F]">
-              Restauracje w Twojej okolicy
+              {filters.mode === "restaurants"
+                ? "Wyniki restauracji"
+                : "Wyniki dań"}
               {isPending && (
                 <span className="ml-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-[#FF4D4F] border-t-transparent" />
               )}
             </h2>
             <span className="text-sm text-[#8C8C8C]">
-              {restaurants.length} wyników
+              {filters.mode === "restaurants"
+                ? restaurants.length
+                : searchMeals.length}{" "}
+              wyników
             </span>
           </div>
 
           <AnimatePresence mode="wait">
-            {restaurants.length > 0 ? (
+            {filters.mode === "restaurants" ? (
+              restaurants.length > 0 ? (
+                <motion.div
+                  key="restaurant-results"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+                >
+                  {restaurants.map((restaurant, index) => (
+                    <motion.div
+                      key={restaurant.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <RestaurantCardEnhanced
+                        restaurant={restaurant}
+                        userLocation={userLocation}
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              ) : (
+                <EmptyResults
+                  message="Nie znaleziono restauracji spełniających kryteria wyszukiwania"
+                  onReset={() => applyFilters(defaultFilters)}
+                />
+              )
+            ) : searchMeals.length > 0 ? (
               <motion.div
-                key="results"
+                key="meal-results"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
               >
-                {restaurants.map((restaurant, index) => (
+                {searchMeals.map((meal, index) => (
                   <motion.div
-                    key={restaurant.id}
+                    key={meal.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
+                    transition={{ delay: index * 0.03 }}
                   >
-                    <RestaurantCardEnhanced restaurant={restaurant} />
+                    <Link
+                      href={`/${meal.restaurantSlug}/${meal.slug}`}
+                      className="group block overflow-hidden rounded-2xl bg-white shadow-sm transition-all hover:shadow-lg hover:-translate-y-1"
+                    >
+                      <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-[#FF4D4F]/10 to-[#FF8C42]/10">
+                        {meal.imageUrl ? (
+                          <img
+                            src={meal.imageUrl}
+                            alt={meal.name}
+                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-6xl">
+                            🍽️
+                          </div>
+                        )}
+                        <div className="absolute right-3 top-3 rounded-full bg-white/90 px-2 py-1 text-xs font-semibold text-[#1F1F1F]">
+                          {formatPrice(meal.basePrice)}
+                        </div>
+                      </div>
+
+                      <div className="p-4">
+                        <h3 className="mb-1 text-base font-bold text-[#1F1F1F] line-clamp-1">
+                          {meal.name}
+                        </h3>
+                        <p className="mb-2 text-sm text-[#8C8C8C] line-clamp-2">
+                          {meal.description || meal.category.name}
+                        </p>
+                        <p className="mb-2 text-xs text-[#8C8C8C]">
+                          {meal.restaurantName}
+                        </p>
+                        <div className="flex flex-wrap gap-2 text-[11px] text-[#8C8C8C]">
+                          {meal.calories !== null && (
+                            <span className="rounded-full bg-[#F5F5F5] px-2 py-0.5">
+                              {meal.calories} kcal
+                            </span>
+                          )}
+                          {meal.protein !== null && (
+                            <span className="rounded-full bg-[#F5F5F5] px-2 py-0.5">
+                              B {meal.protein}g
+                            </span>
+                          )}
+                          {meal.carbs !== null && (
+                            <span className="rounded-full bg-[#F5F5F5] px-2 py-0.5">
+                              W {meal.carbs}g
+                            </span>
+                          )}
+                          {meal.fat !== null && (
+                            <span className="rounded-full bg-[#F5F5F5] px-2 py-0.5">
+                              T {meal.fat}g
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
                   </motion.div>
                 ))}
               </motion.div>
             ) : (
-              <motion.div
-                key="empty"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="flex flex-col items-center justify-center py-20 text-center"
-              >
-                <div className="mb-4 text-6xl">🔍</div>
-                <h3 className="mb-2 text-xl font-bold text-[#1F1F1F]">
-                  Brak wyników
-                </h3>
-                <p className="mb-4 text-[#8C8C8C]">
-                  Nie znaleziono restauracji spełniających kryteria wyszukiwania
-                </p>
-                <button
-                  onClick={() => applyFilters(defaultFilters)}
-                  className="rounded-full bg-[#FF4D4F] px-6 py-2 text-sm font-medium text-white hover:bg-[#FF3B30]"
-                >
-                  Wyczyść filtry
-                </button>
-              </motion.div>
+              <EmptyResults
+                message="Nie znaleziono dań spełniających kryteria wyszukiwania"
+                onReset={() =>
+                  applyFilters({ ...defaultFilters, mode: "meals" })
+                }
+              />
             )}
           </AnimatePresence>
         </section>
@@ -434,8 +548,121 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
 // ENHANCED RESTAURANT CARD
 // ============================================
 
-function RestaurantCardEnhanced({ restaurant }: { restaurant: Restaurant }) {
-  const primaryLocation = restaurant.locations[0];
+function EmptyResults({
+  message,
+  onReset,
+}: {
+  message: string;
+  onReset: () => void;
+}) {
+  return (
+    <motion.div
+      key="empty"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      className="flex flex-col items-center justify-center py-20 text-center"
+    >
+      <div className="mb-4 text-6xl">🔍</div>
+      <h3 className="mb-2 text-xl font-bold text-[#1F1F1F]">Brak wyników</h3>
+      <p className="mb-4 text-[#8C8C8C]">{message}</p>
+      <button
+        onClick={onReset}
+        className="rounded-full bg-[#FF4D4F] px-6 py-2 text-sm font-medium text-white hover:bg-[#FF3B30]"
+      >
+        Wyczyść filtry
+      </button>
+    </motion.div>
+  );
+}
+
+function getDistanceKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const R = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function getReferencePoint(
+  userLocation: {
+    latitude: number;
+    longitude: number;
+  } | null,
+) {
+  if (
+    userLocation &&
+    Math.abs(userLocation.latitude) > 0.001 &&
+    Math.abs(userLocation.longitude) > 0.001
+  ) {
+    return { lat: userLocation.latitude, lng: userLocation.longitude };
+  }
+
+  // PKiN fallback when geolocation is unavailable.
+  return { lat: 52.23196, lng: 21.00672 };
+}
+
+function pickNearestLocation(
+  locations: LocationData[],
+  userLocation: { latitude: number; longitude: number } | null,
+) {
+  if (locations.length === 0) {
+    return null;
+  }
+
+  const withCoords = locations.filter(
+    (loc) => loc.latitude !== null && loc.longitude !== null,
+  );
+  if (withCoords.length === 0) {
+    return locations[0];
+  }
+
+  const ref = getReferencePoint(userLocation);
+  return withCoords.reduce((best, loc) => {
+    if (!best) {
+      return loc;
+    }
+    const bestDistance = getDistanceKm(
+      ref.lat,
+      ref.lng,
+      best.latitude as number,
+      best.longitude as number,
+    );
+    const currentDistance = getDistanceKm(
+      ref.lat,
+      ref.lng,
+      loc.latitude as number,
+      loc.longitude as number,
+    );
+    return currentDistance < bestDistance ? loc : best;
+  }, withCoords[0]);
+}
+
+function RestaurantCardEnhanced({
+  restaurant,
+  userLocation,
+}: {
+  restaurant: Restaurant;
+  userLocation: {
+    latitude: number;
+    longitude: number;
+  } | null;
+}) {
+  const primaryLocation = pickNearestLocation(
+    restaurant.locations,
+    userLocation,
+  );
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("pl-PL", {
@@ -518,6 +745,11 @@ function RestaurantCardEnhanced({ restaurant }: { restaurant: Restaurant }) {
               <Clock className="h-3 w-3" />
               Min. {formatPrice(primaryLocation.minOrderValue)}
             </span>
+            {restaurant.locations.length > 1 && (
+              <span className="rounded-full bg-[#FFF1F1] px-2 py-0.5 text-[11px] text-[#FF4D4F]">
+                {restaurant.locations.length} lokalizacji
+              </span>
+            )}
           </div>
         )}
 
