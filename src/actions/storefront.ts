@@ -11,6 +11,7 @@ export type RestaurantFilters = {
   mode?: "restaurants" | "meals";
   page?: number;
   perPage?: number;
+  categorySlugs?: string[];
   sortBy?: string;
   query?: string;
   city?: string;
@@ -113,6 +114,11 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
     if (filters?.categoryIds && filters.categoryIds.length > 0) {
       mealWhere.categoryId = { in: filters.categoryIds };
     }
+    if (filters?.categorySlugs && filters.categorySlugs.length > 0) {
+      mealWhere.category = {
+        slug: { in: filters.categorySlugs },
+      };
+    }
 
     const hasNutritionalFilters =
       filters?.minProtein !== undefined ||
@@ -164,6 +170,25 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
     if (filters?.tagIds && filters.tagIds.length > 0) {
       restaurantWhere.tags = {
         some: { id: { in: filters.tagIds } },
+      };
+    }
+
+    if (
+      (filters?.categoryIds && filters.categoryIds.length > 0) ||
+      (filters?.categorySlugs && filters.categorySlugs.length > 0)
+    ) {
+      restaurantWhere.meals = {
+        some: {
+          ...(restaurantWhere.meals?.some ?? {}),
+          ...(filters?.categoryIds && filters.categoryIds.length > 0
+            ? { categoryId: { in: filters.categoryIds } }
+            : {}),
+          ...(filters?.categorySlugs && filters.categorySlugs.length > 0
+            ? { category: { slug: { in: filters.categorySlugs } } }
+            : {}),
+          isAvailable: true,
+          approvalStatus: "APPROVED",
+        },
       };
     }
 

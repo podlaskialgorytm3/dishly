@@ -41,6 +41,7 @@ export type FilterValues = {
   mode: "restaurants" | "meals";
   page: number;
   perPage: number;
+  categorySlugs: string[];
   sortBy: string;
   query: string;
   city: string;
@@ -73,6 +74,7 @@ export const defaultFilters: FilterValues = {
   mode: "restaurants",
   page: 1,
   perPage: 24,
+  categorySlugs: [],
   sortBy: "rating_desc",
   query: "",
   city: "",
@@ -179,7 +181,17 @@ export function StorefrontFilters({
     const updated = current.includes(id)
       ? current.filter((t) => t !== id)
       : [...current, id];
-    updateFilter("categoryIds", updated);
+
+    const updatedSlugs = mealCategories
+      .filter((category) => updated.includes(category.id))
+      .map((category) => category.slug);
+
+    onFiltersChange({
+      ...currentFilters,
+      categoryIds: updated,
+      categorySlugs: updatedSlugs,
+      page: 1,
+    });
   };
 
   const restaurantSortOptions = [
@@ -557,7 +569,7 @@ export function StorefrontFilters({
                 </div>
               )}
 
-              {currentFilters.mode === "meals" && mealCategories.length > 0 && (
+              {mealCategories.length > 0 && (
                 <div>
                   <p className="mb-2 text-xs font-semibold text-[#8C8C8C] uppercase tracking-wide">
                     Kategorie dań

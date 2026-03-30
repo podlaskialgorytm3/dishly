@@ -1,7 +1,14 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef, useTransition } from "react";
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useTransition,
+  type MouseEvent,
+} from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Star,
   MapPin,
@@ -198,6 +205,7 @@ const heroCategories = [
 // ============================================
 
 export function StorefrontClient({ initialData }: StorefrontClientProps) {
+  const router = useRouter();
   const [restaurants, setRestaurants] = useState(initialData.restaurants);
   const [searchMeals, setSearchMeals] = useState(initialData.searchMeals);
   const [restaurantPagination, setRestaurantPagination] = useState(
@@ -222,7 +230,7 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
   const [activeHeroCategories, setActiveHeroCategories] = useState<string[]>(
     [],
   );
-  const resultsRef = useRef<HTMLElement | null>(null);
+  const [heroParallax, setHeroParallax] = useState({ x: 0, y: 0 });
   const userLocation = useLocationStore((s) => s.userLocation);
   const addItem = useCartStore((s) => s.addItem);
   const confirmClearAndAdd = useCartStore((s) => s.confirmClearAndAdd);
@@ -264,6 +272,10 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
         mode: newFilters.mode,
         page: newFilters.page,
         perPage: newFilters.perPage,
+        categorySlugs:
+          newFilters.categorySlugs.length > 0
+            ? newFilters.categorySlugs
+            : undefined,
         query: newFilters.query || undefined,
         city: newFilters.city || undefined,
         minRating: newFilters.minRating || undefined,
@@ -307,6 +319,15 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
     });
   }, []);
 
+  useEffect(() => {
+    const activeSlugs = initialData.mealCategories
+      .filter((category) => filters.categoryIds.includes(category.id))
+      .map((category) => category.slug)
+      .filter((slug) => heroCategories.some((cat) => cat.slug === slug));
+
+    setActiveHeroCategories(activeSlugs);
+  }, [filters.categoryIds, initialData.mealCategories]);
+
   const pagination =
     filters.mode === "restaurants" ? restaurantPagination : mealPagination;
 
@@ -328,26 +349,41 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
 
     setActiveHeroCategories(next);
 
-    const query = heroCategories
-      .filter((cat) => next.includes(cat.slug))
-      .map((cat) => cat.label)
-      .join(", ");
+    const selectedCategoryIds = initialData.mealCategories
+      .filter((category) => next.includes(category.slug))
+      .map((category) => category.id);
 
     applyFilters({
       ...defaultFilters,
       mode: "restaurants",
       sortBy: "rating_desc",
-      query,
+      categoryIds: selectedCategoryIds,
+      categorySlugs: next,
       perPage: filters.perPage,
     });
   };
 
-  const handleHeroCta = () => {
-    if (resultsRef.current) {
-      resultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+  const handleHeroMouseMove = (event: MouseEvent<HTMLElement>) => {
+    if (window.innerWidth < 1024) {
       return;
     }
-    window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width;
+    const y = (event.clientY - rect.top) / rect.height;
+
+    setHeroParallax({
+      x: (x - 0.5) * 12,
+      y: (y - 0.5) * 10,
+    });
+  };
+
+  const handleHeroMouseLeave = () => {
+    setHeroParallax({ x: 0, y: 0 });
+  };
+
+  const handleHeroCta = () => {
+    router.push("/mapa");
   };
 
   const locationEyebrow = userLocation?.city
@@ -421,8 +457,15 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
-      <section className="hero-section relative flex min-h-screen w-full items-center justify-center overflow-hidden px-4">
-        <HeroMapBackground locations={initialData.mapLocations} />
+      <section
+        className="hero-section relative flex min-h-screen w-full items-center justify-center overflow-hidden px-4"
+        onMouseMove={handleHeroMouseMove}
+        onMouseLeave={handleHeroMouseLeave}
+      >
+        <HeroMapBackground
+          locations={initialData.mapLocations}
+          parallaxOffset={heroParallax}
+        />
         <div
           className="hero-overlay absolute inset-0 z-10"
           aria-hidden="true"
@@ -573,7 +616,7 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
         </section>
 
         {/* Results */}
-        <section ref={resultsRef}>
+        <section>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-bold text-[#1F1F1F]">
               {filters.mode === "restaurants"

@@ -8,6 +8,10 @@ import type { RestaurantMapLocation } from "@/actions/storefront";
 
 type HeroMapBackgroundProps = {
   locations: RestaurantMapLocation[];
+  parallaxOffset?: {
+    x: number;
+    y: number;
+  };
 };
 
 const mapPinIcon = new L.DivIcon({
@@ -24,7 +28,10 @@ const mapPinIcon = new L.DivIcon({
   iconAnchor: [5, 5],
 });
 
-export function HeroMapBackground({ locations }: HeroMapBackgroundProps) {
+export function HeroMapBackground({
+  locations,
+  parallaxOffset,
+}: HeroMapBackgroundProps) {
   const [isMobile, setIsMobile] = useState(false);
   const previewLocations = locations.slice(0, 400);
 
@@ -129,6 +136,10 @@ export function HeroMapBackground({ locations }: HeroMapBackgroundProps) {
     <div
       className="absolute inset-0 z-0 pointer-events-none"
       aria-hidden="true"
+      style={{
+        transform: `translate3d(${parallaxOffset?.x ?? 0}px, ${parallaxOffset?.y ?? 0}px, 0)`,
+        transition: "transform 180ms ease-out",
+      }}
     >
       <MapContainer
         center={[52.23196, 21.00672]}
