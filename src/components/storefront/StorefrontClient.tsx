@@ -23,7 +23,6 @@ import {
   type FilterValues,
   defaultFilters,
 } from "@/components/storefront/StorefrontFilters";
-import { LocationPicker } from "@/components/storefront/LocationPicker";
 import { CartDrawer } from "@/components/storefront/CartDrawer";
 import {
   getStorefrontData,
@@ -505,13 +504,6 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
               <ArrowRight className="h-3 w-3" />
             </span>
           </button>
-
-          <div className="mb-5 flex justify-center">
-            <LocationPicker
-              savedAddresses={initialData.userAddresses}
-              isLoggedIn={initialData.isLoggedIn}
-            />
-          </div>
 
           <span id="hero-cats-label" className="cats-label mb-4">
             Czego szukasz?
