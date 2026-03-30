@@ -107,6 +107,7 @@ model User {
   createdMeals     Meal[]       @relation("MealCreator")
   approvedMeals    Meal[]       @relation("MealApprover")
   statusLogs       OrderStatusLog[]
+  favoriteRestaurants FavoriteRestaurant[]
 
   @@index([email])
   @@index([role])
@@ -158,6 +159,20 @@ model Review {
   @@index([restaurantId])
   @@index([userId])
   @@index([rating])
+}
+
+model FavoriteRestaurant {
+  id           String     @id @default(cuid())
+  userId       String
+  restaurantId String
+  createdAt    DateTime   @default(now())
+
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, restaurantId])
+  @@index([userId])
+  @@index([restaurantId])
 }
 
 // ============================================
@@ -229,6 +244,7 @@ model Restaurant {
   cuisineTypes       CuisineType[]      @relation("RestaurantCuisines")
   tags               RestaurantTag[]    @relation("RestaurantAmenities")
   visibilitySettings VisibilitySettings[]
+  favoritedBy         FavoriteRestaurant[]
 
   @@index([ownerId])
   @@index([slug])

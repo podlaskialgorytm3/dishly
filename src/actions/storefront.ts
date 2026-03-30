@@ -548,6 +548,16 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
       select: { id: true, name: true, slug: true },
     });
 
+    // Fetch favorite restaurant IDs for logged-in users.
+    let favoriteRestaurantIds: string[] = [];
+    if (session?.user?.id) {
+      const favorites = await db.favoriteRestaurant.findMany({
+        where: { userId: session.user.id },
+        select: { restaurantId: true },
+      });
+      favoriteRestaurantIds = favorites.map((item) => item.restaurantId);
+    }
+
     // Fetch recent orders for logged-in users
     let recentOrders: any[] = [];
     if (session?.user?.id) {
@@ -685,6 +695,7 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
           total: mealsTotal,
           totalPages: mealsTotalPages,
         },
+        favoriteRestaurantIds,
         mode,
         isLoggedIn: !!session?.user,
       },
@@ -692,6 +703,49 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
   } catch (error) {
     console.error("Error fetching storefront data:", error);
     return { success: false, error: "Nie udało się pobrać danych" };
+  }
+}
+
+export async function toggleRestaurantFavorite(restaurantId: string) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, error: "UNAUTHORIZED" };
+    }
+
+    const existing = await db.favoriteRestaurant.findUnique({
+      where: {
+        userId_restaurantId: {
+          userId: session.user.id,
+          restaurantId,
+        },
+      },
+      select: { id: true },
+    });
+
+    if (existing) {
+      await db.favoriteRestaurant.delete({
+        where: {
+          userId_restaurantId: {
+            userId: session.user.id,
+            restaurantId,
+          },
+        },
+      });
+      return { success: true, isFavorite: false };
+    }
+
+    await db.favoriteRestaurant.create({
+      data: {
+        userId: session.user.id,
+        restaurantId,
+      },
+    });
+
+    return { success: true, isFavorite: true };
+  } catch (error) {
+    console.error("Error toggling restaurant favorite:", error);
+    return { success: false, error: "Nie udało się zapisać ulubionych" };
   }
 }
 

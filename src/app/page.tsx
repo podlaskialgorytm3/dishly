@@ -58,6 +58,7 @@ export default async function Home() {
             total: 0,
             totalPages: 1,
           },
+          favoriteRestaurantIds: [],
           isLoggedIn: false,
         };
 

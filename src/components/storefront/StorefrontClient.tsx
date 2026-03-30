@@ -11,6 +11,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Star,
+  Heart,
   MapPin,
   Truck,
   Clock,
@@ -26,6 +27,7 @@ import {
 import { CartDrawer } from "@/components/storefront/CartDrawer";
 import {
   getStorefrontData,
+  toggleRestaurantFavorite,
   type RestaurantFilters,
   type RestaurantMapLocation,
 } from "@/actions/storefront";
@@ -175,9 +177,12 @@ type StorefrontClientProps = {
       total: number;
       totalPages: number;
     };
+    favoriteRestaurantIds: string[];
     isLoggedIn: boolean;
   };
 };
+
+const GUEST_FAVORITES_KEY = "dishly.favoriteRestaurants";
 
 // ============================================
 // QUICK CATEGORIES
@@ -232,6 +237,9 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
     [],
   );
   const [heroParallax, setHeroParallax] = useState({ x: 0, y: 0 });
+  const [favoriteRestaurantIds, setFavoriteRestaurantIds] = useState<string[]>(
+    initialData.favoriteRestaurantIds,
+  );
   const userLocation = useLocationStore((s) => s.userLocation);
   const addItem = useCartStore((s) => s.addItem);
   const confirmClearAndAdd = useCartStore((s) => s.confirmClearAndAdd);
@@ -243,6 +251,31 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
       currency: "PLN",
     }).format(price);
   };
+
+  const readGuestFavorites = useCallback(() => {
+    if (typeof window === "undefined") {
+      return [] as string[];
+    }
+    try {
+      const raw = localStorage.getItem(GUEST_FAVORITES_KEY);
+      if (!raw) {
+        return [] as string[];
+      }
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed)
+        ? parsed.filter((item) => typeof item === "string")
+        : [];
+    } catch {
+      return [] as string[];
+    }
+  }, []);
+
+  const writeGuestFavorites = useCallback((ids: string[]) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    localStorage.setItem(GUEST_FAVORITES_KEY, JSON.stringify(ids));
+  }, []);
 
   const buildQueryFromFilters = useCallback((nextFilters: FilterValues) => {
     const params = new URLSearchParams();
@@ -426,6 +459,18 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
     }
   }, [initialData.isLoggedIn, initialData.userAddresses, userLocation]);
 
+  useEffect(() => {
+    if (initialData.isLoggedIn) {
+      setFavoriteRestaurantIds(initialData.favoriteRestaurantIds);
+      return;
+    }
+    setFavoriteRestaurantIds(readGuestFavorites());
+  }, [
+    initialData.favoriteRestaurantIds,
+    initialData.isLoggedIn,
+    readGuestFavorites,
+  ]);
+
   // Fetch filtered restaurants
   const applyFilters = useCallback(
     (newFilters: FilterValues, options?: { syncUrl?: boolean }) => {
@@ -487,6 +532,9 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
           setSearchMeals(result.data.searchMeals);
           setRestaurantPagination(result.data.restaurantPagination);
           setMealPagination(result.data.mealPagination);
+          if (result.data.isLoggedIn) {
+            setFavoriteRestaurantIds(result.data.favoriteRestaurantIds || []);
+          }
         }
       });
     },
@@ -665,6 +713,35 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
     }
 
     openDrawer();
+  };
+
+  const handleToggleFavoriteRestaurant = async (restaurantId: string) => {
+    if (initialData.isLoggedIn) {
+      const wasFavorite = favoriteRestaurantIds.includes(restaurantId);
+      setFavoriteRestaurantIds((prev) =>
+        wasFavorite
+          ? prev.filter((id) => id !== restaurantId)
+          : [...prev, restaurantId],
+      );
+
+      const result = await toggleRestaurantFavorite(restaurantId);
+      if (!result.success) {
+        setFavoriteRestaurantIds((prev) =>
+          wasFavorite
+            ? [...prev, restaurantId]
+            : prev.filter((id) => id !== restaurantId),
+        );
+      }
+      return;
+    }
+
+    setFavoriteRestaurantIds((prev) => {
+      const next = prev.includes(restaurantId)
+        ? prev.filter((id) => id !== restaurantId)
+        : [...prev, restaurantId];
+      writeGuestFavorites(next);
+      return next;
+    });
   };
 
   return (
@@ -859,6 +936,11 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
                       <RestaurantCardEnhanced
                         restaurant={restaurant}
                         userLocation={userLocation}
+                        isFavorite={favoriteRestaurantIds.includes(
+                          restaurant.id,
+                        )}
+                        onToggleFavorite={handleToggleFavoriteRestaurant}
+                        isLoggedIn={initialData.isLoggedIn}
                       />
                     </motion.div>
                   ))}
@@ -1193,12 +1275,18 @@ function pickNearestMealLocation(
 function RestaurantCardEnhanced({
   restaurant,
   userLocation,
+  isFavorite,
+  onToggleFavorite,
+  isLoggedIn,
 }: {
   restaurant: Restaurant;
   userLocation: {
     latitude: number;
     longitude: number;
   } | null;
+  isFavorite: boolean;
+  onToggleFavorite: (restaurantId: string) => void;
+  isLoggedIn: boolean;
 }) {
   const primaryLocation = pickNearestLocation(
     restaurant.locations,
@@ -1210,6 +1298,15 @@ function RestaurantCardEnhanced({
       style: "currency",
       currency: "PLN",
     }).format(price);
+  };
+
+  const estimatedDeliveryTime = getEstimatedDeliveryTime(primaryLocation);
+  const fullStars = Math.max(0, Math.min(5, Math.round(restaurant.avgRating)));
+
+  const handleFavoriteClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onToggleFavorite(restaurant.id);
   };
 
   return (
@@ -1239,18 +1336,26 @@ function RestaurantCardEnhanced({
           </div>
         )}
 
-        {/* Rating badge */}
-        {restaurant.avgRating > 0 && (
-          <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-xs font-semibold backdrop-blur-sm">
-            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-            {restaurant.avgRating.toFixed(1)}
-            <span className="text-[#8C8C8C]">({restaurant.reviewCount})</span>
-          </div>
-        )}
+        <button
+          type="button"
+          onClick={handleFavoriteClick}
+          aria-label={
+            isFavorite
+              ? `Usuń ${restaurant.name} z ulubionych`
+              : `Dodaj ${restaurant.name} do ulubionych`
+          }
+          className="absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-[#1F1F1F] shadow-sm backdrop-blur-sm transition hover:scale-105"
+        >
+          <Heart
+            className={`h-5 w-5 transition-colors ${
+              isFavorite ? "fill-[#E8503A] text-[#E8503A]" : "text-[#666]"
+            }`}
+          />
+        </button>
 
         {/* Free delivery badge */}
         {primaryLocation && primaryLocation.deliveryFee === 0 && (
-          <div className="absolute right-3 top-3 rounded-full bg-green-500 px-2.5 py-1 text-xs font-bold text-white">
+          <div className="absolute left-3 top-3 rounded-full bg-green-500 px-2.5 py-1 text-xs font-bold text-white">
             Darmowa dostawa
           </div>
         )}
@@ -1262,6 +1367,30 @@ function RestaurantCardEnhanced({
           {restaurant.name}
         </h3>
 
+        <div
+          className="mb-2 flex items-center gap-2"
+          aria-label={`Ocena ${restaurant.avgRating.toFixed(1)} na 5`}
+        >
+          <div className="flex items-center gap-0.5">
+            {Array.from({ length: 5 }, (_, i) => (
+              <Star
+                key={i}
+                className={`h-3.5 w-3.5 ${
+                  i < fullStars
+                    ? "fill-amber-400 text-amber-400"
+                    : "text-slate-300"
+                }`}
+              />
+            ))}
+          </div>
+          <span className="text-xs font-semibold text-[#1F1F1F]">
+            {restaurant.avgRating.toFixed(1)}
+          </span>
+          <span className="text-xs text-[#8C8C8C]">
+            ({restaurant.reviewCount})
+          </span>
+        </div>
+
         {/* Cuisine types */}
         {restaurant.cuisineTypes.length > 0 && (
           <p className="mb-2 text-sm text-[#8C8C8C]">
@@ -1271,43 +1400,76 @@ function RestaurantCardEnhanced({
 
         {/* Location & delivery info */}
         {primaryLocation && (
-          <div className="flex flex-wrap items-center gap-3 text-xs text-[#8C8C8C]">
-            <span className="flex items-center gap-1">
+          <div className="mb-2 flex flex-wrap items-center gap-3 text-xs text-[#8C8C8C]">
+            <span
+              className="flex items-center gap-1"
+              aria-label={`Miasto ${primaryLocation.city}`}
+            >
               <MapPin className="h-3 w-3" />
               {primaryLocation.city}
             </span>
-            <span className="flex items-center gap-1">
-              <Truck className="h-3 w-3" />
+            <span
+              className="flex items-center gap-1"
+              aria-label={`Czas dostawy ${estimatedDeliveryTime}`}
+            >
+              <Clock className="h-3 w-3" />
+              {estimatedDeliveryTime}
+            </span>
+          </div>
+        )}
+
+        {primaryLocation && (
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <div className="inline-flex items-center gap-1 rounded-full bg-[#FFF0EE] px-3 py-1.5 text-sm font-extrabold text-[#C03422]">
+              <Truck className="h-4 w-4" />
               {primaryLocation.deliveryFee > 0
                 ? `od ${formatPrice(primaryLocation.deliveryFee)}`
-                : "Darmowa"}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
+                : "Darmowa dostawa"}
+            </div>
+            <div className="text-xs text-[#8C8C8C]">
               Min. {formatPrice(primaryLocation.minOrderValue)}
-            </span>
-            {restaurant.locations.length > 1 && (
-              <span className="rounded-full bg-[#FFF1F1] px-2 py-0.5 text-[11px] text-[#FF4D4F]">
-                {restaurant.locations.length} lokalizacji
-              </span>
-            )}
+            </div>
           </div>
         )}
 
         {/* Tags */}
-        {restaurant.tags.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
-            {restaurant.tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag.id}
-                className="rounded-full bg-[#F5F5F5] px-2 py-0.5 text-[11px] text-[#8C8C8C]"
-              >
-                {tag.name}
-              </span>
-            ))}
-          </div>
+        <div className="mt-2 flex flex-wrap gap-1">
+          {restaurant.locations.length > 1 && (
+            <span className="rounded-full bg-[#FFF1F1] px-2 py-0.5 text-[11px] text-[#FF4D4F]">
+              {restaurant.locations.length} lokalizacji
+            </span>
+          )}
+          {restaurant.tags.slice(0, 3).map((tag) => (
+            <span
+              key={tag.id}
+              className="rounded-full bg-[#F5F5F5] px-2 py-0.5 text-[11px] text-[#8C8C8C]"
+            >
+              {tag.name}
+            </span>
+          ))}
+        </div>
+
+        {!isLoggedIn && (
+          <p className="mt-2 text-[11px] text-[#8C8C8C]">
+            Ulubione zapisujemy lokalnie. Zaloguj się, aby zachować je na stałe.
+          </p>
         )}
       </div>
     </Link>
   );
+}
+
+function getEstimatedDeliveryTime(
+  location: {
+    deliveryRadius: number;
+  } | null,
+) {
+  if (!location) {
+    return "25-35 min";
+  }
+
+  const center = Math.max(20, Math.min(50, 18 + location.deliveryRadius * 2));
+  const from = Math.max(15, Math.round(center - 5));
+  const to = Math.round(center + 5);
+  return `${from}-${to} min`;
 }
