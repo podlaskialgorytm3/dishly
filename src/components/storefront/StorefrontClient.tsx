@@ -4,6 +4,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useMemo,
   useTransition,
   type MouseEvent,
 } from "react";
@@ -255,6 +256,8 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
     [],
   );
   const [heroParallax, setHeroParallax] = useState({ x: 0, y: 0 });
+  const [radiusKm, setRadiusKm] = useState(25);
+  const [radiusControlOpen, setRadiusControlOpen] = useState(false);
   const [favoriteRestaurantIds, setFavoriteRestaurantIds] = useState<string[]>(
     initialData.favoriteRestaurantIds,
   );
@@ -668,13 +671,34 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
     ? `${userLocation.city} i okolice`
     : "Warszawa i okolice";
 
-  const uniqueRestaurantCount = new Set(
-    initialData.mapLocations.map((location) => location.restaurant.id),
-  ).size;
-  const restaurantCountRounded =
-    uniqueRestaurantCount >= 100
-      ? Math.floor(uniqueRestaurantCount / 100) * 100
-      : uniqueRestaurantCount;
+  const openRestaurantsInRadius = useMemo(() => {
+    const reference = getReferencePoint(userLocation);
+    const uniqueRestaurants = new Set<string>();
+
+    for (const location of initialData.mapLocations) {
+      if (!location.isOpenNow) {
+        continue;
+      }
+
+      const distance = getDistanceKm(
+        reference.lat,
+        reference.lng,
+        location.latitude,
+        location.longitude,
+      );
+
+      if (distance <= radiusKm) {
+        uniqueRestaurants.add(location.restaurant.id);
+      }
+    }
+
+    return uniqueRestaurants.size;
+  }, [initialData.mapLocations, radiusKm, userLocation]);
+
+  const restaurantCountLabel =
+    openRestaurantsInRadius > 100
+      ? "100+ restauracji dostępnych teraz"
+      : `${openRestaurantsInRadius.toLocaleString("pl-PL")} restauracji dostępnych teraz`;
 
   const handleAddMealToCart = (
     meal: Pick<
@@ -808,12 +832,44 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
             Najlepsze restauracje w Twojej okolicy - uczciwe ceny, szeroki wybór
           </p>
 
-          <div className="hero-stat mb-8" role="status" aria-live="polite">
-            <span className="hero-stat-dot" aria-hidden="true" />
-            <span className="hero-stat-text">
-              {restaurantCountRounded.toLocaleString("pl-PL")}+ restauracji
-              dostępnych teraz
-            </span>
+          <div className="mb-8 flex w-full flex-col items-center">
+            <button
+              type="button"
+              className="hero-stat"
+              onClick={() => setRadiusControlOpen((prev) => !prev)}
+              aria-expanded={radiusControlOpen}
+              aria-controls="hero-radius-control"
+            >
+              <span className="hero-stat-dot" aria-hidden="true" />
+              <span className="hero-stat-text">{restaurantCountLabel}</span>
+            </button>
+
+            {radiusControlOpen && (
+              <div
+                id="hero-radius-control"
+                className="mt-3 w-full max-w-xs rounded-2xl border border-[#E8DFD4] bg-white/95 p-3 text-left shadow-lg backdrop-blur"
+              >
+                <div className="mb-2 flex items-center justify-between text-xs text-[#6B6058]">
+                  <span>Promień wyszukiwania</span>
+                  <span className="font-semibold text-[#1F1F1F]">
+                    {radiusKm} km
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={1}
+                  max={200}
+                  value={radiusKm}
+                  onChange={(event) => setRadiusKm(Number(event.target.value))}
+                  className="h-1 w-full accent-[#E8503A]"
+                  aria-label="Promień wyszukiwania restauracji"
+                />
+                <p className="mt-2 text-xs text-[#6B6058]">
+                  Otwartych restauracji w promieniu:{" "}
+                  {openRestaurantsInRadius.toLocaleString("pl-PL")}
+                </p>
+              </div>
+            )}
           </div>
 
           <button
