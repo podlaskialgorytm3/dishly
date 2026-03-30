@@ -2,18 +2,18 @@
 
 import Link from "next/link";
 import {
-  Bell,
   ShoppingCart,
-  User,
   UtensilsCrossed,
-  Home,
   Menu,
   X,
   MapPin,
+  ChevronDown,
+  LocateFixed,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useCartStore } from "@/stores/cart-store";
+import { useLocationStore } from "@/stores/location-store";
 
 interface NavigationPage {
   title: string;
@@ -31,8 +31,16 @@ interface MainHeaderProps {
 
 export function MainHeader({ user, navigationPages = [] }: MainHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [locationMenuOpen, setLocationMenuOpen] = useState(false);
+  const locationMenuRef = useRef<HTMLDivElement | null>(null);
+  const pathname = usePathname();
+
   const openDrawer = useCartStore((s) => s.openDrawer);
   const itemCount = useCartStore((s) => s.itemCount);
+  const userLocation = useLocationStore((s) => s.userLocation);
+  const detectLocation = useLocationStore((s) => s.detectLocation);
+  const isLocationLoading = useLocationStore((s) => s.isLoading);
+  const locationError = useLocationStore((s) => s.error);
 
   const getInitials = () => {
     if (user?.firstName && user?.lastName) {
@@ -48,253 +56,296 @@ export function MainHeader({ user, navigationPages = [] }: MainHeaderProps) {
     return "Użytkownik";
   };
 
+  const normalizedPages = useMemo(
+    () =>
+      navigationPages.map((page) => ({
+        ...page,
+        normalized: `${page.title} ${page.slug}`.toLowerCase(),
+      })),
+    [navigationPages],
+  );
+
+  const resolvePageHref = (fallback: string, keywords: string[]) => {
+    const found = normalizedPages.find((page) =>
+      keywords.some((kw) => page.normalized.includes(kw)),
+    );
+    return found ? `/${found.slug}` : fallback;
+  };
+
+  const navItems = [
+    { label: "Restauracje", href: "/" },
+    {
+      label: "Jak to działa",
+      href: resolvePageHref("/jak-to-dziala", ["jak", "działa", "dziala"]),
+    },
+    { label: "Kariera", href: resolvePageHref("/kariera", ["kariera"]) },
+    { label: "Blog", href: resolvePageHref("/blog", ["blog"]) },
+  ];
+
+  const isActive = (href: string) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
+  const locationLabel = userLocation
+    ? [userLocation.city, userLocation.address].filter(Boolean).join(", ") ||
+      "Ustaw lokalizację"
+    : "Wybierz lokalizację";
+
+  useEffect(() => {
+    const closeOnOutside = (event: MouseEvent) => {
+      if (!locationMenuRef.current) {
+        return;
+      }
+      if (!locationMenuRef.current.contains(event.target as Node)) {
+        setLocationMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", closeOnOutside);
+    return () => document.removeEventListener("mousedown", closeOnOutside);
+  }, []);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setLocationMenuOpen(false);
+  }, [pathname]);
+
   return (
     <>
-      <header className="sticky top-0 z-[1000] bg-white/90 backdrop-blur-[10px] border-b border-[#EEEEEE] transition-all duration-300">
-        <div className="mx-auto max-w-7xl px-8 h-[75px]">
-          <div className="flex items-center justify-between h-full gap-8">
-            {/* Logo */}
-            <Link
-              href="/"
-              className="flex items-center gap-2 shrink-0 transition-opacity duration-200 hover:opacity-85"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#FF4D4F] to-[#FF8C42] shadow-lg">
-                <UtensilsCrossed className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-[#FF4D4F]">DISHLY</span>
-            </Link>
+      <header className="sticky top-0 z-[100] border-b border-[#EAEAEA] bg-white">
+        <div className="mx-auto h-[68px] max-w-7xl px-4 sm:px-6 lg:px-10">
+          <div className="flex h-full items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-3 md:gap-4">
+              <Link
+                href="/"
+                className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-90"
+              >
+                <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-[#E8503A]">
+                  <UtensilsCrossed className="h-5 w-5 text-white" />
+                </div>
+                <span className="hidden text-[18px] font-medium tracking-[0.06em] text-[#E8503A] sm:block">
+                  DISHLY
+                </span>
+              </Link>
 
-            {/* Navigation Links - Desktop */}
-            {navigationPages.length > 0 && (
-              <nav className="hidden lg:flex items-center gap-8 flex-1 justify-center">
-                {navigationPages.map((page) => (
-                  <Link
-                    key={page.slug}
-                    href={`/${page.slug}`}
-                    className="text-sm font-medium text-[#1F1F1F] hover:text-[#FF4D4F] hover:font-semibold transition-all duration-300 relative group"
-                  >
-                    {page.title}
-                    <span className="absolute -bottom-1 left-1/2 w-0 h-0.5 bg-[#FF4D4F] transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
-                  </Link>
-                ))}
-              </nav>
-            )}
+              <div className="relative" ref={locationMenuRef}>
+                <button
+                  onClick={() => setLocationMenuOpen((prev) => !prev)}
+                  className="hidden items-center gap-2 rounded-full border border-[#E6E6E6] bg-[#F8F8F8] px-3.5 py-1.5 text-left md:flex"
+                  type="button"
+                >
+                  <MapPin className="h-3.5 w-3.5 text-[#E8503A]" />
+                  <div className="leading-tight">
+                    <p className="text-[11px] text-[#9CA3AF]">Dostawa do</p>
+                    <p className="max-w-[180px] truncate text-[13px] font-medium text-[#111827]">
+                      {locationLabel}
+                    </p>
+                  </div>
+                  <ChevronDown className="h-3.5 w-3.5 text-[#9CA3AF]" />
+                </button>
 
-            {/* Right Section */}
-            <div className="flex items-center gap-5">
-              {user ? (
-                <>
-                  {/* Home Button - dla wszystkich zalogowanych użytkowników */}
-                  <Link href="/">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full hover:bg-transparent transition-all duration-200 hover:scale-105 group"
-                      title="Strona Główna"
+                <button
+                  onClick={() => setLocationMenuOpen((prev) => !prev)}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#E6E6E6] bg-[#F8F8F8] text-[#E8503A] md:hidden"
+                  type="button"
+                >
+                  <MapPin className="h-4 w-4" />
+                </button>
+
+                {locationMenuOpen && (
+                  <div className="absolute left-0 top-[calc(100%+8px)] z-[120] w-[260px] rounded-2xl border border-[#EAEAEA] bg-white p-3 shadow-lg">
+                    <p className="mb-2 text-xs text-[#6B7280]">
+                      Lokalizacja dostawy
+                    </p>
+                    <p className="mb-3 truncate text-sm font-medium text-[#111827]">
+                      {locationLabel}
+                    </p>
+                    <button
+                      onClick={async () => {
+                        await detectLocation();
+                      }}
+                      className="mb-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#E6E6E6] px-3 py-2 text-sm text-[#111827] hover:bg-[#F9F9F9]"
+                      type="button"
                     >
-                      <Home className="h-5 w-5 text-[#1F1F1F] group-hover:text-[#FF4D4F] transition-colors duration-200" />
-                    </Button>
-                  </Link>
-
-                  {/* Notifications */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative rounded-full hover:bg-transparent transition-all duration-200 hover:scale-105 group"
-                  >
-                    <Bell className="h-5 w-5 text-[#1F1F1F] group-hover:text-[#FF4D4F] transition-colors duration-200" />
-                    <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF4D4F] text-[10px] font-bold text-white">
-                      3
-                    </span>
-                  </Button>
-
-                  {/* Cart (only for CLIENT) */}
-                  {user.role === "CLIENT" && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={openDrawer}
-                      className="relative rounded-full hover:bg-transparent transition-all duration-200 hover:scale-105 group"
+                      <LocateFixed className="h-4 w-4" />
+                      {isLocationLoading
+                        ? "Pobieranie lokalizacji..."
+                        : "Użyj mojej lokalizacji"}
+                    </button>
+                    <Link
+                      href={
+                        user?.role === "CLIENT"
+                          ? "/delivery-settings"
+                          : "/login"
+                      }
+                      onClick={() => setLocationMenuOpen(false)}
+                      className="inline-flex w-full items-center justify-center rounded-xl bg-[#E8503A] px-3 py-2 text-sm font-medium text-white hover:opacity-90"
                     >
-                      <ShoppingCart className="h-5 w-5 text-[#1F1F1F] group-hover:text-[#FF4D4F] transition-colors duration-200" />
-                      {itemCount > 0 && (
-                        <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF4D4F] text-[10px] font-bold text-white">
-                          {itemCount}
-                        </span>
-                      )}
-                    </Button>
-                  )}
-
-                  {/* Delivery addresses (only for CLIENT) */}
-                  {user.role === "CLIENT" && (
-                    <Link href="/delivery-settings">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full hover:bg-transparent transition-all duration-200 hover:scale-105 group"
-                        title="Adresy dostawy"
-                      >
-                        <MapPin className="h-5 w-5 text-[#1F1F1F] group-hover:text-[#FF4D4F] transition-colors duration-200" />
-                      </Button>
+                      Zmień adres
                     </Link>
-                  )}
+                    {locationError && (
+                      <p className="mt-2 text-xs text-[#B91C1C]">
+                        {locationError}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
 
-                  {/* User Avatar with Name */}
-                  <Link href="/dashboard">
-                    <div className="hidden md:flex items-center gap-2 rounded-full bg-gray-100 py-1.5 pl-1.5 pr-4 transition-all duration-200 hover:bg-gray-200">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#FF4D4F] to-[#FF8C42] font-semibold text-white text-sm">
-                        {getInitials()}
-                      </div>
-                      <span className="text-sm font-medium text-[#1F1F1F]">
-                        {getFullName()}
-                      </span>
-                    </div>
+            <nav className="hidden flex-1 items-center justify-center gap-1 xl:flex">
+              {navItems.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`rounded-xl px-3.5 py-1.5 text-[13.5px] transition-colors ${
+                    isActive(item.href)
+                      ? "font-medium text-[#E8503A]"
+                      : "text-[#6B7280] hover:bg-[#F5F5F5] hover:text-[#111827]"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={openDrawer}
+                className="inline-flex items-center gap-2 rounded-full border border-[#E6E6E6] px-3 py-1.5 text-[#111827] hover:bg-[#F8F8F8]"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                <span className="hidden text-[13.5px] sm:inline">Koszyk</span>
+                <span className="rounded-full bg-[#E8503A] px-1.5 py-[1px] text-[10px] font-medium text-white">
+                  {itemCount}
+                </span>
+              </button>
+
+              <span className="hidden h-6 w-px bg-[#E5E7EB] md:block" />
+
+              {!user ? (
+                <div className="hidden items-center gap-2 md:flex">
+                  <Link
+                    href="/login"
+                    className="rounded-xl px-3 py-1.5 text-[13.5px] text-[#6B7280] transition-colors hover:bg-[#F5F5F5] hover:text-[#111827]"
+                  >
+                    Zaloguj się
                   </Link>
-                </>
+                  <Link
+                    href="/register"
+                    className="rounded-full bg-[#E8503A] px-5 py-2 text-[13.5px] font-medium text-white transition-opacity hover:opacity-90"
+                  >
+                    Zarejestruj się
+                  </Link>
+                </div>
               ) : (
-                <>
-                  <Link href="/login" className="hidden md:block">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-[#1F1F1F] hover:text-[#FF4D4F]"
-                    >
-                      Zaloguj się
-                    </Button>
-                  </Link>
-                  <Link href="/register" className="hidden md:block">
-                    <Button
-                      size="sm"
-                      className="bg-[#FF4D4F] hover:bg-[#FF8C42] transition-colors duration-200"
-                    >
-                      Zarejestruj się
-                    </Button>
-                  </Link>
-                </>
+                <Link
+                  href="/dashboard"
+                  className="hidden h-9 w-9 items-center justify-center rounded-full bg-[#E8503A] text-[13px] font-medium text-white transition-opacity hover:opacity-85 md:inline-flex"
+                  title={getFullName()}
+                >
+                  {getInitials()}
+                </Link>
               )}
 
-              {/* Mobile Menu Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="lg:hidden rounded-full hover:bg-transparent transition-all duration-200 hover:scale-105 group"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              <button
+                type="button"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#E6E6E6] text-[#111827] transition-colors hover:bg-[#F8F8F8] xl:hidden"
+                onClick={() => setMobileMenuOpen((prev) => !prev)}
               >
                 {mobileMenuOpen ? (
-                  <X className="h-6 w-6 text-[#1F1F1F] group-hover:text-[#FF4D4F] transition-colors duration-200" />
+                  <X className="h-5 w-5" />
                 ) : (
-                  <Menu className="h-6 w-6 text-[#1F1F1F] group-hover:text-[#FF4D4F] transition-colors duration-200" />
+                  <Menu className="h-5 w-5" />
                 )}
-              </Button>
+              </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Mobile Menu Drawer */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 z-[999] bg-black/50 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-[130] bg-black/45 xl:hidden"
           onClick={() => setMobileMenuOpen(false)}
         >
-          <div
-            className="fixed right-0 top-0 h-full w-[85%] max-w-sm bg-white shadow-2xl animate-slideInRight"
+          <aside
+            className="absolute right-0 top-0 h-full w-full max-w-[360px] bg-white shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex flex-col h-full">
-              {/* Mobile Menu Header */}
-              <div className="flex items-center justify-between p-6 border-b border-[#EEEEEE]">
-                <span className="text-lg font-bold text-[#FF4D4F]">Menu</span>
-                <Button
-                  variant="ghost"
-                  size="icon"
+            <div className="flex h-full flex-col">
+              <div className="flex items-center justify-between border-b border-[#EAEAEA] px-5 py-4">
+                <p className="text-base font-medium text-[#111827]">Menu</p>
+                <button
+                  type="button"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-full"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-[#F5F5F5]"
                 >
-                  <X className="h-6 w-6" />
-                </Button>
+                  <X className="h-5 w-5" />
+                </button>
               </div>
 
-              {/* Mobile Navigation Links */}
-              <nav className="flex flex-col p-6 space-y-4">
-                {navigationPages.map((page) => (
+              <nav className="flex flex-col gap-1 px-4 py-4">
+                {navItems.map((item) => (
                   <Link
-                    key={page.slug}
-                    href={`/${page.slug}`}
+                    key={item.label}
+                    href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="text-base font-medium text-[#1F1F1F] hover:text-[#FF4D4F] transition-colors duration-200 py-2"
+                    className={`rounded-xl px-3 py-2 text-[14px] ${
+                      isActive(item.href)
+                        ? "font-medium text-[#E8503A]"
+                        : "text-[#374151] hover:bg-[#F5F5F5]"
+                    }`}
                   >
-                    {page.title}
+                    {item.label}
                   </Link>
                 ))}
               </nav>
 
-              {/* Mobile User Actions */}
-              <div className="mt-auto p-6 border-t border-[#EEEEEE]">
-                {user ? (
-                  <div className="space-y-3">
-                    {user.role === "CLIENT" && (
-                      <Link
-                        href="/delivery-settings"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <div className="flex items-center gap-3 p-3 rounded-xl bg-red-50 hover:bg-red-100 transition-colors">
-                          <MapPin className="h-5 w-5 text-[#FF4D4F]" />
-                          <div>
-                            <p className="text-sm font-medium text-[#1F1F1F]">
-                              Adresy dostawy
-                            </p>
-                            <p className="text-xs text-[#8C8C8C]">
-                              Zarządzaj adresami
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
-                    )}
-                    <Link
-                      href="/dashboard"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#FF4D4F] to-[#FF8C42] font-semibold text-white">
-                          {getInitials()}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-[#1F1F1F]">
-                            {getFullName()}
-                          </p>
-                          <p className="text-xs text-[#8C8C8C]">
-                            Przejdź do panelu
-                          </p>
-                        </div>
-                      </div>
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
+              <div className="mt-auto border-t border-[#EAEAEA] p-4">
+                {!user ? (
+                  <div className="space-y-2">
                     <Link
                       href="/login"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="block"
+                      className="block rounded-xl border border-[#E6E6E6] px-3 py-2 text-center text-sm text-[#374151]"
                     >
-                      <Button variant="outline" className="w-full">
-                        Zaloguj się
-                      </Button>
+                      Zaloguj się
                     </Link>
                     <Link
                       href="/register"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="block"
+                      className="block rounded-xl bg-[#E8503A] px-3 py-2 text-center text-sm font-medium text-white"
                     >
-                      <Button className="w-full bg-[#FF4D4F] hover:bg-[#FF8C42]">
-                        Zarejestruj się
-                      </Button>
+                      Zarejestruj się
                     </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block rounded-xl border border-[#E6E6E6] px-3 py-2 text-center text-sm text-[#374151]"
+                    >
+                      Panel użytkownika
+                    </Link>
+                    {user.role === "CLIENT" && (
+                      <Link
+                        href="/orders"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block rounded-xl border border-[#E6E6E6] px-3 py-2 text-center text-sm text-[#374151]"
+                      >
+                        Moje zamówienia
+                      </Link>
+                    )}
                   </div>
                 )}
               </div>
             </div>
-          </div>
+          </aside>
         </div>
       )}
     </>

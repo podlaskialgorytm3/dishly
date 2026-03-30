@@ -30,6 +30,7 @@ import {
 } from "@/actions/storefront";
 import { useLocationStore } from "@/stores/location-store";
 import { HeroMapBackground } from "@/components/storefront/HeroMapBackground";
+import { useCartStore } from "@/stores/cart-store";
 
 // ============================================
 // TYPES
@@ -124,13 +125,18 @@ type SearchMeal = {
     name: string;
     slug: string;
   };
+  restaurantId: string;
   restaurantName: string;
   restaurantSlug: string;
+  restaurantLogoUrl: string | null;
   locations: {
     id: string;
     name: string;
     city: string;
     address: string;
+    deliveryRadius: number;
+    deliveryFee: number;
+    minOrderValue: number;
     latitude: number | null;
     longitude: number | null;
   }[];
@@ -211,6 +217,9 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
   });
   const [isPending, startTransition] = useTransition();
   const userLocation = useLocationStore((s) => s.userLocation);
+  const addItem = useCartStore((s) => s.addItem);
+  const confirmClearAndAdd = useCartStore((s) => s.confirmClearAndAdd);
+  const openDrawer = useCartStore((s) => s.openDrawer);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("pl-PL", {
@@ -313,6 +322,63 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
       sortBy: filters.mode === "meals" ? "newest" : "rating_desc",
     };
     applyFilters(newFilters);
+  };
+
+  const handleAddMealToCart = (meal: SearchMeal) => {
+    const targetLocation = pickNearestMealLocation(
+      meal.locations,
+      userLocation,
+    );
+
+    if (!targetLocation) {
+      window.alert("To danie nie ma aktywnej lokalizacji dostawy.");
+      return;
+    }
+
+    const restaurant = {
+      id: meal.restaurantId,
+      name: meal.restaurantName,
+      slug: meal.restaurantSlug,
+      logoUrl: meal.restaurantLogoUrl,
+    };
+
+    const location = {
+      id: targetLocation.id,
+      name: targetLocation.name,
+      city: targetLocation.city,
+      address: targetLocation.address,
+      deliveryFee: targetLocation.deliveryFee,
+      minOrderValue: targetLocation.minOrderValue,
+      deliveryRadius: targetLocation.deliveryRadius,
+    };
+
+    const nextItem = {
+      mealId: meal.id,
+      mealName: meal.name,
+      mealSlug: meal.slug,
+      mealImageUrl: meal.imageUrl,
+      variantId: null,
+      variantName: null,
+      basePrice: meal.basePrice,
+      variantPriceModifier: 0,
+      addons: [],
+      quantity: 1,
+      note: "",
+      isAvailable: true,
+    };
+
+    const result = addItem(restaurant, location, nextItem);
+    if (result === "confirm-clear") {
+      const shouldReplace = window.confirm(
+        "W koszyku są produkty z innej restauracji. Wyczyścić koszyk i dodać nowe danie?",
+      );
+      if (!shouldReplace) {
+        return;
+      }
+      confirmClearAndAdd(restaurant, location, nextItem);
+    }
+
+    openDrawer();
   };
 
   return (
@@ -504,31 +570,32 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.03 }}
                   >
-                    <Link
-                      href={`/${meal.restaurantSlug}/${meal.slug}`}
-                      className="group block overflow-hidden rounded-2xl bg-white shadow-sm transition-all hover:shadow-lg hover:-translate-y-1"
-                    >
-                      <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-[#FF4D4F]/10 to-[#FF8C42]/10">
-                        {meal.imageUrl ? (
-                          <img
-                            src={meal.imageUrl}
-                            alt={meal.name}
-                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="flex h-full items-center justify-center text-6xl">
-                            🍽️
+                    <div className="group overflow-hidden rounded-2xl bg-white shadow-sm transition-all hover:shadow-lg hover:-translate-y-1">
+                      <Link href={`/${meal.restaurantSlug}/${meal.slug}`}>
+                        <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-[#FF4D4F]/10 to-[#FF8C42]/10">
+                          {meal.imageUrl ? (
+                            <img
+                              src={meal.imageUrl}
+                              alt={meal.name}
+                              className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center text-6xl">
+                              🍽️
+                            </div>
+                          )}
+                          <div className="absolute right-3 top-3 rounded-full bg-white/90 px-2 py-1 text-xs font-semibold text-[#1F1F1F]">
+                            {formatPrice(meal.basePrice)}
                           </div>
-                        )}
-                        <div className="absolute right-3 top-3 rounded-full bg-white/90 px-2 py-1 text-xs font-semibold text-[#1F1F1F]">
-                          {formatPrice(meal.basePrice)}
                         </div>
-                      </div>
+                      </Link>
 
                       <div className="p-4">
-                        <h3 className="mb-1 text-base font-bold text-[#1F1F1F] line-clamp-1">
-                          {meal.name}
-                        </h3>
+                        <Link href={`/${meal.restaurantSlug}/${meal.slug}`}>
+                          <h3 className="mb-1 text-base font-bold text-[#1F1F1F] line-clamp-1">
+                            {meal.name}
+                          </h3>
+                        </Link>
                         <p className="mb-2 text-sm text-[#8C8C8C] line-clamp-2">
                           {meal.description || meal.category.name}
                         </p>
@@ -557,8 +624,24 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
                             </span>
                           )}
                         </div>
+
+                        <div className="mt-3 flex gap-2">
+                          <button
+                            onClick={() => handleAddMealToCart(meal)}
+                            className="inline-flex items-center justify-center rounded-full bg-[#FF4D4F] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#FF3B30]"
+                            type="button"
+                          >
+                            Dodaj do koszyka
+                          </button>
+                          <Link
+                            href={`/${meal.restaurantSlug}/${meal.slug}`}
+                            className="inline-flex items-center justify-center rounded-full border border-[#EEEEEE] px-4 py-2 text-xs font-semibold text-[#1F1F1F] hover:bg-[#FAFAFA]"
+                          >
+                            Zobacz danie
+                          </Link>
+                        </div>
                       </div>
-                    </Link>
+                    </div>
                   </motion.div>
                 ))}
               </motion.div>
@@ -723,6 +806,42 @@ function getReferencePoint(
 
 function pickNearestLocation(
   locations: LocationData[],
+  userLocation: { latitude: number; longitude: number } | null,
+) {
+  if (locations.length === 0) {
+    return null;
+  }
+
+  const withCoords = locations.filter(
+    (loc) => loc.latitude !== null && loc.longitude !== null,
+  );
+  if (withCoords.length === 0) {
+    return locations[0];
+  }
+
+  const ref = getReferencePoint(userLocation);
+  return withCoords.reduce((best, loc) => {
+    if (!best) {
+      return loc;
+    }
+    const bestDistance = getDistanceKm(
+      ref.lat,
+      ref.lng,
+      best.latitude as number,
+      best.longitude as number,
+    );
+    const currentDistance = getDistanceKm(
+      ref.lat,
+      ref.lng,
+      loc.latitude as number,
+      loc.longitude as number,
+    );
+    return currentDistance < bestDistance ? loc : best;
+  }, withCoords[0]);
+}
+
+function pickNearestMealLocation(
+  locations: SearchMeal["locations"],
   userLocation: { latitude: number; longitude: number } | null,
 ) {
   if (locations.length === 0) {
