@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useTransition } from "react";
+import { useState, useCallback, useEffect, useRef, useTransition } from "react";
 import Link from "next/link";
 import {
   Star,
@@ -8,11 +8,6 @@ import {
   Truck,
   Clock,
   RefreshCw,
-  Pizza,
-  Utensils,
-  Soup,
-  Salad,
-  Cake,
   ArrowRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -182,12 +177,20 @@ type StorefrontClientProps = {
 // QUICK CATEGORIES
 // ============================================
 
-const quickCategories = [
-  { label: "Pizza", icon: Pizza, emoji: "🍕" },
-  { label: "Burgery", icon: Utensils, emoji: "🍔" },
-  { label: "Sushi", icon: Soup, emoji: "🍣" },
-  { label: "Zdrowe", icon: Salad, emoji: "🥗" },
-  { label: "Desery", icon: Cake, emoji: "🍰" },
+const heroCategories = [
+  { slug: "pizza", label: "Pizza", emoji: "🍕" },
+  { slug: "burgery", label: "Burgery", emoji: "🍔" },
+  { slug: "sushi", label: "Sushi", emoji: "🍱" },
+  { slug: "salatki", label: "Sałatki", emoji: "🥗" },
+  { slug: "desery", label: "Desery", emoji: "🍰" },
+  { slug: "azjatyckie", label: "Azjatyckie", emoji: "🥢" },
+  { slug: "weganskie", label: "Wegańskie", emoji: "🌱" },
+  { slug: "zdrowe", label: "Zdrowe", emoji: "🥦" },
+  { slug: "kebab", label: "Kebab", emoji: "🌯" },
+  { slug: "sniadania", label: "Śniadania", emoji: "🍳" },
+  { slug: "zupy", label: "Zupy", emoji: "🍜" },
+  { slug: "makarony", label: "Makarony", emoji: "🍝" },
+  { slug: "bbq", label: "BBQ", emoji: "🔥" },
 ];
 
 // ============================================
@@ -216,6 +219,10 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
         : initialData.mealPagination.perPage,
   });
   const [isPending, startTransition] = useTransition();
+  const [activeHeroCategories, setActiveHeroCategories] = useState<string[]>(
+    [],
+  );
+  const resultsRef = useRef<HTMLElement | null>(null);
   const userLocation = useLocationStore((s) => s.userLocation);
   const addItem = useCartStore((s) => s.addItem);
   const confirmClearAndAdd = useCartStore((s) => s.confirmClearAndAdd);
@@ -314,15 +321,46 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
     applyFilters({ ...filters, page: clamped });
   };
 
-  // Quick category search
-  const handleQuickCategory = (label: string) => {
-    const newFilters = {
+  const handleHeroCategoryToggle = (slug: string) => {
+    const next = activeHeroCategories.includes(slug)
+      ? activeHeroCategories.filter((item) => item !== slug)
+      : [...activeHeroCategories, slug];
+
+    setActiveHeroCategories(next);
+
+    const query = heroCategories
+      .filter((cat) => next.includes(cat.slug))
+      .map((cat) => cat.label)
+      .join(", ");
+
+    applyFilters({
       ...defaultFilters,
-      query: label,
-      sortBy: filters.mode === "meals" ? "newest" : "rating_desc",
-    };
-    applyFilters(newFilters);
+      mode: "restaurants",
+      sortBy: "rating_desc",
+      query,
+      perPage: filters.perPage,
+    });
   };
+
+  const handleHeroCta = () => {
+    if (resultsRef.current) {
+      resultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
+  };
+
+  const locationEyebrow = userLocation?.city
+    ? `${userLocation.city} i okolice`
+    : "Warszawa i okolice";
+
+  const uniqueRestaurantCount = new Set(
+    initialData.mapLocations.map((location) => location.restaurant.id),
+  ).size;
+  const restaurantCountRounded =
+    uniqueRestaurantCount >= 100
+      ? Math.floor(uniqueRestaurantCount / 100) * 100
+      : uniqueRestaurantCount;
 
   const handleAddMealToCart = (meal: SearchMeal) => {
     const targetLocation = pickNearestMealLocation(
@@ -383,53 +421,81 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
-      {/* Hero Section with Location Picker */}
-      <section className="relative overflow-hidden px-4 py-12 md:py-16">
+      <section className="hero-section relative flex min-h-screen w-full items-center justify-center overflow-hidden px-4">
         <HeroMapBackground locations={initialData.mapLocations} />
-        <Link
-          href="/mapa"
-          aria-label="Przejdź do interaktywnej mapy restauracji"
-          className="absolute inset-0 z-10"
+        <div
+          className="hero-overlay absolute inset-0 z-10"
+          aria-hidden="true"
         />
-        <div className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-br from-[#1F1F1F]/45 via-[#1F1F1F]/30 to-[#FF4D4F]/35" />
-        <div className="relative z-30 mx-auto max-w-4xl text-center">
-          <h1 className="mb-4 text-3xl font-bold text-white md:text-5xl lg:text-6xl">
-            Zamów coś pysznego 🍕
+
+        <div className="hero-content relative z-20 mx-auto flex w-full max-w-5xl flex-col items-center px-3 text-center md:px-8">
+          <span className="hero-eyebrow">{locationEyebrow}</span>
+
+          <h1
+            className="hero-h1 mb-4 text-[#1a1612]"
+            style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+          >
+            Zamów coś
+            <br />
+            <span className="text-[#E8503A]">pysznego</span>
           </h1>
-          <p className="mb-6 text-base text-white/90 md:text-xl">
-            Najlepsze restauracje w Twojej okolicy
+
+          <p className="hero-sub mb-8 max-w-2xl text-[#6b6058]">
+            Najlepsze restauracje w Twojej okolicy - uczciwe ceny, szeroki wybór
           </p>
 
-          {/* Location picker */}
-          <div className="flex justify-center mb-6">
+          <div className="hero-stat mb-8" role="status" aria-live="polite">
+            <span className="hero-stat-dot" aria-hidden="true" />
+            <span className="hero-stat-text">
+              {restaurantCountRounded.toLocaleString("pl-PL")}+ restauracji
+              dostępnych teraz
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleHeroCta}
+            className="hero-cta mb-10"
+          >
+            Przeglądaj restauracje
+            <span className="hero-cta-arrow" aria-hidden="true">
+              <ArrowRight className="h-3 w-3" />
+            </span>
+          </button>
+
+          <div className="mb-5 flex justify-center">
             <LocationPicker
               savedAddresses={initialData.userAddresses}
               isLoggedIn={initialData.isLoggedIn}
             />
           </div>
 
-          {/* Quick Category Tiles */}
-          <div className="flex flex-wrap justify-center gap-3">
-            {quickCategories.map((cat) => (
+          <span id="hero-cats-label" className="cats-label mb-4">
+            Czego szukasz?
+          </span>
+          <div
+            className="cats-wrap flex max-w-[720px] flex-wrap justify-center gap-2"
+            role="group"
+            aria-labelledby="hero-cats-label"
+          >
+            {heroCategories.map((cat) => (
               <button
-                key={cat.label}
-                onClick={() => handleQuickCategory(cat.label)}
-                className="flex items-center gap-2 rounded-full bg-white/20 px-5 py-2.5 text-sm font-medium text-white backdrop-blur-sm transition-all hover:bg-white/30 hover:scale-105"
+                key={cat.slug}
+                type="button"
+                onClick={() => handleHeroCategoryToggle(cat.slug)}
+                className={`cat-pill inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-[13px] transition-all ${
+                  activeHeroCategories.includes(cat.slug)
+                    ? "active border-[#1a1612] bg-[#1a1612] text-white"
+                    : "border-[#c8beb2b3] bg-[#ffffffe0] text-[#3d3530] hover:bg-[#fffffff8]"
+                }`}
+                data-slug={cat.slug}
               >
-                <span className="text-lg">{cat.emoji}</span>
-                {cat.label}
+                <span className="cat-icon" aria-hidden="true">
+                  {cat.emoji}
+                </span>
+                <span>{cat.label}</span>
               </button>
             ))}
-          </div>
-
-          <div className="mt-6">
-            <Link
-              href="/mapa"
-              className="inline-flex items-center gap-2 rounded-full bg-white/90 px-6 py-2.5 text-sm font-semibold text-[#1F1F1F] shadow-sm transition hover:scale-[1.02] hover:bg-white"
-            >
-              Otwórz interaktywną mapę restauracji
-              <MapPin className="h-4 w-4" />
-            </Link>
           </div>
         </div>
       </section>
@@ -507,7 +573,7 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
         </section>
 
         {/* Results */}
-        <section>
+        <section ref={resultsRef}>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-bold text-[#1F1F1F]">
               {filters.mode === "restaurants"
