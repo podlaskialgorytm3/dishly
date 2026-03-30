@@ -31,7 +31,7 @@ import {
   type RestaurantMapLocation,
 } from "@/actions/storefront";
 import { useLocationStore } from "@/stores/location-store";
-import { HeroMapBackground } from "@/components/storefront/HeroMapBackground";
+import { HeroMapBackground } from "./HeroMapBackground";
 import { useCartStore } from "@/stores/cart-store";
 
 // ============================================
