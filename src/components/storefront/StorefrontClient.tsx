@@ -8,6 +8,7 @@ import {
   type MouseEvent,
 } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Star,
@@ -32,8 +33,12 @@ import {
   type RestaurantMapLocation,
 } from "@/actions/storefront";
 import { useLocationStore } from "@/stores/location-store";
-import { HeroMapBackground } from "./HeroMapBackground";
 import { useCartStore } from "@/stores/cart-store";
+
+const HeroMapBackground = dynamic(
+  () => import("./HeroMapBackground").then((mod) => mod.HeroMapBackground),
+  { ssr: false },
+);
 
 // ============================================
 // TYPES
