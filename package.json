@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "db:import:warsaw": "tsx prisma/import-warsaw-restaurants.ts",
+    "db:export:warsaw-owners": "tsx prisma/export-warsaw-owners.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
