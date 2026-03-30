@@ -105,8 +105,21 @@ type TrendingMeal = {
   protein: number | null;
   isVegetarian: boolean;
   isVegan: boolean;
+  restaurantId: string;
   restaurantName: string;
   restaurantSlug: string;
+  restaurantLogoUrl: string | null;
+  locations: {
+    id: string;
+    name: string;
+    city: string;
+    address: string;
+    deliveryRadius: number;
+    deliveryFee: number;
+    minOrderValue: number;
+    latitude: number | null;
+    longitude: number | null;
+  }[];
 };
 
 type SearchMeal = {
@@ -658,7 +671,21 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
       ? Math.floor(uniqueRestaurantCount / 100) * 100
       : uniqueRestaurantCount;
 
-  const handleAddMealToCart = (meal: SearchMeal) => {
+  const handleAddMealToCart = (
+    meal: Pick<
+      SearchMeal,
+      | "id"
+      | "name"
+      | "slug"
+      | "imageUrl"
+      | "basePrice"
+      | "restaurantId"
+      | "restaurantName"
+      | "restaurantSlug"
+      | "restaurantLogoUrl"
+      | "locations"
+    >,
+  ) => {
     const targetLocation = pickNearestMealLocation(
       meal.locations,
       userLocation,
@@ -1083,43 +1110,57 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
               🔥 Popularne dania
             </h2>
             <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-              {initialData.trendingMeals.map((meal) => (
-                <Link
-                  key={meal.id}
-                  href={`/${meal.restaurantSlug}/${meal.slug}`}
-                  className="flex-shrink-0 w-[200px] rounded-2xl bg-white p-3 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
-                >
-                  <div className="mb-2 h-32 overflow-hidden rounded-xl bg-[#F5F5F5]">
-                    {meal.imageUrl ? (
-                      <img
-                        src={meal.imageUrl}
-                        alt={meal.name}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-4xl">
-                        🍽️
+              {initialData.trendingMeals.map((meal) =>
+                (() => {
+                  const isDeliverable = meal.locations.length > 0;
+                  return (
+                    <div
+                      key={meal.id}
+                      className="flex-shrink-0 w-[220px] rounded-2xl bg-white p-3 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+                    >
+                      <Link href={`/${meal.restaurantSlug}/${meal.slug}`}>
+                        <div className="mb-2 h-32 overflow-hidden rounded-xl bg-[#F5F5F5]">
+                          {meal.imageUrl ? (
+                            <img
+                              src={meal.imageUrl}
+                              alt={meal.name}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center text-4xl">
+                              🍽️
+                            </div>
+                          )}
+                        </div>
+                        <h3 className="text-sm font-semibold text-[#1F1F1F] truncate">
+                          {meal.name}
+                        </h3>
+                        <p className="text-xs text-[#8C8C8C] truncate">
+                          {meal.restaurantName}
+                        </p>
+                      </Link>
+                      <div className="mt-1 flex items-center justify-between">
+                        <span className="text-sm font-bold text-[#FF4D4F]">
+                          {formatPrice(meal.basePrice)}
+                        </span>
+                        {meal.calories && (
+                          <span className="text-xs text-[#8C8C8C]">
+                            {meal.calories} kcal
+                          </span>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <h3 className="text-sm font-semibold text-[#1F1F1F] truncate">
-                    {meal.name}
-                  </h3>
-                  <p className="text-xs text-[#8C8C8C] truncate">
-                    {meal.restaurantName}
-                  </p>
-                  <div className="mt-1 flex items-center justify-between">
-                    <span className="text-sm font-bold text-[#FF4D4F]">
-                      {formatPrice(meal.basePrice)}
-                    </span>
-                    {meal.calories && (
-                      <span className="text-xs text-[#8C8C8C]">
-                        {meal.calories} kcal
-                      </span>
-                    )}
-                  </div>
-                </Link>
-              ))}
+                      <button
+                        type="button"
+                        onClick={() => handleAddMealToCart(meal)}
+                        disabled={!isDeliverable}
+                        className="mt-2 inline-flex w-full items-center justify-center rounded-full bg-[#FF4D4F] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#FF3B30] disabled:cursor-not-allowed disabled:bg-[#D9D9D9]"
+                      >
+                        {isDeliverable ? "Dodaj do koszyka" : "Niedostępne"}
+                      </button>
+                    </div>
+                  );
+                })(),
+              )}
             </div>
           </section>
         )}

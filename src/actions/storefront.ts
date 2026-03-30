@@ -604,17 +604,43 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
         restaurant: {
           isActive: true,
           status: "APPROVED",
+          locations: {
+            some: { isActive: true },
+          },
         },
         ...(hasNutritionalFilters ? mealWhere : {}),
       },
       include: {
         restaurant: {
-          select: { name: true, slug: true },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            logoUrl: true,
+            locations: {
+              where: { isActive: true },
+              select: {
+                id: true,
+                name: true,
+                city: true,
+                address: true,
+                deliveryRadius: true,
+                deliveryFee: true,
+                minOrderValue: true,
+                latitude: true,
+                longitude: true,
+              },
+            },
+          },
         },
       },
       orderBy: { createdAt: "desc" },
-      take: 10,
+      take: 30,
     });
+
+    const addableTrendingMeals = trendingMeals.filter(
+      (meal) => meal.restaurant.locations.length > 0,
+    );
 
     return {
       success: true,
@@ -645,7 +671,7 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
           postalCode: addr.postalCode,
           isDefault: addr.isDefault,
         })),
-        trendingMeals: trendingMeals.map((meal) => ({
+        trendingMeals: addableTrendingMeals.slice(0, 10).map((meal) => ({
           id: meal.id,
           name: meal.name,
           slug: meal.slug,
@@ -655,8 +681,15 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
           protein: meal.protein ? Number(meal.protein) : null,
           isVegetarian: meal.isVegetarian,
           isVegan: meal.isVegan,
+          restaurantId: meal.restaurant.id,
           restaurantName: meal.restaurant.name,
           restaurantSlug: meal.restaurant.slug,
+          restaurantLogoUrl: meal.restaurant.logoUrl,
+          locations: meal.restaurant.locations.map((location) => ({
+            ...location,
+            deliveryFee: Number(location.deliveryFee),
+            minOrderValue: Number(location.minOrderValue),
+          })),
         })),
         searchMeals: paginatedSearchMeals.map((meal) => ({
           id: meal.id,
