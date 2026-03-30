@@ -9,14 +9,18 @@ import { auth } from "@/lib/auth";
 
 export type RestaurantFilters = {
   mode?: "restaurants" | "meals";
+  sortBy?: string;
   query?: string;
   city?: string;
   minRating?: number;
   maxAvgPrice?: number;
   maxDeliveryFee?: number;
   maxMinOrderValue?: number;
+  freeDeliveryOnly?: boolean;
+  multiLocationOnly?: boolean;
   cuisineTypeIds?: string[];
   tagIds?: string[];
+  categoryIds?: string[];
   minPrice?: number;
   maxPrice?: number;
   // Nutritional filters
@@ -30,6 +34,7 @@ export type RestaurantFilters = {
   maxFat?: number;
   isVegetarian?: boolean;
   isVegan?: boolean;
+  isGlutenFree?: boolean;
   maxSpiceLevel?: number;
 };
 
@@ -78,8 +83,14 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
     if (filters?.isVegan) {
       mealWhere.isVegan = true;
     }
+    if (filters?.isGlutenFree) {
+      mealWhere.isGlutenFree = true;
+    }
     if (filters?.maxSpiceLevel !== undefined) {
       mealWhere.spiceLevel = { lte: filters.maxSpiceLevel };
+    }
+    if (filters?.categoryIds && filters.categoryIds.length > 0) {
+      mealWhere.categoryId = { in: filters.categoryIds };
     }
 
     const hasNutritionalFilters =
@@ -93,6 +104,7 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
       filters?.maxFat !== undefined ||
       filters?.isVegetarian ||
       filters?.isVegan ||
+      filters?.isGlutenFree ||
       filters?.maxSpiceLevel !== undefined;
 
     if (filters?.minPrice !== undefined) {
@@ -158,6 +170,16 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
         some: {
           ...(restaurantWhere.locations?.some ?? {}),
           minOrderValue: { lte: filters.maxMinOrderValue },
+          isActive: true,
+        },
+      };
+    }
+
+    if (filters?.freeDeliveryOnly) {
+      restaurantWhere.locations = {
+        some: {
+          ...(restaurantWhere.locations?.some ?? {}),
+          deliveryFee: { lte: 0 },
           isActive: true,
         },
       };
@@ -305,6 +327,56 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
       );
     }
 
+    if (filters?.multiLocationOnly) {
+      processedRestaurants = processedRestaurants.filter(
+        (r) => r.locations.length > 1,
+      );
+    }
+
+    const minDeliveryFee = (
+      restaurant: (typeof processedRestaurants)[number],
+    ) =>
+      restaurant.locations.length > 0
+        ? Math.min(...restaurant.locations.map((l) => l.deliveryFee))
+        : Number.POSITIVE_INFINITY;
+
+    const minOrderValue = (
+      restaurant: (typeof processedRestaurants)[number],
+    ) =>
+      restaurant.locations.length > 0
+        ? Math.min(...restaurant.locations.map((l) => l.minOrderValue))
+        : Number.POSITIVE_INFINITY;
+
+    switch (filters?.sortBy) {
+      case "rating_desc":
+        processedRestaurants.sort((a, b) => b.avgRating - a.avgRating);
+        break;
+      case "rating_asc":
+        processedRestaurants.sort((a, b) => a.avgRating - b.avgRating);
+        break;
+      case "name_asc":
+        processedRestaurants.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "delivery_fee_asc":
+        processedRestaurants.sort(
+          (a, b) => minDeliveryFee(a) - minDeliveryFee(b),
+        );
+        break;
+      case "min_order_asc":
+        processedRestaurants.sort(
+          (a, b) => minOrderValue(a) - minOrderValue(b),
+        );
+        break;
+      case "locations_desc":
+        processedRestaurants.sort(
+          (a, b) => b.locations.length - a.locations.length,
+        );
+        break;
+      default:
+        processedRestaurants.sort((a, b) => b.avgRating - a.avgRating);
+        break;
+    }
+
     // Global meals search (independent of restaurant listing mode).
     const mealSearchWhere: any = {
       ...mealWhere,
@@ -352,6 +424,45 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
       take: 200,
     });
 
+    const sortedSearchMeals = [...searchMeals];
+    switch (filters?.sortBy) {
+      case "price_asc":
+        sortedSearchMeals.sort(
+          (a, b) => Number(a.basePrice) - Number(b.basePrice),
+        );
+        break;
+      case "price_desc":
+        sortedSearchMeals.sort(
+          (a, b) => Number(b.basePrice) - Number(a.basePrice),
+        );
+        break;
+      case "calories_asc":
+        sortedSearchMeals.sort(
+          (a, b) =>
+            (a.calories ?? Number.POSITIVE_INFINITY) -
+            (b.calories ?? Number.POSITIVE_INFINITY),
+        );
+        break;
+      case "calories_desc":
+        sortedSearchMeals.sort(
+          (a, b) =>
+            (b.calories ?? Number.NEGATIVE_INFINITY) -
+            (a.calories ?? Number.NEGATIVE_INFINITY),
+        );
+        break;
+      case "protein_desc":
+        sortedSearchMeals.sort(
+          (a, b) => Number(b.protein ?? 0) - Number(a.protein ?? 0),
+        );
+        break;
+      case "name_asc":
+        sortedSearchMeals.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      default:
+        // Keep newest by createdAt from DB query.
+        break;
+    }
+
     // Fetch cuisine types for filter options
     const cuisineTypes = await db.cuisineType.findMany({
       where: { isActive: true },
@@ -362,6 +473,11 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
     const restaurantTags = await db.restaurantTag.findMany({
       where: { isActive: true },
       orderBy: { name: "asc" },
+    });
+
+    const mealCategories = await db.category.findMany({
+      orderBy: { sortOrder: "asc" },
+      select: { id: true, name: true, slug: true },
     });
 
     // Fetch recent orders for logged-in users
@@ -428,6 +544,7 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
         restaurants: processedRestaurants,
         cuisineTypes,
         restaurantTags,
+        mealCategories,
         recentOrders: recentOrders.map((order) => ({
           id: order.id,
           orderNumber: order.orderNumber,
@@ -463,7 +580,7 @@ export async function getStorefrontData(filters?: RestaurantFilters) {
           restaurantName: meal.restaurant.name,
           restaurantSlug: meal.restaurant.slug,
         })),
-        searchMeals: searchMeals.map((meal) => ({
+        searchMeals: sortedSearchMeals.map((meal) => ({
           id: meal.id,
           name: meal.name,
           slug: meal.slug,
