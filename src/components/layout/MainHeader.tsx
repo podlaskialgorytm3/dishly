@@ -32,8 +32,12 @@ interface MainHeaderProps {
 export function MainHeader({ user, navigationPages = [] }: MainHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [locationMenuOpen, setLocationMenuOpen] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const locationMenuRef = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
+  const isHome = pathname === "/";
+  const isFloatingHeroNavbar = isHome && !isMobileViewport;
 
   const openDrawer = useCartStore((s) => s.openDrawer);
   const itemCount = useCartStore((s) => s.itemCount);
@@ -112,9 +116,42 @@ export function MainHeader({ user, navigationPages = [] }: MainHeaderProps) {
     setLocationMenuOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    const updateViewport = () => {
+      setIsMobileViewport(window.innerWidth < 768);
+    };
+
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+    return () => window.removeEventListener("resize", updateViewport);
+  }, []);
+
+  useEffect(() => {
+    if (!isFloatingHeroNavbar) {
+      setIsScrolled(false);
+      return;
+    }
+
+    const onScroll = () => {
+      setIsScrolled(window.scrollY > 80);
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isFloatingHeroNavbar]);
+
+  const headerClass = isFloatingHeroNavbar
+    ? `absolute left-0 right-0 top-0 z-[100] border-b transition-[background-color,border-color,backdrop-filter] duration-300 backdrop-blur-[12px] ${
+        isScrolled
+          ? "bg-[rgba(255,252,248,0.98)] border-[rgba(200,190,178,0.6)]"
+          : "bg-[rgba(255,252,248,0.82)] border-[rgba(200,190,178,0.35)]"
+      }`
+    : "sticky top-0 z-[100] border-b border-[rgba(200,190,178,0.45)] bg-[rgba(255,252,248,0.98)]";
+
   return (
     <>
-      <header className="sticky top-0 z-[100] border-b border-[#EAEAEA] bg-white">
+      <header className={headerClass}>
         <div className="mx-auto h-[68px] max-w-7xl px-4 sm:px-6 lg:px-10">
           <div className="flex h-full items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3 md:gap-4">
@@ -133,7 +170,7 @@ export function MainHeader({ user, navigationPages = [] }: MainHeaderProps) {
               <div className="relative" ref={locationMenuRef}>
                 <button
                   onClick={() => setLocationMenuOpen((prev) => !prev)}
-                  className="hidden items-center gap-2 rounded-full border border-[#E6E6E6] bg-[#F8F8F8] px-3.5 py-1.5 text-left md:flex"
+                  className="hidden items-center gap-2 rounded-full border border-[rgba(200,190,178,0.55)] bg-[rgba(255,255,255,0.75)] px-3.5 py-1.5 text-left backdrop-blur-[8px] md:flex"
                   type="button"
                 >
                   <MapPin className="h-3.5 w-3.5 text-[#E8503A]" />
@@ -143,7 +180,7 @@ export function MainHeader({ user, navigationPages = [] }: MainHeaderProps) {
                       {locationLabel}
                     </p>
                   </div>
-                  <ChevronDown className="h-3.5 w-3.5 text-[#9CA3AF]" />
+                  <ChevronDown className="h-3.5 w-3.5 text-[#7E7469]" />
                 </button>
 
                 <button
@@ -155,7 +192,7 @@ export function MainHeader({ user, navigationPages = [] }: MainHeaderProps) {
                 </button>
 
                 {locationMenuOpen && (
-                  <div className="absolute left-0 top-[calc(100%+8px)] z-[120] w-[260px] rounded-2xl border border-[#EAEAEA] bg-white p-3 shadow-lg">
+                  <div className="absolute left-0 top-[calc(100%+8px)] z-[200] w-[260px] rounded-2xl border border-[rgba(200,190,178,0.45)] bg-[rgba(255,252,248,0.98)] p-3 shadow-lg backdrop-blur-[10px]">
                     <p className="mb-2 text-xs text-[#6B7280]">
                       Lokalizacja dostawy
                     </p>
@@ -203,7 +240,7 @@ export function MainHeader({ user, navigationPages = [] }: MainHeaderProps) {
                   className={`rounded-xl px-3.5 py-1.5 text-[13.5px] transition-colors ${
                     isActive(item.href)
                       ? "font-medium text-[#E8503A]"
-                      : "text-[#6B7280] hover:bg-[#F5F5F5] hover:text-[#111827]"
+                      : "text-[#3D3530] hover:bg-[rgba(255,252,248,0.6)] hover:text-[#1A1612]"
                   }`}
                 >
                   {item.label}
@@ -215,7 +252,7 @@ export function MainHeader({ user, navigationPages = [] }: MainHeaderProps) {
               <button
                 type="button"
                 onClick={openDrawer}
-                className="inline-flex items-center gap-2 rounded-full border border-[#E6E6E6] px-3 py-1.5 text-[#111827] hover:bg-[#F8F8F8]"
+                className="inline-flex items-center gap-2 rounded-full border border-[rgba(200,190,178,0.5)] bg-[rgba(255,255,255,0.7)] px-3 py-1.5 text-[#1A1612] hover:bg-[rgba(255,255,255,0.92)]"
               >
                 <ShoppingCart className="h-4 w-4" />
                 <span className="hidden text-[13.5px] sm:inline">Koszyk</span>

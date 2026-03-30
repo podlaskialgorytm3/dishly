@@ -458,7 +458,7 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       <section
-        className="hero-section relative flex min-h-screen w-full items-center justify-center overflow-hidden px-4"
+        className="hero-section relative flex min-h-screen w-full items-center justify-center overflow-hidden px-4 pt-[68px]"
         onMouseMove={handleHeroMouseMove}
         onMouseLeave={handleHeroMouseLeave}
       >
