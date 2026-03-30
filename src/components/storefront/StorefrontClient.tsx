@@ -232,7 +232,6 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
     [],
   );
   const [heroParallax, setHeroParallax] = useState({ x: 0, y: 0 });
-  const [didHydrateFromUrl, setDidHydrateFromUrl] = useState(false);
   const userLocation = useLocationStore((s) => s.userLocation);
   const addItem = useCartStore((s) => s.addItem);
   const confirmClearAndAdd = useCartStore((s) => s.confirmClearAndAdd);
@@ -429,14 +428,16 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
 
   // Fetch filtered restaurants
   const applyFilters = useCallback(
-    (newFilters: FilterValues) => {
+    (newFilters: FilterValues, options?: { syncUrl?: boolean }) => {
       setFilters(newFilters);
 
-      const params = buildQueryFromFilters(newFilters);
-      const query = params.toString();
-      router.replace(query ? `${pathname}?${query}` : pathname, {
-        scroll: false,
-      });
+      if (options?.syncUrl !== false) {
+        const params = buildQueryFromFilters(newFilters);
+        const query = params.toString();
+        router.replace(query ? `${pathname}?${query}` : pathname, {
+          scroll: false,
+        });
+      }
 
       startTransition(async () => {
         const apiFilters: RestaurantFilters = {
@@ -493,15 +494,42 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
   );
 
   useEffect(() => {
-    if (didHydrateFromUrl) {
+    const currentQuery = searchParams.toString();
+    const currentFiltersQuery = buildQueryFromFilters(filters).toString();
+
+    if (!currentQuery) {
+      if (currentFiltersQuery) {
+        const resetMode = initialData.mode;
+        applyFilters(
+          {
+            ...defaultFilters,
+            mode: resetMode,
+            sortBy: resetMode === "restaurants" ? "rating_desc" : "newest",
+            perPage: filters.perPage,
+          },
+          { syncUrl: false },
+        );
+      }
       return;
     }
+
     const parsed = parseFiltersFromQuery();
-    if (parsed) {
-      applyFilters(parsed);
+    if (!parsed) {
+      return;
     }
-    setDidHydrateFromUrl(true);
-  }, [applyFilters, didHydrateFromUrl, parseFiltersFromQuery]);
+
+    const parsedQuery = buildQueryFromFilters(parsed).toString();
+    if (parsedQuery !== currentFiltersQuery) {
+      applyFilters(parsed, { syncUrl: false });
+    }
+  }, [
+    applyFilters,
+    buildQueryFromFilters,
+    filters,
+    initialData.mode,
+    parseFiltersFromQuery,
+    searchParams,
+  ]);
 
   useEffect(() => {
     const activeSlugs = initialData.mealCategories
