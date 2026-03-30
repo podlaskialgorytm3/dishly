@@ -8,7 +8,7 @@ import {
   type MouseEvent,
 } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Star,
   MapPin,
@@ -205,6 +205,8 @@ const heroCategories = [
 
 export function StorefrontClient({ initialData }: StorefrontClientProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [restaurants, setRestaurants] = useState(initialData.restaurants);
   const [searchMeals, setSearchMeals] = useState(initialData.searchMeals);
   const [restaurantPagination, setRestaurantPagination] = useState(
@@ -230,6 +232,7 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
     [],
   );
   const [heroParallax, setHeroParallax] = useState({ x: 0, y: 0 });
+  const [didHydrateFromUrl, setDidHydrateFromUrl] = useState(false);
   const userLocation = useLocationStore((s) => s.userLocation);
   const addItem = useCartStore((s) => s.addItem);
   const confirmClearAndAdd = useCartStore((s) => s.confirmClearAndAdd);
@@ -241,6 +244,168 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
       currency: "PLN",
     }).format(price);
   };
+
+  const buildQueryFromFilters = useCallback((nextFilters: FilterValues) => {
+    const params = new URLSearchParams();
+
+    if (nextFilters.mode !== defaultFilters.mode) {
+      params.set("mode", nextFilters.mode);
+    }
+    if (nextFilters.query.trim()) {
+      params.set("q", nextFilters.query.trim());
+    }
+    if (nextFilters.city.trim()) {
+      params.set("city", nextFilters.city.trim());
+    }
+    if (nextFilters.page > 1) {
+      params.set("page", String(nextFilters.page));
+    }
+    if (nextFilters.perPage !== defaultFilters.perPage) {
+      params.set("perPage", String(nextFilters.perPage));
+    }
+    if (nextFilters.sortBy !== defaultFilters.sortBy) {
+      params.set("sort", nextFilters.sortBy);
+    }
+    if (nextFilters.minRating > 0) {
+      params.set("minRating", String(nextFilters.minRating));
+    }
+    if (nextFilters.maxDeliveryFee !== undefined) {
+      params.set("maxDeliveryFee", String(nextFilters.maxDeliveryFee));
+    }
+    if (nextFilters.maxMinOrderValue !== undefined) {
+      params.set("maxMinOrderValue", String(nextFilters.maxMinOrderValue));
+    }
+    if (nextFilters.freeDeliveryOnly) {
+      params.set("freeDeliveryOnly", "1");
+    }
+    if (nextFilters.multiLocationOnly) {
+      params.set("multiLocationOnly", "1");
+    }
+    if (nextFilters.cuisineTypeIds.length > 0) {
+      params.set("cuisineTypeIds", nextFilters.cuisineTypeIds.join(","));
+    }
+    if (nextFilters.tagIds.length > 0) {
+      params.set("tagIds", nextFilters.tagIds.join(","));
+    }
+    if (nextFilters.categorySlugs.length > 0) {
+      params.set("categorySlugs", nextFilters.categorySlugs.join(","));
+    }
+    if (nextFilters.maxPrice !== undefined) {
+      params.set("maxPrice", String(nextFilters.maxPrice));
+    }
+    if (nextFilters.minCalories !== undefined) {
+      params.set("minCalories", String(nextFilters.minCalories));
+    }
+    if (nextFilters.maxCalories !== undefined) {
+      params.set("maxCalories", String(nextFilters.maxCalories));
+    }
+    if (nextFilters.minProtein !== undefined) {
+      params.set("minProtein", String(nextFilters.minProtein));
+    }
+    if (nextFilters.maxProtein !== undefined) {
+      params.set("maxProtein", String(nextFilters.maxProtein));
+    }
+    if (nextFilters.minCarbs !== undefined) {
+      params.set("minCarbs", String(nextFilters.minCarbs));
+    }
+    if (nextFilters.maxCarbs !== undefined) {
+      params.set("maxCarbs", String(nextFilters.maxCarbs));
+    }
+    if (nextFilters.minFat !== undefined) {
+      params.set("minFat", String(nextFilters.minFat));
+    }
+    if (nextFilters.maxFat !== undefined) {
+      params.set("maxFat", String(nextFilters.maxFat));
+    }
+    if (nextFilters.isVegetarian) {
+      params.set("isVegetarian", "1");
+    }
+    if (nextFilters.isVegan) {
+      params.set("isVegan", "1");
+    }
+    if (nextFilters.isGlutenFree) {
+      params.set("isGlutenFree", "1");
+    }
+
+    return params;
+  }, []);
+
+  const parseFiltersFromQuery = useCallback((): FilterValues | null => {
+    if (!searchParams || Array.from(searchParams.keys()).length === 0) {
+      return null;
+    }
+
+    const slugs = (searchParams.get("categorySlugs") || "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+    const categoryIds = initialData.mealCategories
+      .filter((category) => slugs.includes(category.slug))
+      .map((category) => category.id);
+
+    const mode = searchParams.get("mode") === "meals" ? "meals" : "restaurants";
+
+    return {
+      ...defaultFilters,
+      mode,
+      query: searchParams.get("q") || "",
+      city: searchParams.get("city") || "",
+      page: Number(searchParams.get("page") || 1),
+      perPage: Number(searchParams.get("perPage") || defaultFilters.perPage),
+      sortBy:
+        searchParams.get("sort") ||
+        (mode === "restaurants" ? "rating_desc" : "newest"),
+      minRating: Number(searchParams.get("minRating") || 0),
+      maxDeliveryFee: searchParams.get("maxDeliveryFee")
+        ? Number(searchParams.get("maxDeliveryFee"))
+        : undefined,
+      maxMinOrderValue: searchParams.get("maxMinOrderValue")
+        ? Number(searchParams.get("maxMinOrderValue"))
+        : undefined,
+      freeDeliveryOnly: searchParams.get("freeDeliveryOnly") === "1",
+      multiLocationOnly: searchParams.get("multiLocationOnly") === "1",
+      cuisineTypeIds: (searchParams.get("cuisineTypeIds") || "")
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+      tagIds: (searchParams.get("tagIds") || "")
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+      categorySlugs: slugs,
+      categoryIds,
+      maxPrice: searchParams.get("maxPrice")
+        ? Number(searchParams.get("maxPrice"))
+        : undefined,
+      minCalories: searchParams.get("minCalories")
+        ? Number(searchParams.get("minCalories"))
+        : undefined,
+      maxCalories: searchParams.get("maxCalories")
+        ? Number(searchParams.get("maxCalories"))
+        : undefined,
+      minProtein: searchParams.get("minProtein")
+        ? Number(searchParams.get("minProtein"))
+        : undefined,
+      maxProtein: searchParams.get("maxProtein")
+        ? Number(searchParams.get("maxProtein"))
+        : undefined,
+      minCarbs: searchParams.get("minCarbs")
+        ? Number(searchParams.get("minCarbs"))
+        : undefined,
+      maxCarbs: searchParams.get("maxCarbs")
+        ? Number(searchParams.get("maxCarbs"))
+        : undefined,
+      minFat: searchParams.get("minFat")
+        ? Number(searchParams.get("minFat"))
+        : undefined,
+      maxFat: searchParams.get("maxFat")
+        ? Number(searchParams.get("maxFat"))
+        : undefined,
+      isVegetarian: searchParams.get("isVegetarian") === "1",
+      isVegan: searchParams.get("isVegan") === "1",
+      isGlutenFree: searchParams.get("isGlutenFree") === "1",
+    };
+  }, [initialData.mealCategories, searchParams]);
 
   // Effect to automatically set address from profile
   useEffect(() => {
@@ -263,60 +428,80 @@ export function StorefrontClient({ initialData }: StorefrontClientProps) {
   }, [initialData.isLoggedIn, initialData.userAddresses, userLocation]);
 
   // Fetch filtered restaurants
-  const applyFilters = useCallback((newFilters: FilterValues) => {
-    setFilters(newFilters);
+  const applyFilters = useCallback(
+    (newFilters: FilterValues) => {
+      setFilters(newFilters);
 
-    startTransition(async () => {
-      const apiFilters: RestaurantFilters = {
-        mode: newFilters.mode,
-        page: newFilters.page,
-        perPage: newFilters.perPage,
-        categorySlugs:
-          newFilters.categorySlugs.length > 0
-            ? newFilters.categorySlugs
-            : undefined,
-        query: newFilters.query || undefined,
-        city: newFilters.city || undefined,
-        minRating: newFilters.minRating || undefined,
-        maxDeliveryFee: newFilters.maxDeliveryFee,
-        maxMinOrderValue: newFilters.maxMinOrderValue,
-        freeDeliveryOnly: newFilters.freeDeliveryOnly || undefined,
-        multiLocationOnly: newFilters.multiLocationOnly || undefined,
-        cuisineTypeIds:
-          newFilters.cuisineTypeIds.length > 0
-            ? newFilters.cuisineTypeIds
-            : undefined,
-        tagIds: newFilters.tagIds.length > 0 ? newFilters.tagIds : undefined,
-        categoryIds:
-          newFilters.categoryIds.length > 0
-            ? newFilters.categoryIds
-            : undefined,
-        minPrice: newFilters.minPrice,
-        maxPrice: newFilters.maxPrice,
-        minCalories: newFilters.minCalories,
-        maxCalories: newFilters.maxCalories,
-        minProtein: newFilters.minProtein,
-        maxProtein: newFilters.maxProtein,
-        minCarbs: newFilters.minCarbs,
-        maxCarbs: newFilters.maxCarbs,
-        minFat: newFilters.minFat,
-        maxFat: newFilters.maxFat,
-        isVegetarian: newFilters.isVegetarian || undefined,
-        isVegan: newFilters.isVegan || undefined,
-        isGlutenFree: newFilters.isGlutenFree || undefined,
-        maxSpiceLevel: newFilters.maxSpiceLevel,
-        sortBy: newFilters.sortBy,
-      };
+      const params = buildQueryFromFilters(newFilters);
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, {
+        scroll: false,
+      });
 
-      const result = await getStorefrontData(apiFilters);
-      if (result.success && result.data) {
-        setRestaurants(result.data.restaurants);
-        setSearchMeals(result.data.searchMeals);
-        setRestaurantPagination(result.data.restaurantPagination);
-        setMealPagination(result.data.mealPagination);
-      }
-    });
-  }, []);
+      startTransition(async () => {
+        const apiFilters: RestaurantFilters = {
+          mode: newFilters.mode,
+          page: newFilters.page,
+          perPage: newFilters.perPage,
+          categorySlugs:
+            newFilters.categorySlugs.length > 0
+              ? newFilters.categorySlugs
+              : undefined,
+          query: newFilters.query || undefined,
+          city: newFilters.city || undefined,
+          minRating: newFilters.minRating || undefined,
+          maxDeliveryFee: newFilters.maxDeliveryFee,
+          maxMinOrderValue: newFilters.maxMinOrderValue,
+          freeDeliveryOnly: newFilters.freeDeliveryOnly || undefined,
+          multiLocationOnly: newFilters.multiLocationOnly || undefined,
+          cuisineTypeIds:
+            newFilters.cuisineTypeIds.length > 0
+              ? newFilters.cuisineTypeIds
+              : undefined,
+          tagIds: newFilters.tagIds.length > 0 ? newFilters.tagIds : undefined,
+          categoryIds:
+            newFilters.categoryIds.length > 0
+              ? newFilters.categoryIds
+              : undefined,
+          minPrice: newFilters.minPrice,
+          maxPrice: newFilters.maxPrice,
+          minCalories: newFilters.minCalories,
+          maxCalories: newFilters.maxCalories,
+          minProtein: newFilters.minProtein,
+          maxProtein: newFilters.maxProtein,
+          minCarbs: newFilters.minCarbs,
+          maxCarbs: newFilters.maxCarbs,
+          minFat: newFilters.minFat,
+          maxFat: newFilters.maxFat,
+          isVegetarian: newFilters.isVegetarian || undefined,
+          isVegan: newFilters.isVegan || undefined,
+          isGlutenFree: newFilters.isGlutenFree || undefined,
+          maxSpiceLevel: newFilters.maxSpiceLevel,
+          sortBy: newFilters.sortBy,
+        };
+
+        const result = await getStorefrontData(apiFilters);
+        if (result.success && result.data) {
+          setRestaurants(result.data.restaurants);
+          setSearchMeals(result.data.searchMeals);
+          setRestaurantPagination(result.data.restaurantPagination);
+          setMealPagination(result.data.mealPagination);
+        }
+      });
+    },
+    [buildQueryFromFilters, pathname, router],
+  );
+
+  useEffect(() => {
+    if (didHydrateFromUrl) {
+      return;
+    }
+    const parsed = parseFiltersFromQuery();
+    if (parsed) {
+      applyFilters(parsed);
+    }
+    setDidHydrateFromUrl(true);
+  }, [applyFilters, didHydrateFromUrl, parseFiltersFromQuery]);
 
   useEffect(() => {
     const activeSlugs = initialData.mealCategories
