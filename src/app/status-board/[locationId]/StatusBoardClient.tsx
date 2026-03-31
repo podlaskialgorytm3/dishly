@@ -170,10 +170,12 @@ export default function StatusBoardClient({
     readyPickupOrders.length +
     readyDeliveryOrders.length;
 
-  // Short order number (last segment)
+  // Short order number (last segment, formatted with leading zero)
   const shortNumber = (orderNumber: string) => {
     const parts = orderNumber.split("-");
-    return parts.length >= 3 ? parts[parts.length - 1] : orderNumber;
+    const lastPart = parts.length >= 3 ? parts[parts.length - 1] : orderNumber;
+    const num = parseInt(lastPart, 10);
+    return isNaN(num) ? lastPart : num.toString().padStart(2, "0");
   };
 
   const OrderCard = ({
