@@ -25,6 +25,7 @@ import {
   ClipboardList,
   Clock,
   Monitor,
+  MessageSquare,
   type LucideIcon,
 } from "lucide-react";
 
@@ -122,6 +123,12 @@ export default async function DashboardLayout({
           roles: ["OWNER"],
         },
         {
+          name: "Opinie klientów",
+          href: "/dashboard/reviews",
+          icon: MessageSquare,
+          roles: ["OWNER"],
+        },
+        {
           name: "Lokalizacje",
           href: "/dashboard/owner/locations",
           icon: MapPin,
@@ -171,6 +178,13 @@ export default async function DashboardLayout({
           panelKey: "orders",
         },
         {
+          name: "Opinie klientów",
+          href: "/dashboard/reviews",
+          icon: MessageSquare,
+          roles: ["MANAGER"],
+          panelKey: "reviews",
+        },
+        {
           name: "Menu",
           href: "/dashboard/owner/menu",
           icon: UtensilsCrossed,
@@ -214,6 +228,13 @@ export default async function DashboardLayout({
           icon: ShoppingBag,
           roles: ["WORKER"],
           panelKey: "orders",
+        },
+        {
+          name: "Opinie klientów",
+          href: "/dashboard/reviews",
+          icon: MessageSquare,
+          roles: ["WORKER"],
+          panelKey: "reviews",
         },
         {
           name: "Menu",

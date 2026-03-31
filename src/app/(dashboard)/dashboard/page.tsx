@@ -17,6 +17,8 @@ import {
   Eye,
   Briefcase,
   Shield,
+  Star,
+  MessageSquare,
 } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -51,10 +53,12 @@ export default async function DashboardPage() {
     planName: string | null;
     maxLocations: number | null;
     maxStaff: number | null;
+    avgRating: number;
+    reviewCount: number;
   } | null = null;
 
   if (session.user.role === "OWNER" && session.user.restaurantId) {
-    const [locCount, staffCount, restaurant] = await Promise.all([
+    const [locCount, staffCount, restaurant, reviews] = await Promise.all([
       db.location.count({ where: { restaurantId: session.user.restaurantId } }),
       db.user.count({
         where: {
@@ -81,8 +85,19 @@ export default async function DashboardPage() {
           },
         },
       }),
+      db.review.findMany({
+        where: {
+          restaurantId: session.user.restaurantId,
+          isVisible: true,
+        },
+        select: { rating: true },
+      }),
     ]);
     const activeSub = restaurant?.subscriptions[0];
+    const avgRating =
+      reviews.length > 0
+        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        : 0;
     ownerData = {
       locationsCount: locCount,
       staffCount: staffCount,
@@ -90,6 +105,8 @@ export default async function DashboardPage() {
       planName: activeSub?.plan?.name ?? null,
       maxLocations: activeSub?.plan?.maxLocations ?? null,
       maxStaff: activeSub?.plan?.maxStaffAccounts ?? null,
+      avgRating,
+      reviewCount: reviews.length,
     };
   }
 
@@ -141,6 +158,14 @@ export default async function DashboardPage() {
           icon: Users2,
           color: "#4CAF50",
           bgColor: "#E8F5E9",
+        },
+        {
+          title: "Średnia ocena",
+          value: ownerData.reviewCount > 0 ? ownerData.avgRating.toFixed(1) : "—",
+          subtitle: `${ownerData.reviewCount} ${ownerData.reviewCount === 1 ? "opinia" : "opinii"}`,
+          icon: Star,
+          color: "#FFC107",
+          bgColor: "#FFF9E6",
         },
         {
           title: "Plan subskrypcji",
@@ -260,6 +285,13 @@ export default async function DashboardPage() {
           color: "#FF4D4F",
         },
         {
+          title: "Opinie klientów",
+          description: "Zobacz oceny i komentarze",
+          href: "/dashboard/reviews",
+          icon: MessageSquare,
+          color: "#FFC107",
+        },
+        {
           title: "Zespół",
           description: "Pracownicy i menadżerowie",
           href: "/dashboard/owner/staff",
@@ -293,6 +325,13 @@ export default async function DashboardPage() {
           color: "#FF4D4F",
         },
         {
+          title: "Opinie klientów",
+          description: "Zobacz oceny i komentarze",
+          href: "/dashboard/reviews",
+          icon: MessageSquare,
+          color: "#FFC107",
+        },
+        {
           title: "Menu",
           description: "Przeglądaj menu restauracji",
           href: "/dashboard/owner/menu",
@@ -322,6 +361,51 @@ export default async function DashboardPage() {
   };
 
   const quickActions = getQuickActions();
+
+  // Recent reviews for OWNER/MANAGER
+  let recentReviews: {
+    id: string;
+    rating: number;
+    content: string | null;
+    createdAt: Date;
+    user: { firstName: string | null; lastName: string | null };
+  }[] = [];
+
+  if (session.user.role === "OWNER" && session.user.restaurantId) {
+    recentReviews = await db.review.findMany({
+      where: {
+        restaurantId: session.user.restaurantId,
+        isVisible: true,
+      },
+      include: {
+        user: {
+          select: { firstName: true, lastName: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    });
+  } else if (session.user.role === "MANAGER" && session.user.locationId) {
+    const location = await db.location.findUnique({
+      where: { id: session.user.locationId },
+      select: { restaurantId: true },
+    });
+    if (location?.restaurantId) {
+      recentReviews = await db.review.findMany({
+        where: {
+          restaurantId: location.restaurantId,
+          isVisible: true,
+        },
+        include: {
+          user: {
+            select: { firstName: true, lastName: true },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+      });
+    }
+  }
 
   // Recent activity (mock data for now)
   const recentActivity =
@@ -539,6 +623,82 @@ export default async function DashboardPage() {
               </div>
             </div>
           )}
+
+          {/* Recent Reviews (Owner/Manager) */}
+          {(session.user.role === "OWNER" ||
+            session.user.role === "MANAGER") &&
+            recentReviews.length > 0 && (
+              <div>
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-[#1F1F1F]">
+                    Najnowsze opinie
+                  </h2>
+                  <Link
+                    href="/dashboard/reviews"
+                    className="text-sm font-medium text-[#FF4D4F] transition-colors hover:text-[#FF3B30]"
+                  >
+                    Zobacz wszystkie →
+                  </Link>
+                </div>
+                <div className="rounded-[20px] border border-[#EEEEEE] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
+                  <div className="divide-y divide-[#EEEEEE]">
+                    {recentReviews.map((review) => {
+                      const userName =
+                        `${review.user.firstName || ""} ${review.user.lastName || ""}`.trim() ||
+                        "Anonim";
+                      const timeAgo = Math.floor(
+                        (Date.now() - review.createdAt.getTime()) /
+                          (1000 * 60 * 60 * 24),
+                      );
+                      const timeLabel =
+                        timeAgo === 0
+                          ? "Dzisiaj"
+                          : timeAgo === 1
+                            ? "Wczoraj"
+                            : `${timeAgo} dni temu`;
+
+                      return (
+                        <div
+                          key={review.id}
+                          className="flex items-start gap-4 p-6 transition-colors hover:bg-[#FAFAFA]"
+                        >
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#FFF9E6]">
+                            <Star className="h-5 w-5 fill-[#FFC107] text-[#FFC107]" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-[#1F1F1F]">
+                                {userName}
+                              </p>
+                              <div className="flex items-center gap-0.5">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star
+                                    key={star}
+                                    className={`h-3 w-3 ${
+                                      star <= review.rating
+                                        ? "fill-[#FFC107] text-[#FFC107]"
+                                        : "text-gray-300"
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                            {review.content && (
+                              <p className="mt-1 text-sm text-[#8C8C8C] line-clamp-2">
+                                {review.content}
+                              </p>
+                            )}
+                          </div>
+                          <span className="text-xs text-[#8C8C8C]">
+                            {timeLabel}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
 
           {/* Manager/Worker location assignment info */}
           {(session.user.role === "MANAGER" ||
