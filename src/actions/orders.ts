@@ -774,7 +774,8 @@ export async function verifyCartAvailability(
 
 export async function getReorderData(orderId: string) {
   const session = await auth();
-  if (!session) return { success: false, error: "Zaloguj się, aby ponowić zamówienie" };
+  if (!session)
+    return { success: false, error: "Zaloguj się, aby ponowić zamówienie" };
 
   const order = await db.order.findUnique({
     where: { id: orderId, userId: session.user.id },
@@ -849,14 +850,14 @@ export async function getReorderData(orderId: string) {
     (item) =>
       item.meal.isAvailable &&
       item.meal.approvalStatus === "APPROVED" &&
-      item.addons.every((a) => a.addon.isAvailable)
+      item.addons.every((a) => a.addon.isAvailable),
   );
 
   const unavailableItems = order.items.filter(
     (item) =>
       !item.meal.isAvailable ||
       item.meal.approvalStatus !== "APPROVED" ||
-      item.addons.some((a) => !a.addon.isAvailable)
+      item.addons.some((a) => !a.addon.isAvailable),
   );
 
   if (availableItems.length === 0) {
@@ -901,7 +902,9 @@ export async function getReorderData(orderId: string) {
         name: order.location.name,
       },
       cartItems,
-      unavailableItems: unavailableItems.map((item) => item.mealName ?? item.meal.name),
+      unavailableItems: unavailableItems.map(
+        (item) => item.mealName ?? item.meal.name,
+      ),
       deliveryAddress: order.deliveryAddress,
     },
   };
@@ -941,7 +944,7 @@ export async function getRecentUniqueOrders(limit: number = 5) {
   });
 
   // Group by restaurant slug and take most recent from each
-  const uniqueByRestaurant = new Map<string, typeof orders[0]>();
+  const uniqueByRestaurant = new Map<string, (typeof orders)[0]>();
   for (const order of orders) {
     const slug = order.restaurantSlug ?? order.location.restaurant.slug;
     if (!uniqueByRestaurant.has(slug)) {
@@ -960,7 +963,11 @@ export async function getRecentUniqueOrders(limit: number = 5) {
     restaurantLogoUrl: order.location.restaurant.logoUrl,
     totalPrice: Number(order.totalPrice),
     deliveredAt: order.deliveredAt?.toISOString() ?? null,
-    itemSummary: order.items.slice(0, 3).map((i) => i.mealName ?? i.meal.name).join(", ") +
+    itemSummary:
+      order.items
+        .slice(0, 3)
+        .map((i) => i.mealName ?? i.meal.name)
+        .join(", ") +
       (order.items.length > 3 ? ` +${order.items.length - 3}` : ""),
     itemCount: order.items.reduce((sum, i) => sum + i.quantity, 0),
     firstItemImage: order.items[0]?.meal.imageUrl ?? null,

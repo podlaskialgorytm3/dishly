@@ -121,7 +121,11 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
 
 type TabKey = "overview" | "addresses" | "reviews" | "orders";
 
-const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+const TABS: {
+  key: TabKey;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}[] = [
   { key: "overview", label: "Przegląd", icon: User },
   { key: "addresses", label: "Adresy", icon: MapPin },
   { key: "reviews", label: "Opinie", icon: Star },
@@ -240,7 +244,9 @@ function QuickReorderCard({
         sessionStorage.setItem("reorderData", JSON.stringify(result.data));
         router.push(`/restauracja/${order.restaurantSlug}?reorder=true`);
       } else {
-        toast.error(result.error || "Nie udało się przygotować ponownego zamówienia");
+        toast.error(
+          result.error || "Nie udało się przygotować ponownego zamówienia",
+        );
       }
     } catch {
       toast.error("Wystąpił błąd podczas ponownego zamawiania");
@@ -336,7 +342,9 @@ export default function ProfileClient({
   const [reviews, setReviews] = useState(initialReviews);
   const [addresses, setAddresses] = useState(initialAddresses);
   const [editingReview, setEditingReview] = useState<ClientReview | null>(null);
-  const [ordersFilter, setOrdersFilter] = useState<"all" | "active" | "completed">("all");
+  const [ordersFilter, setOrdersFilter] = useState<
+    "all" | "active" | "completed"
+  >("all");
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("pl-PL", {
@@ -577,9 +585,7 @@ export default function ProfileClient({
               <div className="rounded-2xl bg-white p-6 shadow-sm">
                 <div className="mb-4 flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-[#1F1F1F]">
-                      Zamów ponownie
-                    </h3>
+                    <h3 className="font-bold text-[#1F1F1F]">Zamów ponownie</h3>
                     <p className="text-sm text-[#8C8C8C]">
                       Twoje ostatnie restauracje
                     </p>
@@ -598,7 +604,9 @@ export default function ProfileClient({
             )}
 
             {/* Active Orders */}
-            {orders.some((o) => !["DELIVERED", "CANCELLED"].includes(o.status)) && (
+            {orders.some(
+              (o) => !["DELIVERED", "CANCELLED"].includes(o.status),
+            ) && (
               <div className="rounded-2xl bg-white p-6 shadow-sm">
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="font-bold text-[#1F1F1F]">
@@ -613,7 +621,9 @@ export default function ProfileClient({
                 </div>
                 <div className="space-y-3">
                   {orders
-                    .filter((o) => !["DELIVERED", "CANCELLED"].includes(o.status))
+                    .filter(
+                      (o) => !["DELIVERED", "CANCELLED"].includes(o.status),
+                    )
                     .slice(0, 3)
                     .map((order) => (
                       <Link
@@ -931,7 +941,13 @@ export default function ProfileClient({
                     : "bg-white text-[#8C8C8C] hover:bg-[#F5F5F5]"
                 }`}
               >
-                Aktywne ({orders.filter((o) => !["DELIVERED", "CANCELLED"].includes(o.status)).length})
+                Aktywne (
+                {
+                  orders.filter(
+                    (o) => !["DELIVERED", "CANCELLED"].includes(o.status),
+                  ).length
+                }
+                )
               </button>
               <button
                 onClick={() => setOrdersFilter("completed")}
@@ -941,12 +957,20 @@ export default function ProfileClient({
                     : "bg-white text-[#8C8C8C] hover:bg-[#F5F5F5]"
                 }`}
               >
-                Zakończone ({orders.filter((o) => ["DELIVERED", "CANCELLED"].includes(o.status)).length})
+                Zakończone (
+                {
+                  orders.filter((o) =>
+                    ["DELIVERED", "CANCELLED"].includes(o.status),
+                  ).length
+                }
+                )
               </button>
             </div>
 
             <div className="rounded-2xl bg-white p-6 shadow-sm">
-              <h3 className="mb-4 font-bold text-[#1F1F1F]">Historia zamówień</h3>
+              <h3 className="mb-4 font-bold text-[#1F1F1F]">
+                Historia zamówień
+              </h3>
 
               {filteredOrders.length === 0 ? (
                 <div className="py-8 text-center">
