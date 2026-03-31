@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { getOrderPaymentStatus } from "@/actions/orders";
+import { getReadableOrderCode } from "@/lib/order-code";
 
 type OrderStatus = {
   id: string;
@@ -120,7 +121,7 @@ export default function OrderSuccessClient({ orderId }: { orderId: string }) {
               <div className="mt-6 rounded-xl bg-[#F5F5F5] px-4 py-3">
                 <p className="text-xs text-[#8C8C8C]">Numer zamówienia</p>
                 <p className="mt-1 font-mono text-lg font-bold text-[#1F1F1F]">
-                  {orderData.orderNumber}
+                  {getReadableOrderCode(orderData.orderNumber)}
                 </p>
               </div>
             )}

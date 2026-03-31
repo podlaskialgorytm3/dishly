@@ -3,7 +3,6 @@
 import Link from "next/link";
 import {
   ShoppingBag,
-  Clock,
   CheckCircle2,
   ChefHat,
   Truck,
@@ -13,6 +12,7 @@ import {
   ChevronRight,
   ExternalLink,
 } from "lucide-react";
+import { getReadableOrderCode } from "@/lib/order-code";
 
 type ClientOrder = {
   id: string;
@@ -172,7 +172,7 @@ export default function ClientOrdersClient({
                             .join(", ")}
                         </p>
                         <p className="mt-0.5 font-mono text-xs text-[#CCCCCC]">
-                          {order.orderNumber}
+                          {getReadableOrderCode(order.orderNumber)}
                         </p>
                       </div>
                       <div className="text-right">

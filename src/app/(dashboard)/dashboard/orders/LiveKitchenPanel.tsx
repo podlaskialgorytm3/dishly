@@ -150,7 +150,37 @@ function KitchenOrderCard({
   const [showTimeEditor, setShowTimeEditor] = useState(false);
   const [editedTime, setEditedTime] = useState(order.estimatedTime ?? 30);
   const [isTimePending, startTimeTransition] = useTransition();
-  const config = STATUS_CONFIG[order.status] || STATUS_CONFIG.PENDING;
+  const isPickupOrder = order.type === "PICKUP";
+
+  // Get base config
+  let config = STATUS_CONFIG[order.status] || STATUS_CONFIG.PENDING;
+
+  // For PICKUP orders, avoid courier-oriented labels and actions.
+  if (isPickupOrder && order.status === "READY") {
+    config = {
+      ...config,
+      label: "Gotowe do odbioru",
+      nextStatus: "DELIVERED",
+      nextLabel: "Wydaj",
+    };
+  }
+
+  if (isPickupOrder && order.status === "DELIVERED") {
+    config = {
+      ...config,
+      label: "Odebrane",
+      icon: Package,
+    };
+  }
+
+  if (isPickupOrder && order.status === "IN_DELIVERY") {
+    config = {
+      ...config,
+      label: "Wydawanie",
+      icon: Package,
+      nextLabel: "Wydaj",
+    };
+  }
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("pl-PL", {
@@ -211,7 +241,7 @@ function KitchenOrderCard({
           </span>
         </div>
         <div className="flex items-center gap-2">
-          {order.type === "PICKUP" && (
+          {isPickupOrder && (
             <span className="flex items-center gap-0.5 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
               <Package className="h-3 w-3" />
               Odbiór
@@ -300,8 +330,8 @@ function KitchenOrderCard({
           </div>
         )}
 
-        {/* Delivery info */}
-        {order.deliveryAddress && (
+        {/* Delivery info - only show for DELIVERY orders */}
+        {order.type === "DELIVERY" && order.deliveryAddress && (
           <div className="mb-3 flex items-start gap-1.5 rounded-lg bg-[#F5F5F5] px-3 py-2 text-xs text-[#8C8C8C]">
             <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
             <span>{order.deliveryAddress}</span>
@@ -470,7 +500,9 @@ function KitchenOrderCard({
               )}
               {order.deliveredAt && (
                 <div>
-                  <span className="text-green-600">Dostarczone:</span>{" "}
+                  <span className="text-green-600">
+                    {isPickupOrder ? "Odebrane:" : "Dostarczone:"}
+                  </span>{" "}
                   <span className="text-green-700">
                     {formatTime(order.deliveredAt)}
                   </span>
@@ -800,7 +832,7 @@ export default function LiveKitchenPanel({
                   }`}
                 >
                   <Monitor className="h-4 w-4" />
-                  Tablica na monitor
+                  Widok numerków
                 </button>
               )}
 
@@ -843,14 +875,14 @@ export default function LiveKitchenPanel({
               <div className="mb-2 flex items-center gap-2">
                 <Monitor className="h-5 w-5 text-indigo-600" />
                 <h3 className="text-sm font-bold text-[#1F1F1F]">
-                  Tablica zamówień na monitor
+                  Widok numerków na monitor
                 </h3>
               </div>
               <p className="mb-3 text-xs text-[#8C8C8C]">
-                Otwórz ten link na monitorze w restauracji. Tablica pokazuje
-                aktualnie przygotowywane zamówienia, zamówienia do odbioru
-                osobistego i do odbioru przez kuriera — odświeża się
-                automatycznie co 10 sekund.
+                Otwórz ten link na monitorze w restauracji. Ekran pokazuje
+                numerki zamówień do odbioru osobistego oraz zamówienia w
+                przygotowaniu. Odświeżanie odbywa się automatycznie co 10
+                sekund.
               </p>
               <div className="flex items-center gap-2">
                 <input

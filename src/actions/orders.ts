@@ -81,10 +81,13 @@ async function geocodeAddress(
 }
 
 // Average preparation time based on items (simulation)
-function estimateDeliveryMinutes(itemCount: number): number {
+function estimateDeliveryMinutes(
+  itemCount: number,
+  orderType: "DELIVERY" | "PICKUP" = "DELIVERY",
+): number {
   const basePrep = 15; // 15 min base
   const perItem = 3; // +3 min per item
-  const deliveryTime = 20; // 20 min delivery
+  const deliveryTime = orderType === "PICKUP" ? 0 : 20;
   return basePrep + Math.min(itemCount * perItem, 30) + deliveryTime;
 }
 
@@ -114,7 +117,8 @@ export async function placeOrder(input: PlaceOrderInput) {
 
   const orderNumber = generateOrderNumber();
   const totalItems = input.items.reduce((sum, item) => sum + item.quantity, 0);
-  const estimatedMinutes = estimateDeliveryMinutes(totalItems);
+  const orderType = input.orderType ?? "DELIVERY";
+  const estimatedMinutes = estimateDeliveryMinutes(totalItems, orderType);
   const estimatedDeliveryAt = new Date(
     Date.now() + estimatedMinutes * 60 * 1000,
   );
@@ -122,7 +126,11 @@ export async function placeOrder(input: PlaceOrderInput) {
   // Geocode delivery address if coordinates are missing
   let finalCustomerLat = input.customerLat || null;
   let finalCustomerLng = input.customerLng || null;
-  if ((!finalCustomerLat || !finalCustomerLng) && input.deliveryAddress) {
+  if (
+    orderType === "DELIVERY" &&
+    (!finalCustomerLat || !finalCustomerLng) &&
+    input.deliveryAddress
+  ) {
     const geocoded = await geocodeAddress(input.deliveryAddress);
     if (geocoded) {
       finalCustomerLat = geocoded.lat;
@@ -136,11 +144,11 @@ export async function placeOrder(input: PlaceOrderInput) {
         orderNumber,
         userId: session?.user?.id ?? null,
         locationId: input.locationId,
-        type: "DELIVERY",
+        type: orderType,
         status: "PENDING",
         paymentStatus: "PAID", // Symulacja - od razu "zapłacone"
         subtotal: input.subtotal,
-        deliveryFee: input.deliveryFee,
+        deliveryFee: orderType === "PICKUP" ? 0 : input.deliveryFee,
         discountPercent: input.discountPercent,
         totalPrice: input.totalPrice,
         notes: input.notes || null,
@@ -149,9 +157,9 @@ export async function placeOrder(input: PlaceOrderInput) {
         guestName: input.guestName || null,
         guestEmail: input.guestEmail || null,
         guestPhone: input.guestPhone || null,
-        deliveryAddress: input.deliveryAddress,
-        customerLat: finalCustomerLat,
-        customerLng: finalCustomerLng,
+        deliveryAddress: orderType === "DELIVERY" ? input.deliveryAddress : "",
+        customerLat: orderType === "DELIVERY" ? finalCustomerLat : null,
+        customerLng: orderType === "DELIVERY" ? finalCustomerLng : null,
         restaurantName: input.restaurantName,
         restaurantSlug: input.restaurantSlug,
         items: {
@@ -242,6 +250,7 @@ export async function getOrderTracking(orderId: string) {
   return {
     id: order.id,
     orderNumber: order.orderNumber,
+    type: order.type,
     status: order.status,
     paymentStatus: order.paymentStatus,
     subtotal: Number(order.subtotal),
@@ -452,6 +461,7 @@ export async function updateOrderStatus(
     where: { id: orderId },
     select: {
       status: true,
+      type: true,
       locationId: true,
       location: {
         select: {
@@ -481,7 +491,19 @@ export async function updateOrderStatus(
   }
 
   // Validate status transition
-  const allowedTransitions = STATUS_TRANSITIONS[order.status];
+  const allowedTransitions =
+    order.type === "PICKUP" && order.status === "READY"
+      ? ["DELIVERED", "CANCELLED"]
+      : STATUS_TRANSITIONS[order.status];
+
+  if (order.type === "PICKUP" && newStatus === "IN_DELIVERY") {
+    return {
+      success: false,
+      error:
+        "Zamówienia z odbiorem osobistym nie mogą mieć statusu 'W dostawie'",
+    };
+  }
+
   if (!allowedTransitions.includes(newStatus)) {
     return {
       success: false,

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
   Clock,
@@ -21,6 +20,7 @@ import {
   Timer,
 } from "lucide-react";
 import { getOrderTracking } from "@/actions/orders";
+import { getReadableOrderCode } from "@/lib/order-code";
 
 // ============================================
 // TYPES
@@ -92,10 +92,48 @@ const ORDER_STATUSES: StatusStep[] = [
   },
 ];
 
-const STATUS_INDEX: Record<string, number> = {};
-ORDER_STATUSES.forEach((s, i) => {
-  STATUS_INDEX[s.key] = i;
-});
+const PICKUP_ORDER_STATUSES: StatusStep[] = [
+  {
+    key: "PENDING",
+    label: "Oczekujące",
+    sublabel: "Zamówienie złożone",
+    icon: ShoppingBag,
+    color: "#FF8C42",
+    bgColor: "#FFF3E8",
+  },
+  {
+    key: "ACCEPTED",
+    label: "Przyjęte",
+    sublabel: "Restauracja potwierdziła",
+    icon: CheckCircle2,
+    color: "#4CAF50",
+    bgColor: "#E8F5E9",
+  },
+  {
+    key: "PREPARING",
+    label: "W przygotowaniu",
+    sublabel: "Kuchnia przygotowuje",
+    icon: ChefHat,
+    color: "#FF4D4F",
+    bgColor: "#FFF1F1",
+  },
+  {
+    key: "READY",
+    label: "Gotowe do odbioru",
+    sublabel: "Czeka na odbiór",
+    icon: Package,
+    color: "#2196F3",
+    bgColor: "#E3F2FD",
+  },
+  {
+    key: "DELIVERED",
+    label: "Odebrane",
+    sublabel: "Smacznego!",
+    icon: UtensilsCrossed,
+    color: "#4CAF50",
+    bgColor: "#E8F5E9",
+  },
+];
 
 // ============================================
 // DELIVERY MAP COMPONENT (Leaflet / OpenStreetMap)
@@ -205,9 +243,11 @@ function DeliveryMap({
 function CountdownTimer({
   estimatedDeliveryAt,
   status,
+  isPickup,
 }: {
   estimatedDeliveryAt: string | null;
   status: string;
+  isPickup: boolean;
 }) {
   const [timeLeft, setTimeLeft] = useState<{
     minutes: number;
@@ -253,7 +293,9 @@ function CountdownTimer({
       <div className="flex items-center gap-3 rounded-2xl bg-green-50 p-4">
         <CheckCircle2 className="h-8 w-8 text-green-500" />
         <div>
-          <p className="text-lg font-bold text-green-700">Dostarczone!</p>
+          <p className="text-lg font-bold text-green-700">
+            {isPickup ? "Odebrane!" : "Dostarczone!"}
+          </p>
           <p className="text-sm text-green-600">Smacznego! 🎉</p>
         </div>
       </div>
@@ -281,7 +323,9 @@ function CountdownTimer({
             Czas szacunkowy minął
           </p>
           <p className="text-sm text-amber-600">
-            Twoje zamówienie jest już w drodze
+            {isPickup
+              ? "Twoje zamówienie powinno być gotowe do odbioru"
+              : "Twoje zamówienie jest już w drodze"}
           </p>
         </div>
       </div>
@@ -293,7 +337,7 @@ function CountdownTimer({
       <Timer className="h-8 w-8 text-[#FF4D4F]" />
       <div>
         <p className="text-sm font-medium text-[#8C8C8C]">
-          Szacowany czas dostawy
+          {isPickup ? "Szacowany czas odbioru" : "Szacowany czas dostawy"}
         </p>
         <div className="flex items-baseline gap-1">
           <span className="text-3xl font-bold tabular-nums text-[#1F1F1F]">
@@ -314,13 +358,23 @@ function CountdownTimer({
 // STATUS STEPS
 // ============================================
 
-function StatusSteps({ currentStatus }: { currentStatus: string }) {
-  const currentIdx = STATUS_INDEX[currentStatus] ?? -1;
+function StatusSteps({
+  currentStatus,
+  statuses,
+}: {
+  currentStatus: string;
+  statuses: StatusStep[];
+}) {
+  const statusIndex = statuses.reduce(
+    (acc, step, idx) => ({ ...acc, [step.key]: idx }),
+    {} as Record<string, number>,
+  );
+  const currentIdx = statusIndex[currentStatus] ?? -1;
   const isCancelled = currentStatus === "CANCELLED";
 
   return (
     <div className="space-y-0">
-      {ORDER_STATUSES.map((step, idx) => {
+      {statuses.map((step, idx) => {
         const isComplete = idx < currentIdx;
         const isCurrent = idx === currentIdx;
         const isFuture = idx > currentIdx;
@@ -362,7 +416,7 @@ function StatusSteps({ currentStatus }: { currentStatus: string }) {
                   />
                 )}
               </div>
-              {idx < ORDER_STATUSES.length - 1 && (
+              {idx < statuses.length - 1 && (
                 <div
                   className="w-0.5 flex-1"
                   style={{
@@ -408,9 +462,10 @@ function StatusSteps({ currentStatus }: { currentStatus: string }) {
 // ============================================
 
 export default function OrderTrackingClient({ order }: { order: OrderData }) {
-  const router = useRouter();
   const [data, setData] = useState(order);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const isPickupOrder = data.type === "PICKUP";
+  const statusSteps = isPickupOrder ? PICKUP_ORDER_STATUSES : ORDER_STATUSES;
 
   // Auto-refresh every 10 seconds for active orders
   useEffect(() => {
@@ -464,7 +519,7 @@ export default function OrderTrackingClient({ order }: { order: OrderData }) {
     });
 
   const currentStatusStep =
-    ORDER_STATUSES.find((s) => s.key === data.status) ?? ORDER_STATUSES[0];
+    statusSteps.find((s) => s.key === data.status) ?? statusSteps[0];
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
@@ -482,7 +537,7 @@ export default function OrderTrackingClient({ order }: { order: OrderData }) {
           <div className="text-center">
             <p className="text-xs text-[#8C8C8C]">Zamówienie</p>
             <p className="font-mono text-sm font-bold text-[#1F1F1F]">
-              {data.orderNumber}
+              {getReadableOrderCode(data.orderNumber)}
             </p>
           </div>
 
@@ -536,19 +591,22 @@ export default function OrderTrackingClient({ order }: { order: OrderData }) {
             <CountdownTimer
               estimatedDeliveryAt={data.estimatedDeliveryAt}
               status={data.status}
+              isPickup={isPickupOrder}
             />
 
             {/* Map */}
-            <DeliveryMap
-              customerLat={data.customerLat}
-              customerLng={data.customerLng}
-              restaurantLat={data.location.latitude}
-              restaurantLng={data.location.longitude}
-              status={data.status}
-              progress={overallProgress}
-              deliveryAddress={data.deliveryAddress ?? undefined}
-              restaurantName={data.restaurantName ?? data.location.name}
-            />
+            {!isPickupOrder && (
+              <DeliveryMap
+                customerLat={data.customerLat}
+                customerLng={data.customerLng}
+                restaurantLat={data.location.latitude}
+                restaurantLng={data.location.longitude}
+                status={data.status}
+                progress={overallProgress}
+                deliveryAddress={data.deliveryAddress ?? undefined}
+                restaurantName={data.restaurantName ?? data.location.name}
+              />
+            )}
 
             {/* Restaurant info */}
             <div className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm">
@@ -582,7 +640,7 @@ export default function OrderTrackingClient({ order }: { order: OrderData }) {
             </div>
 
             {/* Delivery address */}
-            {data.deliveryAddress && (
+            {!isPickupOrder && data.deliveryAddress && (
               <div className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm">
                 <MapPin className="h-5 w-5 text-[#FF4D4F]" />
                 <div>
@@ -591,6 +649,21 @@ export default function OrderTrackingClient({ order }: { order: OrderData }) {
                   </p>
                   <p className="text-sm font-medium text-[#1F1F1F]">
                     {data.deliveryAddress}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Pickup info */}
+            {isPickupOrder && (
+              <div className="flex items-center gap-3 rounded-2xl bg-blue-50 p-4 shadow-sm">
+                <ShoppingBag className="h-5 w-5 text-blue-600" />
+                <div>
+                  <p className="text-xs font-medium text-blue-600">
+                    Odbiór osobisty
+                  </p>
+                  <p className="text-sm font-medium text-[#1F1F1F]">
+                    Odbierz w: {data.location.address}, {data.location.city}
                   </p>
                 </div>
               </div>
@@ -604,7 +677,7 @@ export default function OrderTrackingClient({ order }: { order: OrderData }) {
               <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-[#8C8C8C]">
                 Status zamówienia
               </h3>
-              <StatusSteps currentStatus={data.status} />
+              <StatusSteps currentStatus={data.status} statuses={statusSteps} />
 
               {/* Timestamps */}
               <div className="mt-2 space-y-1 border-t border-[#F5F5F5] pt-3">
@@ -630,7 +703,7 @@ export default function OrderTrackingClient({ order }: { order: OrderData }) {
                     <span>{formatTime(data.readyAt)}</span>
                   </div>
                 )}
-                {data.inDeliveryAt && (
+                {!isPickupOrder && data.inDeliveryAt && (
                   <div className="flex justify-between text-xs text-[#8C8C8C]">
                     <span>Wysłano</span>
                     <span>{formatTime(data.inDeliveryAt)}</span>
@@ -638,7 +711,7 @@ export default function OrderTrackingClient({ order }: { order: OrderData }) {
                 )}
                 {data.deliveredAt && (
                   <div className="flex justify-between text-xs text-green-600">
-                    <span>Dostarczone</span>
+                    <span>{isPickupOrder ? "Odebrane" : "Dostarczone"}</span>
                     <span>{formatTime(data.deliveredAt)}</span>
                   </div>
                 )}
@@ -717,14 +790,21 @@ export default function OrderTrackingClient({ order }: { order: OrderData }) {
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm text-[#8C8C8C]">
-                  <span>Dostawa</span>
-                  <span>
-                    {data.deliveryFee === 0
-                      ? "Darmowa"
-                      : formatPrice(data.deliveryFee)}
-                  </span>
-                </div>
+                {!isPickupOrder ? (
+                  <div className="flex justify-between text-sm text-[#8C8C8C]">
+                    <span>Dostawa</span>
+                    <span>
+                      {data.deliveryFee === 0
+                        ? "Darmowa"
+                        : formatPrice(data.deliveryFee)}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex justify-between text-sm text-[#8C8C8C]">
+                    <span>Odbiór osobisty</span>
+                    <span>0,00 zł</span>
+                  </div>
+                )}
                 <div className="flex justify-between border-t border-[#EEEEEE] pt-1.5 text-base font-bold text-[#1F1F1F]">
                   <span>Razem</span>
                   <span>{formatPrice(data.totalPrice)}</span>
@@ -738,7 +818,7 @@ export default function OrderTrackingClient({ order }: { order: OrderData }) {
                 <div className="flex justify-between">
                   <span className="text-[#8C8C8C]">Numer zamówienia</span>
                   <span className="font-mono font-medium text-[#1F1F1F]">
-                    {data.orderNumber}
+                    {getReadableOrderCode(data.orderNumber)}
                   </span>
                 </div>
                 <div className="flex justify-between">

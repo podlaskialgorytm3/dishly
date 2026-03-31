@@ -275,6 +275,7 @@ export async function updateKitchenOrderStatus(
     where: { id: orderId },
     select: {
       status: true,
+      type: true,
       locationId: true,
       location: {
         select: {
@@ -309,6 +310,15 @@ export async function updateKitchenOrderStatus(
     return {
       success: false,
       error: `Nie można zmienić statusu z ${order.status} na ${newStatus}`,
+    };
+  }
+
+  // Prevent IN_DELIVERY status for PICKUP orders (courier not needed)
+  if (order.type === "PICKUP" && newStatus === "IN_DELIVERY") {
+    return {
+      success: false,
+      error:
+        "Zamówienia z odbioru osobistego nie mogą mieć statusu 'W dostawie'",
     };
   }
 
@@ -420,6 +430,7 @@ export async function getStatusBoardOrders(locationId: string) {
       createdAt: { gte: today },
       paymentStatus: "PAID",
       status: { in: ["ACCEPTED", "PREPARING", "READY"] },
+      type: "PICKUP",
     },
     select: {
       id: true,

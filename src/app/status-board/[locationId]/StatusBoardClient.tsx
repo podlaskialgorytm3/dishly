@@ -3,12 +3,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { getStatusBoardOrders } from "@/actions/kitchen";
 import { useOrderNotification } from "@/hooks/use-order-notification";
+import { getReadableOrderCode } from "@/lib/order-code";
 import {
   ChefHat,
   Clock,
   UtensilsCrossed,
   Bell,
-  Truck,
   ShoppingBag,
   Timer,
 } from "lucide-react";
@@ -158,32 +158,18 @@ export default function StatusBoardClient({
 
   const acceptedOrders = data.orders.filter((o) => o.status === "ACCEPTED");
   const preparingOrders = data.orders.filter((o) => o.status === "PREPARING");
-  const readyPickupOrders = data.orders.filter(
-    (o) => o.status === "READY" && o.type === "PICKUP",
-  );
-  const readyDeliveryOrders = data.orders.filter(
-    (o) => o.status === "READY" && o.type === "DELIVERY",
-  );
+  const readyPickupOrders = data.orders.filter((o) => o.status === "READY");
   const totalActive =
     acceptedOrders.length +
     preparingOrders.length +
-    readyPickupOrders.length +
-    readyDeliveryOrders.length;
-
-  // Short order number (last segment, formatted with leading zero)
-  const shortNumber = (orderNumber: string) => {
-    const parts = orderNumber.split("-");
-    const lastPart = parts.length >= 3 ? parts[parts.length - 1] : orderNumber;
-    const num = parseInt(lastPart, 10);
-    return isNaN(num) ? lastPart : num.toString().padStart(2, "0");
-  };
+    readyPickupOrders.length;
 
   const OrderCard = ({
     order,
     variant,
   }: {
     order: OrderData;
-    variant: "accepted" | "preparing" | "ready-pickup" | "ready-delivery";
+    variant: "accepted" | "preparing" | "ready-pickup";
   }) => {
     const isNew = newOrderIds.has(order.id);
     const elapsed =
@@ -191,7 +177,7 @@ export default function StatusBoardClient({
         ? elapsedMinutes(order.preparingAt)
         : elapsedMinutes(order.createdAt);
 
-    const isReady = variant === "ready-pickup" || variant === "ready-delivery";
+    const isReady = variant === "ready-pickup";
 
     const colors = {
       accepted: {
@@ -212,12 +198,6 @@ export default function StatusBoardClient({
         text: "text-emerald-400",
         glow: "shadow-emerald-400/30",
       },
-      "ready-delivery": {
-        border: "border-sky-400/50",
-        bg: "bg-sky-400/12",
-        text: "text-sky-400",
-        glow: "shadow-sky-400/30",
-      },
     };
 
     const c = colors[variant];
@@ -234,7 +214,7 @@ export default function StatusBoardClient({
             isReady ? "text-5xl lg:text-7xl" : "text-4xl lg:text-5xl"
           }`}
         >
-          {shortNumber(order.orderNumber)}
+          {getReadableOrderCode(order.orderNumber)}
         </span>
 
         {/* Time info */}
@@ -259,17 +239,10 @@ export default function StatusBoardClient({
 
         {/* Order type badge */}
         <div className="mt-2">
-          {order.type === "PICKUP" ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-2.5 py-0.5 text-xs font-medium text-blue-300">
-              <ShoppingBag className="h-3 w-3" />
-              Odbiór
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/20 px-2.5 py-0.5 text-xs font-medium text-violet-300">
-              <Truck className="h-3 w-3" />
-              Dostawa
-            </span>
-          )}
+          <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-2.5 py-0.5 text-xs font-medium text-blue-300">
+            <ShoppingBag className="h-3 w-3" />
+            Odbiór
+          </span>
         </div>
 
         {/* New indicator */}
@@ -329,12 +302,6 @@ export default function StatusBoardClient({
             <ShoppingBag className="h-4 w-4 text-emerald-400" />
             <span className="text-sm font-medium text-emerald-400">
               {readyPickupOrders.length} odbiór
-            </span>
-          </div>
-          <div className="flex items-center gap-2 rounded-lg bg-sky-500/10 px-3 py-1.5">
-            <Truck className="h-4 w-4 text-sky-400" />
-            <span className="text-sm font-medium text-sky-400">
-              {readyDeliveryOrders.length} kurier
             </span>
           </div>
         </div>
@@ -414,7 +381,7 @@ export default function StatusBoardClient({
         </div>
 
         {/* Column 2 - READY FOR PICKUP */}
-        <div className="flex flex-1 flex-col border-r border-white/6">
+        <div className="flex flex-1 flex-col">
           <div className="flex items-center gap-3 bg-emerald-500/8 px-6 py-2.5">
             <ShoppingBag className="h-5 w-5 text-emerald-400" />
             <h2 className="text-lg font-bold text-emerald-400">
@@ -446,36 +413,6 @@ export default function StatusBoardClient({
           </div>
         </div>
 
-        {/* Column 3 - READY FOR COURIER */}
-        <div className="flex flex-1 flex-col">
-          <div className="flex items-center gap-3 bg-sky-500/8 px-6 py-2.5">
-            <Truck className="h-5 w-5 text-sky-400" />
-            <h2 className="text-lg font-bold text-sky-400">ODBIÓR KURIER</h2>
-            <span className="ml-auto rounded-full bg-sky-500 px-3 py-0.5 text-sm font-bold">
-              {readyDeliveryOrders.length}
-            </span>
-          </div>
-          <div className="flex-1 overflow-y-auto p-4">
-            {readyDeliveryOrders.length === 0 ? (
-              <div className="flex h-full items-center justify-center">
-                <div className="text-center">
-                  <Truck className="mx-auto h-14 w-14 text-white/10" />
-                  <p className="mt-2 text-base text-white/20">Brak zamówień</p>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3">
-                {readyDeliveryOrders.map((order) => (
-                  <OrderCard
-                    key={order.id}
-                    order={order}
-                    variant="ready-delivery"
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
       </div>
 
       {/* Bottom bar - total orders today */}
