@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import RestaurantPage from "./RestaurantPage";
+import { getPublicRestaurantReviews } from "@/actions/client/reviews";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -86,6 +87,9 @@ export default async function DynamicPage({ params }: PageProps) {
   });
 
   if (restaurant && restaurant.status === "APPROVED" && restaurant.isActive) {
+    // Pobierz opinie restauracji
+    const reviewsData = await getPublicRestaurantReviews(restaurant.id, 20);
+
     // Serializuj dane dla klienta
     const serializedRestaurant = {
       ...restaurant,
@@ -112,7 +116,12 @@ export default async function DynamicPage({ params }: PageProps) {
       })),
     };
 
-    return <RestaurantPage restaurant={serializedRestaurant} />;
+    return (
+      <RestaurantPage
+        restaurant={serializedRestaurant}
+        reviewsData={reviewsData}
+      />
+    );
   }
 
   // Jeśli nie restauracja, sprawdź strony CMS

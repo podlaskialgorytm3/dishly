@@ -27,6 +27,8 @@ import { MealConfiguratorModal } from "@/components/storefront/MealConfiguratorM
 import { CartDrawer } from "@/components/storefront/CartDrawer";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocationStore } from "@/stores/location-store";
+import { RestaurantReviews } from "@/components/reviews/RestaurantReviews";
+import type { PublicReview } from "@/actions/client/reviews";
 
 type MealVariant = {
   id: string;
@@ -116,9 +118,20 @@ type Restaurant = {
 
 type RestaurantPageProps = {
   restaurant: Restaurant;
+  reviewsData: {
+    reviews: PublicReview[];
+    stats: {
+      avgRating: number;
+      reviewCount: number;
+      distribution: { rating: number; count: number }[];
+    };
+  };
 };
 
-export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
+export default function RestaurantPage({
+  restaurant,
+  reviewsData,
+}: RestaurantPageProps) {
   const userLocation = useLocationStore((s) => s.userLocation);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -877,6 +890,22 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
               ))}
           </div>
         )}
+      </div>
+
+      {/* Reviews Section */}
+      <div className="container mx-auto px-4 md:px-8 mt-12 mb-12">
+        <div
+          className="rounded-[20px] bg-white p-8"
+          style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.04)" }}
+        >
+          <h2 className="text-2xl font-bold text-[#1F1F1F] mb-6">
+            Opinie klientów
+          </h2>
+          <RestaurantReviews
+            reviews={reviewsData.reviews}
+            stats={reviewsData.stats}
+          />
+        </div>
       </div>
 
       {/* Meal Configurator Modal */}

@@ -527,3 +527,85 @@ export async function getRestaurantAverageRating(restaurantId: string) {
     reviewCount: reviews.length,
   };
 }
+
+// ============================================
+// GET PUBLIC RESTAURANT REVIEWS
+// ============================================
+
+export type PublicReview = {
+  id: string;
+  rating: number;
+  content: string | null;
+  createdAt: string;
+  user: {
+    firstName: string;
+    lastName: string;
+  };
+};
+
+export async function getPublicRestaurantReviews(
+  restaurantId: string,
+  limit: number = 10,
+): Promise<{
+  reviews: PublicReview[];
+  stats: {
+    avgRating: number;
+    reviewCount: number;
+    distribution: { rating: number; count: number }[];
+  };
+}> {
+  const reviews = await db.review.findMany({
+    where: {
+      restaurantId,
+      isVisible: true,
+    },
+    include: {
+      user: {
+        select: {
+          firstName: true,
+          lastName: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+
+  // Calculate statistics
+  const allReviews = await db.review.findMany({
+    where: {
+      restaurantId,
+      isVisible: true,
+    },
+    select: { rating: true },
+  });
+
+  const avgRating =
+    allReviews.length > 0
+      ? allReviews.reduce((acc, r) => acc + r.rating, 0) / allReviews.length
+      : 0;
+
+  // Calculate rating distribution
+  const distribution = [1, 2, 3, 4, 5].map((rating) => ({
+    rating,
+    count: allReviews.filter((r) => r.rating === rating).length,
+  }));
+
+  return {
+    reviews: reviews.map((r) => ({
+      id: r.id,
+      rating: r.rating,
+      content: r.content,
+      createdAt: r.createdAt.toISOString(),
+      user: {
+        firstName: r.user.firstName || "Anonim",
+        lastName: r.user.lastName || "",
+      },
+    })),
+    stats: {
+      avgRating,
+      reviewCount: allReviews.length,
+      distribution,
+    },
+  };
+}
