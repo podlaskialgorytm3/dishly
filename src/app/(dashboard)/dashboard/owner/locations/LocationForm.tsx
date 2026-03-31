@@ -123,39 +123,53 @@ export default function LocationForm({
     setError("");
 
     try {
-      const data = isOwner
-        ? {
-            name: form.name,
-            address: form.address,
-            city: form.city,
-            postalCode: form.postalCode,
-            phone: form.phone,
-            deliveryRadius: Number(form.deliveryRadius),
-            deliveryFee: Number(form.deliveryFee),
-            minOrderValue: Number(form.minOrderValue),
-            isAllDay: form.isAllDay,
-            openingHours: form.isAllDay ? undefined : hours,
-          }
-        : {
-            // Manager może edytować tylko te pola
-            deliveryFee: Number(form.deliveryFee),
-            minOrderValue: Number(form.minOrderValue),
-            isAllDay: form.isAllDay,
-            openingHours: form.isAllDay ? undefined : hours,
-          };
-
       if (isEdit) {
+        const data = isOwner
+          ? {
+              name: form.name,
+              address: form.address,
+              city: form.city,
+              postalCode: form.postalCode,
+              phone: form.phone,
+              deliveryRadius: Number(form.deliveryRadius),
+              deliveryFee: Number(form.deliveryFee),
+              minOrderValue: Number(form.minOrderValue),
+              isAllDay: form.isAllDay,
+              openingHours: form.isAllDay ? undefined : hours,
+            }
+          : {
+              // Manager może edytować tylko te pola
+              deliveryFee: Number(form.deliveryFee),
+              minOrderValue: Number(form.minOrderValue),
+              isAllDay: form.isAllDay,
+              openingHours: form.isAllDay ? undefined : hours,
+            };
+
         await updateLocation(location.id, data);
         toast.success("Lokalizacja zaktualizowana");
       } else {
+        // Tylko Owner może tworzyć nową lokalizację
+        const data = {
+          name: form.name,
+          address: form.address,
+          city: form.city,
+          postalCode: form.postalCode,
+          phone: form.phone,
+          deliveryRadius: Number(form.deliveryRadius),
+          deliveryFee: Number(form.deliveryFee),
+          minOrderValue: Number(form.minOrderValue),
+          isAllDay: form.isAllDay,
+          openingHours: form.isAllDay ? undefined : hours,
+        };
         await createLocation(data);
         toast.success("Lokalizacja dodana");
         router.push("/dashboard/owner/locations");
       }
       router.refresh();
-    } catch (e: any) {
-      setError(e.message || "Wystąpił błąd");
-      toast.error(e.message || "Wystąpił błąd");
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "Wystąpił błąd";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

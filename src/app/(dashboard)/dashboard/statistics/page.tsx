@@ -1,6 +1,11 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getDailyStatistics } from "@/actions/kitchen";
+import {
+  getDailyStatistics,
+  getLast7DaysStatistics,
+  getBestsellers,
+  getOwnerAverageRating,
+} from "@/actions/kitchen";
 import StatisticsDashboardClient from "./StatisticsDashboardClient";
 
 export default async function StatisticsPage() {
@@ -20,7 +25,21 @@ export default async function StatisticsPage() {
     redirect("/dashboard");
   }
 
-  const data = await getDailyStatistics();
+  // Fetch all data in parallel
+  const [dailyData, last7DaysData, bestsellers, avgRating] = await Promise.all([
+    getDailyStatistics(),
+    getLast7DaysStatistics(),
+    getBestsellers(10),
+    getOwnerAverageRating(),
+  ]);
 
-  return <StatisticsDashboardClient initialData={data} />;
+  return (
+    <StatisticsDashboardClient
+      initialData={dailyData}
+      last7DaysData={last7DaysData}
+      bestsellers={bestsellers}
+      avgRating={avgRating}
+      userRole={session.user.role}
+    />
+  );
 }

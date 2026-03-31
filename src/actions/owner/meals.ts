@@ -3,6 +3,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import type { Prisma } from "@prisma/client";
 
 // ============================================
 // HELPER FUNCTIONS
@@ -145,7 +146,7 @@ export async function getMeals() {
   // Dla Owner - pokazuj wszystkie posiłki
   const isManager = session.user.role === "MANAGER";
 
-  const whereClause = isManager
+  const whereClause: Prisma.MealWhereInput = isManager
     ? {
         restaurantId: restaurant.id,
         OR: [

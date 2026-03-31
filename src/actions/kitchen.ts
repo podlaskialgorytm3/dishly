@@ -585,6 +585,269 @@ export async function getDailyStatistics(
 }
 
 // ============================================
+// STATISTICS - LAST 7 DAYS (for charts)
+// ============================================
+
+export async function getLast7DaysStatistics(locationId?: string) {
+  const session = await auth();
+  if (!session) return null;
+
+  const { role } = session.user;
+  if (!["OWNER", "MANAGER", "ADMIN"].includes(role)) return null;
+
+  // Determine location filter
+  let locationIds: string[] = [];
+
+  if (role === "ADMIN") {
+    if (locationId) locationIds = [locationId];
+  } else if (role === "OWNER") {
+    const restaurants = await db.restaurant.findMany({
+      where: { ownerId: session.user.id },
+      select: { locations: { select: { id: true } } },
+    });
+    locationIds = restaurants.flatMap((r) => r.locations.map((l) => l.id));
+    if (locationId && locationIds.includes(locationId)) {
+      locationIds = [locationId];
+    }
+  } else {
+    // Manager
+    const user = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { locationId: true },
+    });
+    if (user?.locationId) locationIds = [user.locationId];
+  }
+
+  // Get last 7 days
+  const today = new Date();
+  today.setHours(23, 59, 59, 999);
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+  sevenDaysAgo.setHours(0, 0, 0, 0);
+
+  const whereClause: Record<string, unknown> = {
+    createdAt: { gte: sevenDaysAgo, lte: today },
+    paymentStatus: "PAID",
+    status: { not: "CANCELLED" },
+  };
+  if (locationIds.length > 0) {
+    whereClause.locationId = { in: locationIds };
+  }
+
+  const orders = await db.order.findMany({
+    where: whereClause,
+    select: {
+      id: true,
+      totalPrice: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  // Group by day
+  const dailyData: {
+    date: string;
+    dayName: string;
+    orders: number;
+    revenue: number;
+  }[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split("T")[0];
+    const dayOrders = orders.filter(
+      (o) => o.createdAt.toISOString().split("T")[0] === dateStr,
+    );
+
+    const dayNames = ["Nd", "Pn", "Wt", "Śr", "Cz", "Pt", "So"];
+    dailyData.push({
+      date: dateStr,
+      dayName: dayNames[date.getDay()],
+      orders: dayOrders.length,
+      revenue: dayOrders.reduce((sum, o) => sum + Number(o.totalPrice), 0),
+    });
+  }
+
+  return {
+    dailyData,
+    totalRevenue: orders.reduce((sum, o) => sum + Number(o.totalPrice), 0),
+    totalOrders: orders.length,
+  };
+}
+
+// ============================================
+// BESTSELLERS (top selling meals)
+// ============================================
+
+export async function getBestsellers(limit: number = 10, locationId?: string) {
+  const session = await auth();
+  if (!session) return [];
+
+  const { role } = session.user;
+  if (!["OWNER", "MANAGER", "ADMIN"].includes(role)) return [];
+
+  // Determine location filter
+  let locationIds: string[] = [];
+
+  if (role === "ADMIN") {
+    if (locationId) locationIds = [locationId];
+  } else if (role === "OWNER") {
+    const restaurants = await db.restaurant.findMany({
+      where: { ownerId: session.user.id },
+      select: { locations: { select: { id: true } } },
+    });
+    locationIds = restaurants.flatMap((r) => r.locations.map((l) => l.id));
+    if (locationId && locationIds.includes(locationId)) {
+      locationIds = [locationId];
+    }
+  } else {
+    // Manager
+    const user = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { locationId: true },
+    });
+    if (user?.locationId) locationIds = [user.locationId];
+  }
+
+  // Get last 30 days orders
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const whereClause: Record<string, unknown> = {
+    createdAt: { gte: thirtyDaysAgo },
+    paymentStatus: "PAID",
+    status: { not: "CANCELLED" },
+  };
+  if (locationIds.length > 0) {
+    whereClause.locationId = { in: locationIds };
+  }
+
+  // Get order items with meal info
+  const orderItems = await db.orderItem.findMany({
+    where: {
+      order: whereClause,
+    },
+    select: {
+      mealId: true,
+      mealName: true,
+      quantity: true,
+      totalPrice: true,
+      meal: {
+        select: {
+          id: true,
+          name: true,
+          imageUrl: true,
+          basePrice: true,
+          category: {
+            select: { name: true },
+          },
+        },
+      },
+    },
+  });
+
+  // Aggregate by meal
+  const mealStats = new Map<
+    string,
+    {
+      mealId: string;
+      mealName: string;
+      imageUrl: string | null;
+      category: string;
+      totalQuantity: number;
+      totalRevenue: number;
+    }
+  >();
+
+  for (const item of orderItems) {
+    const existing = mealStats.get(item.mealId);
+    if (existing) {
+      existing.totalQuantity += item.quantity;
+      existing.totalRevenue += Number(item.totalPrice);
+    } else {
+      mealStats.set(item.mealId, {
+        mealId: item.mealId,
+        mealName: item.mealName || item.meal.name,
+        imageUrl: item.meal.imageUrl,
+        category: item.meal.category.name,
+        totalQuantity: item.quantity,
+        totalRevenue: Number(item.totalPrice),
+      });
+    }
+  }
+
+  // Sort by quantity and take top N
+  const bestsellers = Array.from(mealStats.values())
+    .sort((a, b) => b.totalQuantity - a.totalQuantity)
+    .slice(0, limit);
+
+  return bestsellers;
+}
+
+// ============================================
+// AVERAGE RATING FOR OWNER'S RESTAURANTS
+// ============================================
+
+export async function getOwnerAverageRating() {
+  const session = await auth();
+  if (!session) return null;
+
+  const { role } = session.user;
+  if (!["OWNER", "MANAGER", "ADMIN"].includes(role)) return null;
+
+  let restaurantIds: string[] = [];
+
+  if (role === "ADMIN") {
+    // Admin sees all
+    const restaurants = await db.restaurant.findMany({
+      select: { id: true },
+    });
+    restaurantIds = restaurants.map((r) => r.id);
+  } else if (role === "OWNER") {
+    const restaurants = await db.restaurant.findMany({
+      where: { ownerId: session.user.id },
+      select: { id: true },
+    });
+    restaurantIds = restaurants.map((r) => r.id);
+  } else {
+    // Manager
+    const user = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        workingAt: {
+          select: { restaurantId: true },
+        },
+      },
+    });
+    if (user?.workingAt?.restaurantId) {
+      restaurantIds = [user.workingAt.restaurantId];
+    }
+  }
+
+  if (restaurantIds.length === 0) {
+    return { avgRating: 0, reviewCount: 0 };
+  }
+
+  const reviews = await db.review.findMany({
+    where: {
+      restaurantId: { in: restaurantIds },
+      isVisible: true,
+    },
+    select: { rating: true },
+  });
+
+  if (reviews.length === 0) {
+    return { avgRating: 0, reviewCount: 0 };
+  }
+
+  const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+  return {
+    avgRating: sum / reviews.length,
+    reviewCount: reviews.length,
+  };
+}
+
+// ============================================
 // GET USER'S LOCATION ID HELPER
 // ============================================
 

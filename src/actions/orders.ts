@@ -234,8 +234,9 @@ export async function getOrderTracking(orderId: string) {
           phone: true,
           latitude: true,
           longitude: true,
+          restaurantId: true,
           restaurant: {
-            select: { name: true, slug: true, logoUrl: true },
+            select: { id: true, name: true, slug: true, logoUrl: true },
           },
         },
       },
@@ -276,12 +277,14 @@ export async function getOrderTracking(orderId: string) {
     deliveredAt: order.deliveredAt?.toISOString() ?? null,
     cancelledAt: order.cancelledAt?.toISOString() ?? null,
     location: {
+      id: order.location.id,
       name: order.location.name,
       address: order.location.address,
       city: order.location.city,
       phone: order.location.phone,
       latitude: order.location.latitude,
       longitude: order.location.longitude,
+      restaurantId: order.location.restaurantId,
       restaurantName: order.location.restaurant.name,
       restaurantSlug: order.location.restaurant.slug,
       restaurantLogoUrl: order.location.restaurant.logoUrl,
@@ -763,4 +766,203 @@ export async function verifyCartAvailability(
   }
 
   return { available: true };
+}
+
+// ============================================
+// GET REORDER DATA (for quick reorder feature)
+// ============================================
+
+export async function getReorderData(orderId: string) {
+  const session = await auth();
+  if (!session) return { success: false, error: "Zaloguj się, aby ponowić zamówienie" };
+
+  const order = await db.order.findUnique({
+    where: { id: orderId, userId: session.user.id },
+    include: {
+      items: {
+        include: {
+          meal: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              basePrice: true,
+              imageUrl: true,
+              isAvailable: true,
+              approvalStatus: true,
+            },
+          },
+          variant: {
+            select: {
+              id: true,
+              name: true,
+              priceModifier: true,
+            },
+          },
+          addons: {
+            include: {
+              addon: {
+                select: {
+                  id: true,
+                  name: true,
+                  price: true,
+                  isAvailable: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      location: {
+        select: {
+          id: true,
+          name: true,
+          isActive: true,
+          deliveryFee: true,
+          restaurant: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              logoUrl: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!order) {
+    return { success: false, error: "Zamówienie nie znalezione" };
+  }
+
+  // Check if location is still active
+  if (!order.location.isActive) {
+    return {
+      success: false,
+      error: "Ta lokalizacja restauracji jest obecnie niedostępna",
+    };
+  }
+
+  // Check which items are still available
+  const availableItems = order.items.filter(
+    (item) =>
+      item.meal.isAvailable &&
+      item.meal.approvalStatus === "APPROVED" &&
+      item.addons.every((a) => a.addon.isAvailable)
+  );
+
+  const unavailableItems = order.items.filter(
+    (item) =>
+      !item.meal.isAvailable ||
+      item.meal.approvalStatus !== "APPROVED" ||
+      item.addons.some((a) => !a.addon.isAvailable)
+  );
+
+  if (availableItems.length === 0) {
+    return {
+      success: false,
+      error: "Żadne produkty z tego zamówienia nie są już dostępne",
+    };
+  }
+
+  // Build cart items from available items
+  const cartItems = availableItems.map((item) => ({
+    mealId: item.meal.id,
+    mealName: item.meal.name,
+    description: item.meal.description || "",
+    basePrice: Number(item.meal.basePrice),
+    imageUrl: item.meal.imageUrl,
+    variantId: item.variant?.id || null,
+    variantName: item.variant?.name || null,
+    variantPriceModifier: item.variant ? Number(item.variant.priceModifier) : 0,
+    addons: item.addons.map((a) => ({
+      addonId: a.addon.id,
+      name: a.addon.name,
+      price: Number(a.addon.price),
+      quantity: a.quantity,
+    })),
+    quantity: item.quantity,
+    note: item.note || "",
+  }));
+
+  return {
+    success: true,
+    data: {
+      restaurant: {
+        id: order.location.restaurant.id,
+        name: order.location.restaurant.name,
+        slug: order.location.restaurant.slug,
+        logoUrl: order.location.restaurant.logoUrl,
+        deliveryFee: Number(order.location.deliveryFee),
+      },
+      location: {
+        id: order.location.id,
+        name: order.location.name,
+      },
+      cartItems,
+      unavailableItems: unavailableItems.map((item) => item.mealName ?? item.meal.name),
+      deliveryAddress: order.deliveryAddress,
+    },
+  };
+}
+
+// ============================================
+// GET RECENT UNIQUE ORDERS (for quick reorder display)
+// ============================================
+
+export async function getRecentUniqueOrders(limit: number = 5) {
+  const session = await auth();
+  if (!session) return [];
+
+  // Get recent completed orders grouped by restaurant
+  const orders = await db.order.findMany({
+    where: {
+      userId: session.user.id,
+      status: "DELIVERED",
+    },
+    include: {
+      items: {
+        include: {
+          meal: { select: { name: true, imageUrl: true } },
+        },
+      },
+      location: {
+        select: {
+          name: true,
+          restaurant: {
+            select: { name: true, slug: true, logoUrl: true },
+          },
+        },
+      },
+    },
+    orderBy: { deliveredAt: "desc" },
+    take: 20,
+  });
+
+  // Group by restaurant slug and take most recent from each
+  const uniqueByRestaurant = new Map<string, typeof orders[0]>();
+  for (const order of orders) {
+    const slug = order.restaurantSlug ?? order.location.restaurant.slug;
+    if (!uniqueByRestaurant.has(slug)) {
+      uniqueByRestaurant.set(slug, order);
+    }
+  }
+
+  // Take only requested limit
+  const uniqueOrders = Array.from(uniqueByRestaurant.values()).slice(0, limit);
+
+  return uniqueOrders.map((order) => ({
+    id: order.id,
+    orderNumber: order.orderNumber,
+    restaurantName: order.restaurantName ?? order.location.restaurant.name,
+    restaurantSlug: order.restaurantSlug ?? order.location.restaurant.slug,
+    restaurantLogoUrl: order.location.restaurant.logoUrl,
+    totalPrice: Number(order.totalPrice),
+    deliveredAt: order.deliveredAt?.toISOString() ?? null,
+    itemSummary: order.items.slice(0, 3).map((i) => i.mealName ?? i.meal.name).join(", ") +
+      (order.items.length > 3 ? ` +${order.items.length - 3}` : ""),
+    itemCount: order.items.reduce((sum, i) => sum + i.quantity, 0),
+    firstItemImage: order.items[0]?.meal.imageUrl ?? null,
+  }));
 }

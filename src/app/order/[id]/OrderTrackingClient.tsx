@@ -18,9 +18,11 @@ import {
   ShoppingBag,
   UtensilsCrossed,
   Timer,
+  Star,
 } from "lucide-react";
 import { getOrderTracking } from "@/actions/orders";
 import { getReadableOrderCode } from "@/lib/order-code";
+import ReviewForm from "@/components/forms/ReviewForm";
 
 // ============================================
 // TYPES
@@ -461,9 +463,24 @@ function StatusSteps({
 // MAIN COMPONENT
 // ============================================
 
-export default function OrderTrackingClient({ order }: { order: OrderData }) {
+interface OrderTrackingClientProps {
+  order: OrderData;
+  canReview?: boolean;
+  existingReview?: {
+    id: string;
+    rating: number;
+    content: string | null;
+  };
+}
+
+export default function OrderTrackingClient({
+  order,
+  canReview = false,
+  existingReview,
+}: OrderTrackingClientProps) {
   const [data, setData] = useState(order);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(canReview);
   const isPickupOrder = data.type === "PICKUP";
   const statusSteps = isPickupOrder ? PICKUP_ORDER_STATUSES : ORDER_STATUSES;
 
@@ -838,6 +855,66 @@ export default function OrderTrackingClient({ order }: { order: OrderData }) {
                   </span>
                 </div>
               </div>
+
+              {/* Review Form - shows after delivery */}
+              {showReviewForm && data.status === "DELIVERED" && (
+                <ReviewForm
+                  orderId={data.id}
+                  restaurantId={data.location.restaurantId}
+                  restaurantName={data.location.restaurantName}
+                  existingReview={existingReview}
+                  onSuccess={() => setShowReviewForm(false)}
+                />
+              )}
+
+              {/* Review prompt for delivered orders */}
+              {!showReviewForm &&
+                data.status === "DELIVERED" &&
+                !existingReview && (
+                  <button
+                    onClick={() => setShowReviewForm(true)}
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#EEEEEE] bg-white p-4 text-[#8C8C8C] transition-colors hover:border-[#FF4D4F] hover:text-[#FF4D4F]"
+                  >
+                    <Star className="h-5 w-5" />
+                    <span className="font-medium">Oceń to zamówienie</span>
+                  </button>
+                )}
+
+              {/* Show existing review summary */}
+              {existingReview && !showReviewForm && (
+                <div className="rounded-2xl bg-green-50 p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`h-4 w-4 ${
+                              star <= existingReview.rating
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-sm font-medium text-green-700">
+                        Twoja opinia
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => setShowReviewForm(true)}
+                      className="text-sm font-medium text-green-600 hover:underline"
+                    >
+                      Edytuj
+                    </button>
+                  </div>
+                  {existingReview.content && (
+                    <p className="mt-2 text-sm text-green-700">
+                      &ldquo;{existingReview.content}&rdquo;
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

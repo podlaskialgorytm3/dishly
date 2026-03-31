@@ -573,7 +573,6 @@ export default function RestaurantPage({ restaurant }: RestaurantPageProps) {
                       setMaxCarbs(undefined);
                       setMinFat(undefined);
                       setMaxFat(undefined);
-                      setMaxSpice(undefined);
                     }}
                     className="text-xs text-[#8C8C8C] hover:text-[#FF4D4F]"
                   >

@@ -34,7 +34,10 @@ export default async function Home() {
 
   const initialData =
     storefrontResult.success && storefrontResult.data
-      ? storefrontResult.data
+      ? {
+          ...storefrontResult.data,
+          mapLocations: mapResult.success ? (mapResult.data ?? []) : [],
+        }
       : {
           restaurants: [],
           cuisineTypes: [],
@@ -44,8 +47,17 @@ export default async function Home() {
           userAddresses: [],
           trendingMeals: [],
           searchMeals: [],
-          mapLocations: [],
-          mode: "restaurants",
+          mapLocations: [] as {
+            id: string;
+            name: string;
+            lat: number;
+            lng: number;
+            city: string;
+            address: string;
+            restaurantName: string;
+            restaurantSlug: string;
+          }[],
+          mode: "restaurants" as const,
           restaurantPagination: {
             page: 1,
             perPage: 24,
@@ -61,10 +73,6 @@ export default async function Home() {
           favoriteRestaurantIds: [],
           isLoggedIn: false,
         };
-
-  if (storefrontResult.success && storefrontResult.data) {
-    initialData.mapLocations = mapResult.success ? (mapResult.data ?? []) : [];
-  }
 
   return (
     <div className="min-h-screen bg-[var(--dishly-background)]">

@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,149 +7,62 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ============================================
-// ENUMS
-// ============================================
-
-enum Role {
-  ADMIN      // Zarządca DISHLY
-  OWNER      // Właściciel sieci restauracji
-  MANAGER    // Manager konkretnej lokalizacji
-  WORKER     // Pracownik operacyjny
-  CLIENT     // Klient końcowy
-}
-
-enum OrderStatus {
-  PENDING       // Oczekujące – właśnie złożone
-  ACCEPTED      // Przyjęte – restauracja potwierdziła
-  PREPARING     // W przygotowaniu – kuchnia gotuje
-  READY         // Gotowe – czeka na kuriera / odbiór
-  IN_DELIVERY   // W dostawie – kurier w drodze
-  DELIVERED     // Dostarczone
-  CANCELLED     // Anulowane
-}
-
-enum OrderType {
-  DELIVERY
-  PICKUP
-}
-
-enum PaymentStatus {
-  PENDING
-  PAID
-  FAILED
-  REFUNDED
-}
-
-enum SubscriptionInterval {
-  MONTHLY
-  YEARLY
-}
-
-enum PageCategory {
-  NAVIGATION    // O nas, Jak to działa, Kariera, Blog, Kontakt
-  INFORMATION   // Regulamin, Polityka prywatności, Polityka cookies
-}
-
-enum RestaurantStatus {
-  PENDING    // Oczekuje na akceptację admina
-  APPROVED   // Zaakceptowana
-  REJECTED   // Odrzucona
-}
-
-enum MealApprovalStatus {
-  PENDING    // Oczekuje na zatwierdzenie przez właściciela
-  APPROVED   // Zatwierdzony
-  REJECTED   // Odrzucony
-}
-
-enum TagRequestStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-enum TagType {
-  CUISINE
-  AMENITY
-  DISH
-  CATEGORY
-}
-
-// ============================================
-// AUTENTYKACJA I ROLE
-// ============================================
-
 model User {
-  id               String       @id @default(cuid())
-  email            String       @unique
-  passwordHash     String
-  role             Role         @default(CLIENT)
-  firstName        String?
-  lastName         String?
-  phone            String?
-  isApproved       Boolean      @default(false) // Dla OWNER - wymaga akceptacji admina
-  isActive         Boolean      @default(true)  // Ban/Deactivate użytkownika
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
-
-  // Relacje
-  addresses        Address[]
-  orders           Order[]
-  ownedRestaurants Restaurant[] @relation("RestaurantOwner")
-  workingAt        Location?    @relation("LocationWorker", fields: [locationId], references: [id])
-  locationId       String?
-  reviews          Review[]
-  tagRequests      TagRequest[]
-  createdMeals     Meal[]       @relation("MealCreator")
-  approvedMeals    Meal[]       @relation("MealApprover")
-  statusLogs       OrderStatusLog[]
+  id                  String               @id @default(cuid())
+  email               String               @unique
+  passwordHash        String
+  role                Role                 @default(CLIENT)
+  firstName           String?
+  lastName            String?
+  phone               String?
+  isApproved          Boolean              @default(false)
+  isActive            Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  locationId          String?
+  addresses           Address[]
   favoriteRestaurants FavoriteRestaurant[]
+  approvedMeals       Meal[]               @relation("MealApprover")
+  createdMeals        Meal[]               @relation("MealCreator")
+  orders              Order[]
+  statusLogs          OrderStatusLog[]
+  ownedRestaurants    Restaurant[]         @relation("RestaurantOwner")
+  reviews             Review[]
+  tagRequests         TagRequest[]
+  workingAt           Location?            @relation("LocationWorker", fields: [locationId], references: [id])
 
   @@index([email])
   @@index([role])
 }
 
-// ============================================
-// ADRESY
-// ============================================
-
 model Address {
-  id          String   @id @default(cuid())
-  userId      String
-  label       String?  // np. "Dom", "Biuro", "Mama"
-  street      String
-  city        String
-  postalCode  String
-  country     String   @default("PL")
-  latitude    Float?
-  longitude   Float?
-  isDefault   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relacje
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orders      Order[]
+  id         String   @id @default(cuid())
+  userId     String
+  street     String
+  city       String
+  postalCode String
+  country    String   @default("PL")
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  label      String?
+  latitude   Float?
+  longitude  Float?
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders     Order[]
 
   @@index([userId])
 }
 
-// ============================================
-// OPINIE / RECENZJE
-// ============================================
-
 model Review {
-  id           String   @id @default(cuid())
+  id           String     @id @default(cuid())
   restaurantId String
   userId       String
-  rating       Int      // 1-5
-  content      String?  @db.Text
-  isVisible    Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  // Relacje
+  rating       Int
+  content      String?
+  isVisible    Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -166,85 +76,70 @@ model FavoriteRestaurant {
   userId       String
   restaurantId String
   createdAt    DateTime   @default(now())
-
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, restaurantId])
   @@index([userId])
   @@index([restaurantId])
 }
 
-// ============================================
-// SUBSKRYPCJE (SAAS LOGIC)
-// ============================================
-
 model SubscriptionPlan {
-  id                String               @id @default(cuid())
-  name              String               @unique
-  description       String?
-  price             Decimal              @db.Decimal(10, 2)
-  currency          String               @default("PLN")
-  interval          SubscriptionInterval @default(MONTHLY)
-  maxMeals          Int                  @default(50)
-  maxLocations      Int                  @default(1)
-  maxStaffAccounts  Int                  @default(5)
-  isActive          Boolean              @default(true)
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
-
-  // Relacje
-  subscriptions     Subscription[]
+  id               String               @id @default(cuid())
+  name             String               @unique
+  description      String?
+  price            Decimal              @db.Decimal(10, 2)
+  currency         String               @default("PLN")
+  interval         SubscriptionInterval @default(MONTHLY)
+  maxMeals         Int                  @default(50)
+  maxLocations     Int                  @default(1)
+  maxStaffAccounts Int                  @default(5)
+  isActive         Boolean              @default(true)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  subscriptions    Subscription[]
 }
 
 model Subscription {
-  id                String           @id @default(cuid())
-  restaurantId      String
-  planId            String
-  startDate         DateTime         @default(now())
-  endDate           DateTime?
-  isActive          Boolean          @default(true)
-  stripeSubscriptionId String?       @unique
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-
-  // Relacje
-  restaurant        Restaurant       @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  plan              SubscriptionPlan @relation(fields: [planId], references: [id])
+  id                   String           @id @default(cuid())
+  restaurantId         String
+  planId               String
+  startDate            DateTime         @default(now())
+  endDate              DateTime?
+  isActive             Boolean          @default(true)
+  stripeSubscriptionId String?          @unique
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  plan                 SubscriptionPlan @relation(fields: [planId], references: [id])
+  restaurant           Restaurant       @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
 
   @@index([restaurantId])
   @@index([planId])
 }
 
-// ============================================
-// STRUKTURA BIZNESOWA
-// ============================================
-
 model Restaurant {
-  id            String             @id @default(cuid())
-  name          String
-  slug          String             @unique
-  logoUrl       String?
-  coverImageUrl String?            // Zdjęcie główne (cover)
-  bio           String?            @db.Text
-  nip           String?            // NIP firmy
-  ownerId       String
-  status        RestaurantStatus   @default(PENDING)
-  rejectionNote String?            @db.Text
-  isActive      Boolean            @default(true)
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-
-  // Relacje
-  owner              User               @relation("RestaurantOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  id                 String               @id @default(cuid())
+  name               String
+  slug               String               @unique
+  logoUrl            String?
+  coverImageUrl      String?
+  bio                String?
+  nip                String?
+  ownerId            String
+  status             RestaurantStatus     @default(PENDING)
+  rejectionNote      String?
+  isActive           Boolean              @default(true)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  favoritedBy        FavoriteRestaurant[]
   locations          Location[]
   meals              Meal[]
-  subscriptions      Subscription[]
+  owner              User                 @relation("RestaurantOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   reviews            Review[]
-  cuisineTypes       CuisineType[]      @relation("RestaurantCuisines")
-  tags               RestaurantTag[]    @relation("RestaurantAmenities")
+  subscriptions      Subscription[]
   visibilitySettings VisibilitySettings[]
-  favoritedBy         FavoriteRestaurant[]
+  tags               RestaurantTag[]      @relation("RestaurantAmenities")
+  cuisineTypes       CuisineType[]        @relation("RestaurantCuisines")
 
   @@index([ownerId])
   @@index([slug])
@@ -252,38 +147,32 @@ model Restaurant {
 }
 
 model Location {
-  id              String    @id @default(cuid())
-  restaurantId    String
-  name            String
-  address         String
-  city            String
-  postalCode      String    @default("")
-  phone           String
-  deliveryRadius  Int       @default(5) // w km
-  deliveryFee     Decimal   @db.Decimal(10, 2)
-  minOrderValue   Decimal   @db.Decimal(10, 2)
-  openingHours    Json      // { "monday": { "open": "10:00", "close": "22:00", "closed": false }, ... }
-  isAllDay        Boolean   @default(false) // Sprzedaż całodobowa
-  latitude        Float?    // Szerokość geograficzna
-  longitude       Float?    // Długość geograficzna
-  isActive        Boolean   @default(true)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  // Relacje
-  restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  workers         User[]     @relation("LocationWorker")
-  mealLocations   MealLocation[]
-  orders          Order[]
-  settings        LocationSettings?
+  id             String            @id @default(cuid())
+  restaurantId   String
+  name           String
+  address        String
+  city           String
+  postalCode     String            @default("")
+  phone          String
+  deliveryRadius Int               @default(5)
+  deliveryFee    Decimal           @db.Decimal(10, 2)
+  minOrderValue  Decimal           @db.Decimal(10, 2)
+  openingHours   Json
+  isAllDay       Boolean           @default(false)
+  latitude       Float?
+  longitude      Float?
+  isActive       Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  restaurant     Restaurant        @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  settings       LocationSettings?
+  mealLocations  MealLocation[]
+  orders         Order[]
+  workers        User[]            @relation("LocationWorker")
 
   @@index([restaurantId])
   @@index([city])
 }
-
-// ============================================
-// KATALOG MENU
-// ============================================
 
 model Category {
   id          String   @id @default(cuid())
@@ -294,54 +183,47 @@ model Category {
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  // Relacje
   meals       Meal[]
 
   @@index([slug])
 }
 
 model Meal {
-  id              String              @id @default(cuid())
-  restaurantId    String              // Globalne danie dla całej sieci restauracji
+  id              String             @id @default(cuid())
+  restaurantId    String
   categoryId      String
   name            String
   slug            String
-  description     String?             @db.Text
+  description     String?
   imageUrl        String?
-  basePrice       Decimal             @db.Decimal(10, 2)
-  preparationTime Int                 // w minutach
-  weight          Int?                // Gramatura w gramach
-  calories        Int?                // Łączna ilość kalorii [kcal]
-  protein         Decimal?            @db.Decimal(5, 2) // Białko na 100g
-  carbs           Decimal?            @db.Decimal(5, 2) // Węglowodany na 100g
-  fat             Decimal?            @db.Decimal(5, 2) // Tłuszcze na 100g
-  spiceLevel      Int                 @default(0) // 0-9
-  isAvailable     Boolean             @default(true)
-  isVegetarian    Boolean             @default(false)
-  isVegan         Boolean             @default(false)
-  isGlutenFree    Boolean             @default(false)
-  
-  // Pola zatwierdzania (dla Menadżerów)
-  approvalStatus  MealApprovalStatus  @default(APPROVED) // OWNER zawsze APPROVED, MANAGER PENDING
-  createdBy       String?             // ID użytkownika który utworzył
-  createdByRole   Role?               // Rola twórcy (OWNER/MANAGER)
-  approvedBy      String?             // ID właściciela który zatwierdził
-  approvedAt      DateTime?           // Data zatwierdzenia
-  rejectionNote   String?             @db.Text // Powód odrzucenia
-  
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
-
-  // Relacje
-  restaurant      Restaurant          @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  category        Category            @relation(fields: [categoryId], references: [id])
-  variants        MealVariant[]
+  basePrice       Decimal            @db.Decimal(10, 2)
+  preparationTime Int
+  weight          Int?
+  calories        Int?
+  protein         Decimal?           @db.Decimal(5, 2)
+  carbs           Decimal?           @db.Decimal(5, 2)
+  fat             Decimal?           @db.Decimal(5, 2)
+  spiceLevel      Int                @default(0)
+  isAvailable     Boolean            @default(true)
+  isVegetarian    Boolean            @default(false)
+  isVegan         Boolean            @default(false)
+  isGlutenFree    Boolean            @default(false)
+  approvalStatus  MealApprovalStatus @default(APPROVED)
+  createdBy       String?
+  createdByRole   Role?
+  approvedBy      String?
+  approvedAt      DateTime?
+  rejectionNote   String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  approver        User?              @relation("MealApprover", fields: [approvedBy], references: [id])
+  category        Category           @relation(fields: [categoryId], references: [id])
+  creator         User?              @relation("MealCreator", fields: [createdBy], references: [id])
+  restaurant      Restaurant         @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   addons          MealAddon[]
   locations       MealLocation[]
+  variants        MealVariant[]
   orderItems      OrderItem[]
-  creator         User?               @relation("MealCreator", fields: [createdBy], references: [id], onDelete: SetNull)
-  approver        User?               @relation("MealApprover", fields: [approvedBy], references: [id], onDelete: SetNull)
 
   @@unique([restaurantId, slug])
   @@index([restaurantId])
@@ -349,18 +231,15 @@ model Meal {
   @@index([isAvailable])
 }
 
-// Tabela łącznikowa dla przypisania posiłków do lokalizacji
 model MealLocation {
   id          String   @id @default(cuid())
   mealId      String
   locationId  String
-  isAvailable Boolean  @default(true) // Dostępność w danej lokalizacji
+  isAvailable Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  // Relacje
-  meal        Meal     @relation(fields: [mealId], references: [id], onDelete: Cascade)
   location    Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  meal        Meal     @relation(fields: [mealId], references: [id], onDelete: Cascade)
 
   @@unique([mealId, locationId])
   @@index([mealId])
@@ -370,13 +249,11 @@ model MealLocation {
 model MealVariant {
   id            String      @id @default(cuid())
   mealId        String
-  name          String      // np. "Średnia", "Duża", "Rodzinna"
-  priceModifier Decimal     @db.Decimal(10, 2) // np. +10.00 dla większego rozmiaru
+  name          String
+  priceModifier Decimal     @db.Decimal(10, 2)
   isAvailable   Boolean     @default(true)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-
-  // Relacje
   meal          Meal        @relation(fields: [mealId], references: [id], onDelete: Cascade)
   orderItems    OrderItem[]
 
@@ -384,76 +261,59 @@ model MealVariant {
 }
 
 model MealAddon {
-  id          String            @id @default(cuid())
+  id          String           @id @default(cuid())
   mealId      String
   name        String
-  price       Decimal           @db.Decimal(10, 2)
-  isRequired  Boolean           @default(false) // Czy klient musi wybrać
-  maxQuantity Int               @default(1)     // Max ilość do wyboru
-  isAvailable Boolean           @default(true)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-
-  // Relacje
-  meal        Meal              @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  price       Decimal          @db.Decimal(10, 2)
+  isRequired  Boolean          @default(false)
+  maxQuantity Int              @default(1)
+  isAvailable Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  meal        Meal             @relation(fields: [mealId], references: [id], onDelete: Cascade)
   orderItems  OrderItemAddon[]
 
   @@index([mealId])
 }
 
-// ============================================
-// ZAMÓWIENIA
-// ============================================
-
 model Order {
-  id              String        @id @default(cuid())
-  orderNumber     String        @unique
-  userId          String?
-  locationId      String
-  addressId       String?
-  type            OrderType     @default(DELIVERY)
-  status          OrderStatus   @default(PENDING)
-  paymentStatus   PaymentStatus @default(PENDING)
-  subtotal        Decimal       @db.Decimal(10, 2)
-  deliveryFee     Decimal       @db.Decimal(10, 2) @default(0)
-  discountPercent Int           @default(0)
-  totalPrice      Decimal       @db.Decimal(10, 2)
-  notes           String?       @db.Text
-  estimatedTime   Int?          // w minutach
-  estimatedDeliveryAt DateTime? // szacowany czas dostawy
-  stripePaymentId String?       @unique
-
-  // Dane gościa (niezalogowany użytkownik)
-  guestName       String?
-  guestEmail      String?
-  guestPhone      String?
-  deliveryAddress String?       @db.Text // Adres dostawy tekstowo
-
-  // Koordynaty do mapy śledzenia
-  customerLat     Float?
-  customerLng     Float?
-
-  // Nazwa restauracji (snapshot)
-  restaurantName  String?
-  restaurantSlug  String?
-
-  // Status history
-  acceptedAt      DateTime?
-  preparingAt     DateTime?
-  readyAt         DateTime?
-  inDeliveryAt    DateTime?
-  deliveredAt     DateTime?
-  cancelledAt     DateTime?
-
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-
-  // Relacje
-  user            User?         @relation(fields: [userId], references: [id])
-  location        Location      @relation(fields: [locationId], references: [id])
-  address         Address?      @relation(fields: [addressId], references: [id])
-  items           OrderItem[]
-  statusLogs      OrderStatusLog[]
+  id                  String           @id @default(cuid())
+  orderNumber         String           @unique
+  userId              String?
+  locationId          String
+  addressId           String?
+  type                OrderType        @default(DELIVERY)
+  status              OrderStatus      @default(PENDING)
+  paymentStatus       PaymentStatus    @default(PENDING)
+  subtotal            Decimal          @db.Decimal(10, 2)
+  deliveryFee         Decimal          @default(0) @db.Decimal(10, 2)
+  discountPercent     Int              @default(0)
+  totalPrice          Decimal          @db.Decimal(10, 2)
+  notes               String?
+  estimatedTime       Int?
+  estimatedDeliveryAt DateTime?
+  stripePaymentId     String?          @unique
+  guestName           String?
+  guestEmail          String?
+  guestPhone          String?
+  deliveryAddress     String?
+  customerLat         Float?
+  customerLng         Float?
+  restaurantName      String?
+  restaurantSlug      String?
+  acceptedAt          DateTime?
+  preparingAt         DateTime?
+  readyAt             DateTime?
+  inDeliveryAt        DateTime?
+  deliveredAt         DateTime?
+  cancelledAt         DateTime?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  address             Address?         @relation(fields: [addressId], references: [id])
+  location            Location         @relation(fields: [locationId], references: [id])
+  user                User?            @relation(fields: [userId], references: [id])
+  items               OrderItem[]
+  statusLogs          OrderStatusLog[]
 
   @@index([userId])
   @@index([locationId])
@@ -463,44 +323,36 @@ model Order {
 }
 
 model OrderItem {
-  id        String             @id @default(cuid())
-  orderId   String
-  mealId    String
-  variantId String?
-  quantity  Int                @default(1)
-  basePrice Decimal            @db.Decimal(10, 2)
-  totalPrice Decimal           @db.Decimal(10, 2)
-  note      String?            @db.Text // Uwagi dla szefa kuchni
-  mealName  String?            // Snapshot nazwy dania
-  createdAt DateTime           @default(now())
-
-  // Relacje
-  order     Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  meal      Meal               @relation(fields: [mealId], references: [id])
-  variant   MealVariant?       @relation(fields: [variantId], references: [id])
-  addons    OrderItemAddon[]
+  id         String           @id @default(cuid())
+  orderId    String
+  mealId     String
+  variantId  String?
+  quantity   Int              @default(1)
+  basePrice  Decimal          @db.Decimal(10, 2)
+  totalPrice Decimal          @db.Decimal(10, 2)
+  note       String?
+  mealName   String?
+  createdAt  DateTime         @default(now())
+  meal       Meal             @relation(fields: [mealId], references: [id])
+  order      Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variant    MealVariant?     @relation(fields: [variantId], references: [id])
+  addons     OrderItemAddon[]
 
   @@index([orderId])
 }
 
 model OrderItemAddon {
-  id          String     @id @default(cuid())
+  id          String    @id @default(cuid())
   orderItemId String
   addonId     String
-  quantity    Int        @default(1)
-  price       Decimal    @db.Decimal(10, 2)
-  createdAt   DateTime   @default(now())
-
-  // Relacje
-  orderItem   OrderItem  @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
-  addon       MealAddon  @relation(fields: [addonId], references: [id])
+  quantity    Int       @default(1)
+  price       Decimal   @db.Decimal(10, 2)
+  createdAt   DateTime  @default(now())
+  addon       MealAddon @relation(fields: [addonId], references: [id])
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
 
   @@index([orderItemId])
 }
-
-// ============================================
-// GLOBALNE SŁOWNIKI
-// ============================================
 
 model CuisineType {
   id          String       @id @default(cuid())
@@ -509,8 +361,6 @@ model CuisineType {
   isActive    Boolean      @default(true)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-
-  // Relacje
   restaurants Restaurant[] @relation("RestaurantCuisines")
 
   @@index([slug])
@@ -523,8 +373,6 @@ model RestaurantTag {
   isActive    Boolean      @default(true)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-
-  // Relacje
   restaurants Restaurant[] @relation("RestaurantAmenities")
 
   @@index([slug])
@@ -547,94 +395,63 @@ model TagRequest {
   type        TagType
   requestedBy String
   status      TagRequestStatus @default(PENDING)
-  adminNote   String?          @db.Text
+  adminNote   String?
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
-
-  // Relacje
   requester   User             @relation(fields: [requestedBy], references: [id], onDelete: Cascade)
 
   @@index([status])
   @@index([type])
 }
 
-// ============================================
-// LOGI ZMIAN STATUSÓW ZAMÓWIEŃ
-// ============================================
-
 model OrderStatusLog {
-  id        String      @id @default(cuid())
-  orderId   String
+  id         String       @id @default(cuid())
+  orderId    String
   fromStatus OrderStatus?
-  toStatus  OrderStatus
-  changedBy String?     // ID użytkownika który zmienił status
-  note      String?     @db.Text
-  createdAt DateTime    @default(now())
-
-  // Relacje
-  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  user      User?       @relation(fields: [changedBy], references: [id], onDelete: SetNull)
+  toStatus   OrderStatus
+  changedBy  String?
+  note       String?
+  createdAt  DateTime     @default(now())
+  user       User?        @relation(fields: [changedBy], references: [id])
+  order      Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId])
   @@index([createdAt])
 }
 
-// ============================================
-// USTAWIENIA LOKALIZACJI (ETA Override)
-// ============================================
-
 model LocationSettings {
-  id              String   @id @default(cuid())
-  locationId      String   @unique
-  etaOffsetMinutes Int     @default(0) // Manualny narzut czasu (+/- minuty)
-  updatedBy       String?  // ID użytkownika który ostatnio zmienił
-  updatedAt       DateTime @updatedAt
-
-  // Relacje
-  location        Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  id               String   @id @default(cuid())
+  locationId       String   @unique
+  etaOffsetMinutes Int      @default(0)
+  updatedBy        String?
+  updatedAt        DateTime @updatedAt
+  location         Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
 }
 
-// ============================================
-// ZARZĄDZANIE WIDOCZNOŚCIĄ UI (Owner)
-// ============================================
-
-// Klucze paneli UI dostępnych do kontroli widoczności:
-// "statistics"   - Karta Statystyk
-// "revenue"      - Strona Główna z Przychodem
-// "reports"      - Raporty
-// "staff"        - Zarządzanie Personelem
-// "menu"         - Zarządzanie Menu
-// "orders"       - Zamówienia
 model VisibilitySettings {
-  id           String   @id @default(cuid())
+  id           String     @id @default(cuid())
   restaurantId String
-  role         Role     // MANAGER lub WORKER
-  panelKey     String   // np. "statistics", "revenue", "reports"
-  isVisible    Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  // Relacje
+  role         Role
+  panelKey     String
+  isVisible    Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
 
   @@unique([restaurantId, role, panelKey])
   @@index([restaurantId])
 }
 
-// ============================================
-// ZARZĄDZANIE TREŚCIĄ
-// ============================================
-
 model Page {
   id              String       @id @default(cuid())
   title           String
   slug            String       @unique
   category        PageCategory
-  content         String       @db.Text
+  content         String
   metaDescription String?
   isPublished     Boolean      @default(false)
-  showInHeader    Boolean      @default(false)  // Wyświetl w nagłówku
-  showInFooter    Boolean      @default(false)  // Wyświetl w stopce
+  showInHeader    Boolean      @default(false)
+  showInFooter    Boolean      @default(false)
   sortOrder       Int          @default(0)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -642,4 +459,69 @@ model Page {
   @@index([slug])
   @@index([category])
   @@index([isPublished])
+}
+
+enum Role {
+  ADMIN
+  OWNER
+  MANAGER
+  WORKER
+  CLIENT
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  PREPARING
+  READY
+  IN_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum OrderType {
+  DELIVERY
+  PICKUP
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum SubscriptionInterval {
+  MONTHLY
+  YEARLY
+}
+
+enum PageCategory {
+  NAVIGATION
+  INFORMATION
+}
+
+enum RestaurantStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum MealApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TagRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TagType {
+  CUISINE
+  AMENITY
+  DISH
+  CATEGORY
 }
