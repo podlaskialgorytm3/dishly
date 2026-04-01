@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { MainHeader } from "@/components/layout/MainHeader";
 import { Footer } from "@/components/layout/Footer";
 import { StorefrontClient } from "@/components/storefront/StorefrontClient";
-import { getRestaurantMapData, getStorefrontData } from "@/actions/storefront";
+import { getRestaurantMapData, getStorefrontData, type RestaurantMapLocation } from "@/actions/storefront";
 
 export default async function Home() {
   const session = await auth();
@@ -47,16 +47,7 @@ export default async function Home() {
           userAddresses: [],
           trendingMeals: [],
           searchMeals: [],
-          mapLocations: [] as {
-            id: string;
-            name: string;
-            lat: number;
-            lng: number;
-            city: string;
-            address: string;
-            restaurantName: string;
-            restaurantSlug: string;
-          }[],
+          mapLocations: [] as RestaurantMapLocation[],
           mode: "restaurants" as const,
           restaurantPagination: {
             page: 1,
