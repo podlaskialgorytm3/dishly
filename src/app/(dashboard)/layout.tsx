@@ -11,10 +11,9 @@ import {
   LogOut,
   UtensilsCrossed,
   Home,
-  Menu,
-  X,
 } from "lucide-react";
 import { MobileSidebar } from "@/components/dashboard/MobileSidebar";
+import { MobileMenuButton } from "@/components/dashboard/MobileMenuButton";
 import { getIcon, type IconName } from "@/lib/icon-map";
 
 type MenuItem = {
@@ -371,15 +370,7 @@ export default async function DashboardLayout({
         <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-[10px] border-b border-[#EEEEEE]">
           <div className="px-4 md:px-8 h-[60px] md:h-[75px] flex items-center justify-between md:justify-end">
             {/* Mobile Menu Button */}
-            <button
-              className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[#FAFAFA] transition-colors"
-              onClick={() => {
-                const event = new CustomEvent("toggleMobileSidebar");
-                window.dispatchEvent(event);
-              }}
-            >
-              <Menu className="h-6 w-6 text-[#1F1F1F]" />
-            </button>
+            <MobileMenuButton />
 
             {/* Mobile Logo */}
             <div className="md:hidden flex items-center gap-2">
