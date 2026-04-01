@@ -107,49 +107,49 @@ export default async function DashboardLayout({
         {
           name: "Zamówienia",
           href: "/dashboard/orders",
-          icon: ShoppingBag,
+          iconName: "ShoppingBag",
           roles: ["OWNER"],
         },
         {
           name: "Opinie klientów",
           href: "/dashboard/reviews",
-          icon: MessageSquare,
+          iconName: "MessageSquare",
           roles: ["OWNER"],
         },
         {
           name: "Lokalizacje",
           href: "/dashboard/owner/locations",
-          icon: MapPin,
+          iconName: "MapPin",
           roles: ["OWNER"],
         },
         {
           name: "Menu",
           href: "/dashboard/owner/menu",
-          icon: UtensilsCrossed,
+          iconName: "UtensilsCrossed",
           roles: ["OWNER"],
         },
         {
           name: "Zespół",
           href: "/dashboard/owner/staff",
-          icon: Users2,
+          iconName: "Users2",
           roles: ["OWNER"],
         },
         {
           name: "Branding",
           href: "/dashboard/owner/branding",
-          icon: Palette,
+          iconName: "Palette",
           roles: ["OWNER"],
         },
         {
           name: "Widoczność paneli",
           href: "/dashboard/owner/visibility",
-          icon: Eye,
+          iconName: "Eye",
           roles: ["OWNER"],
         },
         {
           name: "Statystyki",
           href: "/dashboard/statistics",
-          icon: BarChart3,
+          iconName: "BarChart3",
           roles: ["OWNER"],
         },
       ];
@@ -161,42 +161,42 @@ export default async function DashboardLayout({
         {
           name: "Zamówienia",
           href: "/dashboard/orders",
-          icon: ShoppingBag,
+          iconName: "ShoppingBag",
           roles: ["MANAGER"],
           panelKey: "orders",
         },
         {
           name: "Opinie klientów",
           href: "/dashboard/reviews",
-          icon: MessageSquare,
+          iconName: "MessageSquare",
           roles: ["MANAGER"],
           panelKey: "reviews",
         },
         {
           name: "Menu",
           href: "/dashboard/owner/menu",
-          icon: UtensilsCrossed,
+          iconName: "UtensilsCrossed",
           roles: ["MANAGER"],
           panelKey: "menu",
         },
         {
           name: "Lokalizacje",
           href: "/dashboard/owner/locations",
-          icon: MapPin,
+          iconName: "MapPin",
           roles: ["MANAGER"],
           panelKey: "locations",
         },
         {
           name: "Statystyki",
           href: "/dashboard/statistics",
-          icon: BarChart3,
+          iconName: "BarChart3",
           roles: ["MANAGER"],
           panelKey: "statistics",
         },
         {
           name: "Raporty",
           href: "/dashboard/reports",
-          icon: ClipboardList,
+          iconName: "ClipboardList",
           roles: ["MANAGER"],
           panelKey: "reports",
         },
@@ -213,21 +213,21 @@ export default async function DashboardLayout({
         {
           name: "Zamówienia",
           href: "/dashboard/orders",
-          icon: ShoppingBag,
+          iconName: "ShoppingBag",
           roles: ["WORKER"],
           panelKey: "orders",
         },
         {
           name: "Opinie klientów",
           href: "/dashboard/reviews",
-          icon: MessageSquare,
+          iconName: "MessageSquare",
           roles: ["WORKER"],
           panelKey: "reviews",
         },
         {
           name: "Menu",
           href: "/dashboard/owner/menu",
-          icon: UtensilsCrossed,
+          iconName: "UtensilsCrossed",
           roles: ["WORKER"],
           panelKey: "menu",
         },
@@ -272,7 +272,7 @@ export default async function DashboardLayout({
           {/* Navigation */}
           <nav className="flex-1 space-y-1 p-4">
             {menuItems.map((item) => {
-              const Icon = item.icon;
+              const Icon = getIcon(item.iconName);
               const isActive = false; // Will be handled by client component
               const isDisabled = item.disabled || false;
 

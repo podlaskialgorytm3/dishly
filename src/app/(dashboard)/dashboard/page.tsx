@@ -161,7 +161,8 @@ export default async function DashboardPage() {
         },
         {
           title: "Średnia ocena",
-          value: ownerData.reviewCount > 0 ? ownerData.avgRating.toFixed(1) : "—",
+          value:
+            ownerData.reviewCount > 0 ? ownerData.avgRating.toFixed(1) : "—",
           subtitle: `${ownerData.reviewCount} ${ownerData.reviewCount === 1 ? "opinia" : "opinii"}`,
           icon: Star,
           color: "#FFC107",
@@ -442,7 +443,9 @@ export default async function DashboardPage() {
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-xl font-bold text-[#1F1F1F] md:text-2xl">Dashboard</h1>
+              <h1 className="text-xl font-bold text-[#1F1F1F] md:text-2xl">
+                Dashboard
+              </h1>
               <p className="mt-1 text-sm text-[#8C8C8C]">
                 Witaj ponownie, {session.user.firstName || session.user.email}
               </p>
@@ -484,7 +487,10 @@ export default async function DashboardPage() {
                       className="flex h-10 w-10 items-center justify-center rounded-xl transition-transform group-hover:scale-110 md:h-12 md:w-12"
                       style={{ backgroundColor: stat.bgColor }}
                     >
-                      <Icon className="h-5 w-5 md:h-6 md:w-6" style={{ color: stat.color }} />
+                      <Icon
+                        className="h-5 w-5 md:h-6 md:w-6"
+                        style={{ color: stat.color }}
+                      />
                     </div>
                     {"change" in stat && stat.change && (
                       <div
@@ -625,8 +631,7 @@ export default async function DashboardPage() {
           )}
 
           {/* Recent Reviews (Owner/Manager) */}
-          {(session.user.role === "OWNER" ||
-            session.user.role === "MANAGER") &&
+          {(session.user.role === "OWNER" || session.user.role === "MANAGER") &&
             recentReviews.length > 0 && (
               <div>
                 <div className="mb-4 flex items-center justify-between">

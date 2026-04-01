@@ -82,7 +82,7 @@ function StatCard({
   bgColor: string;
 }) {
   const Icon = getIcon(iconName);
-  
+
   return (
     <div className="rounded-2xl border border-[#EEEEEE] bg-white p-4 transition-all hover:shadow-md hover:-translate-y-0.5 md:p-6">
       <div className="flex items-center gap-2 md:gap-3">
@@ -94,7 +94,9 @@ function StatCard({
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-xs text-[#8C8C8C] md:text-sm">{label}</p>
-          <p className="text-lg font-bold text-[#1F1F1F] md:text-2xl truncate">{value}</p>
+          <p className="text-lg font-bold text-[#1F1F1F] md:text-2xl truncate">
+            {value}
+          </p>
           {subtext && <p className="text-xs text-[#8C8C8C]">{subtext}</p>}
         </div>
       </div>

@@ -10,8 +10,8 @@ import {
   Users,
   LogOut,
   UtensilsCrossed,
-import { getIcon, type IconName } from "@/lib/icon-map";
 } from "lucide-react";
+import { getIcon, type IconName } from "@/lib/icon-map";
 
 type MenuItem = {
   name: string;
