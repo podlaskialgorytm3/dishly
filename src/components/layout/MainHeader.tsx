@@ -282,7 +282,15 @@ export function MainHeader({ user, navigationPages = [] }: MainHeaderProps) {
                 <Link
                   href="/dashboard"
                   className="hidden h-9 w-9 items-center justify-center rounded-full bg-[#E8503A] text-[13px] font-medium text-white transition-opacity hover:opacity-85 md:inline-flex"
-                  title={getFullName()}
+                  title={`${user.role === "CLIENT" 
+                    ? "Panel użytkownika"
+                    : user.role === "OWNER"
+                      ? "Panel właściciela"
+                      : user.role === "MANAGER"
+                        ? "Panel menedżera" 
+                        : user.role === "WORKER"
+                          ? "Panel pracownika"
+                          : "Panel administracyjny"} - ${getFullName()}`}
                 >
                   {getInitials()}
                 </Link>
@@ -367,7 +375,15 @@ export function MainHeader({ user, navigationPages = [] }: MainHeaderProps) {
                       onClick={() => setMobileMenuOpen(false)}
                       className="block rounded-xl border border-[#E6E6E6] px-3 py-2 text-center text-sm text-[#374151]"
                     >
-                      Panel użytkownika
+                      {user.role === "CLIENT" 
+                        ? "Panel użytkownika"
+                        : user.role === "OWNER"
+                          ? "Panel właściciela"
+                          : user.role === "MANAGER"
+                            ? "Panel menedżera" 
+                            : user.role === "WORKER"
+                              ? "Panel pracownika"
+                              : "Panel administracyjny"}
                     </Link>
                     {user.role === "CLIENT" && (
                       <Link

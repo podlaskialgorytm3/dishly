@@ -201,10 +201,10 @@ export default function MealsClient({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Filtry i wyszukiwarka */}
-      <div className="flex flex-wrap items-center gap-4 rounded-[20px] border border-[#EEEEEE] bg-white p-4">
-        <div className="relative flex-1 min-w-[200px]">
+      <div className="flex flex-col gap-3 rounded-[20px] border border-[#EEEEEE] bg-white p-4 md:flex-row md:flex-wrap md:items-center md:gap-4">
+        <div className="relative flex-1 min-w-full md:min-w-[200px]">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8C8C8C]" />
           <Input
             placeholder="Szukaj dania..."
@@ -217,7 +217,7 @@ export default function MealsClient({
         <select
           value={filterCategory || ""}
           onChange={(e) => setFilterCategory(e.target.value || null)}
-          className="rounded-xl border border-[#EEEEEE] bg-white px-4 py-2 text-sm text-[#1F1F1F] focus:border-[#FF4D4F] focus:outline-none"
+          className="w-full md:w-auto rounded-xl border border-[#EEEEEE] bg-white px-4 py-2 text-sm text-[#1F1F1F] focus:border-[#FF4D4F] focus:outline-none"
         >
           <option value="">Wszystkie kategorie</option>
           {categories.map((cat) => (
@@ -230,7 +230,7 @@ export default function MealsClient({
         <select
           value={filterLocation || ""}
           onChange={(e) => setFilterLocation(e.target.value || null)}
-          className="rounded-xl border border-[#EEEEEE] bg-white px-4 py-2 text-sm text-[#1F1F1F] focus:border-[#FF4D4F] focus:outline-none"
+          className="w-full md:w-auto rounded-xl border border-[#EEEEEE] bg-white px-4 py-2 text-sm text-[#1F1F1F] focus:border-[#FF4D4F] focus:outline-none"
         >
           <option value="">Wszystkie lokalizacje</option>
           {locations.map((loc) => (
@@ -243,7 +243,7 @@ export default function MealsClient({
         <select
           value={filterDietary || ""}
           onChange={(e) => setFilterDietary(e.target.value || null)}
-          className="rounded-xl border border-[#EEEEEE] bg-white px-4 py-2 text-sm text-[#1F1F1F] focus:border-[#FF4D4F] focus:outline-none"
+          className="w-full md:w-auto rounded-xl border border-[#EEEEEE] bg-white px-4 py-2 text-sm text-[#1F1F1F] focus:border-[#FF4D4F] focus:outline-none"
         >
           <option value="">Filtry dietetyczne</option>
           <option value="vegetarian">Wegetariańskie</option>
@@ -253,7 +253,7 @@ export default function MealsClient({
       </div>
 
       {/* Statystyki */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 md:gap-4 md:grid-cols-4">
         <div className="rounded-[16px] border border-[#EEEEEE] bg-white p-4">
           <div className="text-2xl font-bold text-[#1F1F1F]">
             {filteredMeals.length}
@@ -297,9 +297,9 @@ export default function MealsClient({
               }`}
             >
               {/* Główny wiersz */}
-              <div className="flex items-center gap-4 p-4">
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-4 p-4">
                 {/* Obrazek */}
-                <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F5F5F5]">
+                <div className="flex h-16 w-16 md:h-20 md:w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F5F5F5]">
                   {meal.imageUrl ? (
                     <img
                       src={meal.imageUrl}
@@ -307,14 +307,14 @@ export default function MealsClient({
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <div className="text-3xl">🍽️</div>
+                    <div className="text-2xl md:text-3xl">🍽️</div>
                   )}
                 </div>
 
                 {/* Informacje podstawowe */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-[#1F1F1F] truncate">
+                <div className="flex-1 min-w-0 w-full md:w-auto">
+                  <div className="flex items-center flex-wrap gap-2">
+                    <h3 className="font-semibold text-[#1F1F1F] text-sm md:text-base">
                       {meal.name}
                     </h3>
                     {meal.isVegan && (
@@ -333,10 +333,10 @@ export default function MealsClient({
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 text-sm text-[#8C8C8C] line-clamp-1">
+                  <p className="mt-1 text-xs md:text-sm text-[#8C8C8C] line-clamp-2 md:line-clamp-1">
                     {meal.description || "Brak opisu"}
                   </p>
-                  <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-[#8C8C8C]">
+                  <div className="mt-2 flex flex-wrap items-center gap-2 md:gap-3 text-xs text-[#8C8C8C]">
                     <span className="flex items-center gap-1">
                       <span className="font-medium text-[#FF4D4F]">
                         {formatPrice(meal.basePrice)}
@@ -364,7 +364,7 @@ export default function MealsClient({
                   </div>
                 </div>
 
-                {/* Lokalizacje */}
+                {/* Lokalizacje - hidden on mobile */}
                 <div className="hidden lg:flex flex-col items-end gap-1">
                   <span className="text-xs text-[#8C8C8C]">Dostępne w:</span>
                   <div className="flex items-center gap-1">
@@ -394,13 +394,13 @@ export default function MealsClient({
                 </div>
 
                 {/* Akcje */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 md:gap-2 ml-auto md:ml-0">
                   {isOwner && (
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleToggleAvailability(meal.id)}
-                      className={`h-9 w-9 rounded-xl ${
+                      className={`h-8 w-8 md:h-9 md:w-9 rounded-xl ${
                         meal.isAvailable
                           ? "hover:bg-orange-50 hover:text-orange-600"
                           : "bg-orange-100 text-orange-600 hover:bg-orange-200"
@@ -408,9 +408,9 @@ export default function MealsClient({
                       title={meal.isAvailable ? "Ukryj danie" : "Pokaż danie"}
                     >
                       {meal.isAvailable ? (
-                        <EyeOff className="h-4 w-4" />
+                        <EyeOff className="h-3.5 w-3.5 md:h-4 md:w-4" />
                       ) : (
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-3.5 w-3.5 md:h-4 md:w-4" />
                       )}
                     </Button>
                   )}
@@ -419,9 +419,9 @@ export default function MealsClient({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 rounded-xl hover:bg-[#FFF1F1] hover:text-[#FF4D4F]"
+                        className="h-8 w-8 md:h-9 md:w-9 rounded-xl hover:bg-[#FFF1F1] hover:text-[#FF4D4F]"
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3.5 w-3.5 md:h-4 md:w-4" />
                       </Button>
                     </Link>
                   )}
@@ -431,9 +431,9 @@ export default function MealsClient({
                       size="icon"
                       onClick={() => handleDelete(meal.id)}
                       disabled={isDeleting === meal.id}
-                      className="h-9 w-9 rounded-xl hover:bg-red-50 hover:text-red-600"
+                      className="h-8 w-8 md:h-9 md:w-9 rounded-xl hover:bg-red-50 hover:text-red-600"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
                     </Button>
                   )}
                   <Button
@@ -444,12 +444,12 @@ export default function MealsClient({
                         expandedMealId === meal.id ? null : meal.id,
                       )
                     }
-                    className="h-9 w-9 rounded-xl hover:bg-[#F5F5F5]"
+                    className="h-8 w-8 md:h-9 md:w-9 rounded-xl hover:bg-[#F5F5F5]"
                   >
                     {expandedMealId === meal.id ? (
-                      <ChevronUp className="h-4 w-4" />
+                      <ChevronUp className="h-3.5 w-3.5 md:h-4 md:w-4" />
                     ) : (
-                      <ChevronDown className="h-4 w-4" />
+                      <ChevronDown className="h-3.5 w-3.5 md:h-4 md:w-4" />
                     )}
                   </Button>
                 </div>

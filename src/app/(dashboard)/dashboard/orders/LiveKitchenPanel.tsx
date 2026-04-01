@@ -785,17 +785,17 @@ export default function LiveKitchenPanel({
 
       {/* Header */}
       <div className="border-b border-[#EEEEEE] bg-white">
-        <div className="mx-auto max-w-7xl px-8 py-6">
-          <div className="flex items-center justify-between">
+        <div className="mx-auto max-w-7xl px-4 py-4 md:px-8 md:py-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-[#1F1F1F]">
+              <h1 className="text-xl font-bold text-[#1F1F1F] md:text-2xl lg:text-3xl">
                 🍳 Panel Kuchni
               </h1>
-              <p className="text-[#8C8C8C]">
+              <p className="text-sm text-[#8C8C8C]">
                 Zamówienia LIVE — odświeżanie co 10s
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 md:gap-3">
               {/* New orders counter */}
               {(counts["PENDING"] ?? 0) > 0 && (
                 <div className="flex animate-bounce items-center gap-2 rounded-full bg-[#FFF3E8] px-4 py-2 font-bold text-[#FF8C42]">
@@ -921,12 +921,12 @@ export default function LiveKitchenPanel({
           )}
 
           {/* Filter tabs */}
-          <div className="mt-4 flex gap-1 overflow-x-auto">
+          <div className="mt-4 flex gap-1 overflow-x-auto pb-1">
             {KITCHEN_FILTERS.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setFilter(tab.key)}
-                className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium transition-all ${
                   filter === tab.key
                     ? "bg-[#FF4D4F] text-white shadow-md"
                     : "bg-white text-[#8C8C8C] hover:bg-[#F5F5F5]"
@@ -953,9 +953,9 @@ export default function LiveKitchenPanel({
       </div>
 
       {/* Content */}
-      <div className="mx-auto max-w-7xl px-8 py-6">
+      <div className="mx-auto max-w-7xl px-4 py-4 md:px-8 md:py-6">
         {sortedOrders.length === 0 ? (
-          <div className="rounded-2xl bg-white p-12 text-center shadow-sm">
+          <div className="rounded-2xl bg-white p-8 md:p-12 text-center shadow-sm">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#F5F5F5] text-3xl">
               {filter === "active" ? "👨‍🍳" : "📋"}
             </div>
@@ -972,7 +972,7 @@ export default function LiveKitchenPanel({
             </p>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-3 md:gap-4 md:grid-cols-2 xl:grid-cols-3">
             {sortedOrders.map((order) => (
               <KitchenOrderCard
                 key={order.id}

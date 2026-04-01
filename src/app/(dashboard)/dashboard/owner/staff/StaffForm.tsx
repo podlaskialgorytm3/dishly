@@ -188,7 +188,7 @@ export default function StaffForm({
             Dane pracownika
           </h2>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-[#1F1F1F]">
                   Imię *
@@ -249,7 +249,7 @@ export default function StaffForm({
               <label className="text-sm font-medium text-[#1F1F1F]">
                 Rola *
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setForm((p) => ({ ...p, role: "MANAGER" }))}

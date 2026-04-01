@@ -217,7 +217,7 @@ export default function LocationForm({
                 className="rounded-xl border-[#EEEEEE]"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-[#1F1F1F]">
                   Miasto *
@@ -272,7 +272,7 @@ export default function LocationForm({
           Finanse i dostawa
         </h2>
         <div
-          className={`grid gap-4 ${isOwner ? "grid-cols-3" : "grid-cols-2"}`}
+          className={`grid gap-4 ${isOwner ? "grid-cols-1 md:grid-cols-3" : "grid-cols-1 md:grid-cols-2"}`}
         >
           {isOwner && (
             <div className="space-y-1.5">

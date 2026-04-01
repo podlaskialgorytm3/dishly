@@ -260,7 +260,7 @@ export default function BrandingClient({
           administratorowi.
         </p>
         <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <button
               type="button"
               onClick={() => setReqType("CUISINE")}

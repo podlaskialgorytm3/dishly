@@ -31,11 +31,11 @@ export default async function MenuPage() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="border-b border-[#EEEEEE] bg-white px-8 py-6">
+      <div className="border-b border-[#EEEEEE] bg-white px-4 py-4 md:px-8 md:py-6">
         <div className="mx-auto max-w-7xl">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-[#1F1F1F]">
+              <h1 className="text-xl font-bold text-[#1F1F1F] md:text-2xl">
                 {isOwner ? "Zarządzanie Menu" : "Menu Restauracji"}
               </h1>
               {isOwner && (
@@ -52,8 +52,11 @@ export default async function MenuPage() {
             </div>
             {isOwner &&
               (limits.canAddMore ? (
-                <Link href="/dashboard/owner/menu/new">
-                  <Button className="gap-2 rounded-xl bg-[#FF4D4F] text-white hover:bg-[#FF3B30]">
+                <Link
+                  href="/dashboard/owner/menu/new"
+                  className="w-full md:w-auto"
+                >
+                  <Button className="w-full md:w-auto gap-2 rounded-xl bg-[#FF4D4F] text-white hover:bg-[#FF3B30]">
                     <Plus className="h-4 w-4" />
                     Dodaj danie
                   </Button>
@@ -61,7 +64,9 @@ export default async function MenuPage() {
               ) : (
                 <div className="flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-4 py-2 text-sm text-orange-700">
                   <AlertCircle className="h-4 w-4" />
-                  Osiągnięto limit planu ({limits.maxMeals} dań)
+                  <span className="text-xs md:text-sm">
+                    Osiągnięto limit planu ({limits.maxMeals} dań)
+                  </span>
                 </div>
               ))}
           </div>
@@ -94,8 +99,8 @@ export default async function MenuPage() {
       </div>
 
       {/* Content */}
-      <div className="px-8 py-8">
-        <div className="mx-auto max-w-7xl space-y-8">
+      <div className="px-4 py-6 md:px-8 md:py-8">
+        <div className="mx-auto max-w-7xl space-y-6 md:space-y-8">
           {/* Pending meals section - tylko dla Owner */}
           {isOwner && pendingMeals.length > 0 && (
             <PendingMealsSection

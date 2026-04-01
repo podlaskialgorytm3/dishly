@@ -12,20 +12,13 @@ import {
   Cell,
 } from "recharts";
 import {
-  BarChart3,
-  TrendingUp,
-  DollarSign,
-  Users,
-  ShoppingBag,
   Calendar,
-  UtensilsCrossed,
   Clock,
   RefreshCw,
   ChevronLeft,
   ChevronRight,
-  Star,
-  Award,
 } from "lucide-react";
+import { getIcon, type IconName } from "@/lib/icon-map";
 import { Button } from "@/components/ui/button";
 import { getDailyStatistics, getLast7DaysStatistics } from "@/actions/kitchen";
 
@@ -74,35 +67,34 @@ type AvgRating = {
 // ============================================
 
 function StatCard({
-  icon: Icon,
+  iconName,
   label,
   value,
   subtext,
   color,
   bgColor,
 }: {
-  icon: React.ComponentType<{
-    className?: string;
-    style?: React.CSSProperties;
-  }>;
+  iconName: IconName;
   label: string;
   value: string;
   subtext?: string;
   color: string;
   bgColor: string;
 }) {
+  const Icon = getIcon(iconName);
+  
   return (
-    <div className="rounded-2xl border border-[#EEEEEE] bg-white p-6 transition-all hover:shadow-md hover:-translate-y-0.5">
-      <div className="flex items-center gap-3">
+    <div className="rounded-2xl border border-[#EEEEEE] bg-white p-4 transition-all hover:shadow-md hover:-translate-y-0.5 md:p-6">
+      <div className="flex items-center gap-2 md:gap-3">
         <div
-          className="flex h-12 w-12 items-center justify-center rounded-xl"
+          className="flex h-8 w-8 items-center justify-center rounded-xl md:h-12 md:w-12"
           style={{ backgroundColor: bgColor }}
         >
-          <Icon className="h-6 w-6" style={{ color }} />
+          <Icon className="h-4 w-4 md:h-6 md:w-6" style={{ color }} />
         </div>
-        <div>
-          <p className="text-sm text-[#8C8C8C]">{label}</p>
-          <p className="text-2xl font-bold text-[#1F1F1F]">{value}</p>
+        <div className="min-w-0 flex-1">
+          <p className="text-xs text-[#8C8C8C] md:text-sm">{label}</p>
+          <p className="text-lg font-bold text-[#1F1F1F] md:text-2xl truncate">{value}</p>
           {subtext && <p className="text-xs text-[#8C8C8C]">{subtext}</p>}
         </div>
       </div>
@@ -218,13 +210,13 @@ export default function StatisticsDashboardClient({
     <div className="min-h-screen bg-[#FAFAFA]">
       {/* Header */}
       <div className="border-b border-[#EEEEEE] bg-white">
-        <div className="mx-auto max-w-7xl px-8 py-6">
-          <div className="flex items-center justify-between">
+        <div className="mx-auto max-w-7xl px-4 py-4 md:px-8 md:py-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-[#1F1F1F]">
+              <h1 className="text-xl font-bold text-[#1F1F1F] md:text-3xl">
                 📊 Statystyki
               </h1>
-              <p className="text-[#8C8C8C]">
+              <p className="text-sm text-[#8C8C8C] md:text-base">
                 Analiza sprzedaży i wyniki operacyjne
                 {isOwnerOrAdmin && " • Widok globalny"}
               </p>
@@ -233,53 +225,56 @@ export default function StatisticsDashboardClient({
               <button
                 onClick={fetchStats}
                 disabled={isRefreshing}
-                className="flex items-center gap-2 rounded-xl bg-[#F5F5F5] px-4 py-2 text-sm font-medium text-[#8C8C8C] transition-all hover:bg-[#EEEEEE]"
+                className="flex items-center gap-2 rounded-xl bg-[#F5F5F5] px-3 py-2 text-xs font-medium text-[#8C8C8C] transition-all hover:bg-[#EEEEEE] md:px-4 md:text-sm"
               >
                 <RefreshCw
                   className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
                 />
-                Odśwież
+                <span className="hidden sm:inline">Odśwież</span>
               </button>
             </div>
           </div>
 
           {/* Date filter */}
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => goToDay(-1)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#EEEEEE] bg-white text-[#8C8C8C] hover:border-[#FF4D4F] hover:text-[#FF4D4F]"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => goToDay(-1)}
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#EEEEEE] bg-white text-[#8C8C8C] hover:border-[#FF4D4F] hover:text-[#FF4D4F]"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
 
-            <div className="flex items-center gap-2 rounded-xl border border-[#EEEEEE] bg-white px-4 py-2">
-              <Calendar className="h-4 w-4 text-[#8C8C8C]" />
-              <input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                className="border-none bg-transparent text-sm font-medium text-[#1F1F1F] outline-none"
-              />
-              <span className="text-[#8C8C8C]">—</span>
-              <input
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                className="border-none bg-transparent text-sm font-medium text-[#1F1F1F] outline-none"
-              />
+              <div className="flex items-center gap-2 rounded-xl border border-[#EEEEEE] bg-white px-3 py-2 md:px-4">
+                <Calendar className="h-4 w-4 text-[#8C8C8C]" />
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="w-24 border-none bg-transparent text-xs font-medium text-[#1F1F1F] outline-none md:w-auto md:text-sm"
+                />
+                <span className="text-[#8C8C8C]">—</span>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="w-24 border-none bg-transparent text-xs font-medium text-[#1F1F1F] outline-none md:w-auto md:text-sm"
+                />
+              </div>
+
+              <button
+                onClick={() => goToDay(1)}
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#EEEEEE] bg-white text-[#8C8C8C] hover:border-[#FF4D4F] hover:text-[#FF4D4F]"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
             </div>
-
-            <button
-              onClick={() => goToDay(1)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#EEEEEE] bg-white text-[#8C8C8C] hover:border-[#FF4D4F] hover:text-[#FF4D4F]"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
 
             {!isToday && (
               <Button
                 onClick={goToToday}
                 variant="outline"
+                size="sm"
                 className="rounded-xl border-[#FF4D4F] text-[#FF4D4F] hover:bg-[#FF4D4F]/5"
               >
                 Dzisiaj
@@ -287,10 +282,11 @@ export default function StatisticsDashboardClient({
             )}
 
             {/* Quick date ranges */}
-            <div className="flex gap-1">
+            <div className="flex flex-wrap gap-1">
               {[
                 {
-                  label: "Ostatnie 7 dni",
+                  label: "7 dni",
+                  fullLabel: "Ostatnie 7 dni",
                   fn: () => {
                     const to = new Date();
                     const from = new Date();
@@ -300,7 +296,8 @@ export default function StatisticsDashboardClient({
                   },
                 },
                 {
-                  label: "Ostatnie 30 dni",
+                  label: "30 dni",
+                  fullLabel: "Ostatnie 30 dni",
                   fn: () => {
                     const to = new Date();
                     const from = new Date();
@@ -313,9 +310,10 @@ export default function StatisticsDashboardClient({
                 <button
                   key={range.label}
                   onClick={range.fn}
-                  className="rounded-lg border border-[#EEEEEE] bg-white px-3 py-1.5 text-xs font-medium text-[#8C8C8C] transition-colors hover:border-[#FF4D4F] hover:text-[#FF4D4F]"
+                  className="rounded-lg border border-[#EEEEEE] bg-white px-2 py-1 text-xs font-medium text-[#8C8C8C] transition-colors hover:border-[#FF4D4F] hover:text-[#FF4D4F] md:px-3 md:py-1.5"
                 >
-                  {range.label}
+                  <span className="md:hidden">{range.label}</span>
+                  <span className="hidden md:inline">{range.fullLabel}</span>
                 </button>
               ))}
             </div>
@@ -324,10 +322,10 @@ export default function StatisticsDashboardClient({
       </div>
 
       {/* Content */}
-      <div className="mx-auto max-w-7xl px-8 py-6">
+      <div className="mx-auto max-w-7xl px-4 py-4 md:px-8 md:py-6">
         {!data ? (
-          <div className="rounded-2xl bg-white p-12 text-center shadow-sm">
-            <p className="text-lg font-bold text-[#1F1F1F]">
+          <div className="rounded-2xl bg-white p-6 text-center shadow-sm md:p-12">
+            <p className="text-base font-bold text-[#1F1F1F] md:text-lg">
               Brak danych do wyświetlenia
             </p>
             <p className="mt-1 text-sm text-[#8C8C8C]">
@@ -337,44 +335,44 @@ export default function StatisticsDashboardClient({
         ) : (
           <>
             {/* Stat cards */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+            <div className="grid gap-3 grid-cols-2 md:gap-4 md:grid-cols-3 lg:grid-cols-6">
               <StatCard
-                icon={DollarSign}
+                iconName="DollarSign"
                 label="Przychód"
                 value={formatPrice(data.totalRevenue)}
                 color="#4CAF50"
                 bgColor="#E8F5E9"
               />
               <StatCard
-                icon={ShoppingBag}
+                iconName="ShoppingBag"
                 label="Zamówienia"
                 value={data.totalOrders.toString()}
                 color="#FF4D4F"
                 bgColor="#FFF1F1"
               />
               <StatCard
-                icon={UtensilsCrossed}
+                iconName="UtensilsCrossed"
                 label="Sprzedane posiłki"
                 value={data.totalMeals.toString()}
                 color="#FF8C42"
                 bgColor="#FFF3E8"
               />
               <StatCard
-                icon={TrendingUp}
+                iconName="TrendingUp"
                 label="Śr. wartość zam."
                 value={formatPrice(data.avgOrderValue)}
                 color="#2196F3"
                 bgColor="#E3F2FD"
               />
               <StatCard
-                icon={Users}
+                iconName="Users"
                 label="Pracownicy"
                 value={data.staffCount.toString()}
                 color="#9C27B0"
                 bgColor="#F3E5F5"
               />
               <StatCard
-                icon={Star}
+                iconName="Star"
                 label="Średnia ocena"
                 value={avgRating ? avgRating.avgRating.toFixed(1) : "—"}
                 subtext={avgRating ? `${avgRating.reviewCount} opinii` : ""}

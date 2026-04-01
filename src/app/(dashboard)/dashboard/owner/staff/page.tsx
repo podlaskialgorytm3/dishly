@@ -27,18 +27,18 @@ export default async function StaffPage() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="border-b border-[#EEEEEE] bg-white px-8 py-6">
+      <div className="border-b border-[#EEEEEE] bg-white px-4 py-4 md:px-8 md:py-6">
         <div className="mx-auto max-w-7xl">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-[#1F1F1F]">Zespół</h1>
+              <h1 className="text-xl font-bold text-[#1F1F1F] md:text-2xl">Zespół</h1>
               <p className="mt-1 text-sm text-[#8C8C8C]">
                 {staff.length} / {maxStaff} kont pracowniczych w planie
               </p>
             </div>
             {staff.length < maxStaff ? (
-              <Link href="/dashboard/owner/staff/new">
-                <Button className="gap-2 rounded-xl bg-[#FF4D4F] text-white hover:bg-[#FF3B30]">
+              <Link href="/dashboard/owner/staff/new" className="w-full md:w-auto">
+                <Button className="w-full md:w-auto gap-2 rounded-xl bg-[#FF4D4F] text-white hover:bg-[#FF3B30]">
                   <Plus className="h-4 w-4" />
                   Dodaj pracownika
                 </Button>
@@ -46,7 +46,7 @@ export default async function StaffPage() {
             ) : (
               <div className="flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-4 py-2 text-sm text-orange-700">
                 <AlertCircle className="h-4 w-4" />
-                Osiągnięto limit planu
+                <span className="text-xs md:text-sm">Osiągnięto limit planu</span>
               </div>
             )}
           </div>
@@ -72,7 +72,7 @@ export default async function StaffPage() {
       </div>
 
       {/* Content */}
-      <div className="px-8 py-8">
+      <div className="px-4 py-6 md:px-8 md:py-8">
         <div className="mx-auto max-w-7xl">
           {locations.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-[20px] border border-dashed border-[#EEEEEE] bg-white px-8 py-16 text-center">
@@ -112,23 +112,23 @@ export default async function StaffPage() {
               </Link>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-[20px] border border-[#EEEEEE] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
-              <table className="w-full">
+            <div className="overflow-x-auto rounded-[20px] border border-[#EEEEEE] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
+              <table className="w-full min-w-[640px]">
                 <thead>
                   <tr className="border-b border-[#EEEEEE] bg-[#FAFAFA]">
-                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#8C8C8C]">
+                    <th className="px-4 py-3 md:px-6 md:py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#8C8C8C]">
                       Pracownik
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#8C8C8C]">
+                    <th className="px-4 py-3 md:px-6 md:py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#8C8C8C]">
                       Rola
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#8C8C8C]">
+                    <th className="px-4 py-3 md:px-6 md:py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#8C8C8C]">
                       Lokalizacja
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#8C8C8C]">
+                    <th className="px-4 py-3 md:px-6 md:py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#8C8C8C]">
                       Status
                     </th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-[#8C8C8C]">
+                    <th className="px-4 py-3 md:px-6 md:py-4 text-right text-xs font-semibold uppercase tracking-wide text-[#8C8C8C]">
                       Akcje
                     </th>
                   </tr>
@@ -139,7 +139,7 @@ export default async function StaffPage() {
                       key={member.id}
                       className="transition-colors hover:bg-[#FAFAFA]"
                     >
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3 md:px-6 md:py-4">
                         <div className="flex items-center gap-3">
                           <div
                             className={`flex h-9 w-9 items-center justify-center rounded-full ${member.role === "MANAGER" ? "bg-purple-100" : "bg-blue-100"}`}
@@ -160,7 +160,7 @@ export default async function StaffPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3 md:px-6 md:py-4">
                         <span
                           className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
                             member.role === "MANAGER"
@@ -171,13 +171,13 @@ export default async function StaffPage() {
                           {member.role === "MANAGER" ? "Menadżer" : "Pracownik"}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3 md:px-6 md:py-4">
                         <div className="flex items-center gap-1.5 text-sm text-[#1F1F1F]">
                           <MapPin className="h-3.5 w-3.5 text-[#8C8C8C]" />
                           {member.workingAt?.name ?? "—"}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3 md:px-6 md:py-4">
                         <span
                           className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
                             member.isActive
@@ -191,7 +191,7 @@ export default async function StaffPage() {
                           {member.isActive ? "Aktywny" : "Nieaktywny"}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3 md:px-6 md:py-4">
                         <div className="flex items-center justify-end gap-1">
                           <ResetPasswordButton
                             staffId={member.id}

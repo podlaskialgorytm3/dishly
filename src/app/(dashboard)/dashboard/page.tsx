@@ -438,16 +438,16 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen">
       {/* Topbar */}
-      <div className="border-b border-[#EEEEEE] bg-white px-8 py-6">
+      <div className="border-b border-[#EEEEEE] bg-white px-4 py-4 md:px-8 md:py-6">
         <div className="mx-auto max-w-7xl">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-[#1F1F1F]">Dashboard</h1>
+              <h1 className="text-xl font-bold text-[#1F1F1F] md:text-2xl">Dashboard</h1>
               <p className="mt-1 text-sm text-[#8C8C8C]">
                 Witaj ponownie, {session.user.firstName || session.user.email}
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               {session.user.role === "CLIENT" && (
                 <Link
                   href="/"
@@ -468,23 +468,23 @@ export default async function DashboardPage() {
       </div>
 
       {/* Main Content */}
-      <div className="px-8 py-8">
-        <div className="mx-auto max-w-7xl space-y-8">
+      <div className="px-4 py-6 md:px-8 md:py-8">
+        <div className="mx-auto max-w-7xl space-y-6 md:space-y-8">
           {/* Stats Grid */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 grid-cols-2 md:gap-6 md:grid-cols-2 xl:grid-cols-4">
             {stats.map((stat, index) => {
               const Icon = stat.icon;
               return (
                 <div
                   key={index}
-                  className="group rounded-[20px] border border-[#EEEEEE] bg-white p-6 shadow-[0_8px_24px_rgba(0,0,0,0.04)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)]"
+                  className="group rounded-[20px] border border-[#EEEEEE] bg-white p-4 shadow-[0_8px_24px_rgba(0,0,0,0.04)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)] md:p-6"
                 >
                   <div className="flex items-start justify-between">
                     <div
-                      className="flex h-12 w-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110"
+                      className="flex h-10 w-10 items-center justify-center rounded-xl transition-transform group-hover:scale-110 md:h-12 md:w-12"
                       style={{ backgroundColor: stat.bgColor }}
                     >
-                      <Icon className="h-6 w-6" style={{ color: stat.color }} />
+                      <Icon className="h-5 w-5 md:h-6 md:w-6" style={{ color: stat.color }} />
                     </div>
                     {"change" in stat && stat.change && (
                       <div
@@ -499,12 +499,12 @@ export default async function DashboardPage() {
                         ) : (
                           <ArrowDownRight className="h-3 w-3" />
                         )}
-                        {stat.change}
+                        <span className="hidden sm:inline">{stat.change}</span>
                       </div>
                     )}
                   </div>
-                  <div className="mt-4">
-                    <p className="text-3xl font-bold text-[#1F1F1F]">
+                  <div className="mt-3 md:mt-4">
+                    <p className="text-2xl font-bold text-[#1F1F1F] md:text-3xl">
                       {stat.value}
                     </p>
                     <p className="mt-1 text-sm text-[#8C8C8C]">{stat.title}</p>
@@ -521,17 +521,17 @@ export default async function DashboardPage() {
 
           {/* Quick Actions */}
           <div>
-            <h2 className="mb-4 text-lg font-semibold text-[#1F1F1F]">
+            <h2 className="mb-3 text-base font-semibold text-[#1F1F1F] md:mb-4 md:text-lg">
               Szybkie akcje
             </h2>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:gap-6 xl:grid-cols-3">
               {quickActions.map((action, index) => {
                 const Icon = action.icon;
                 const isDisabled = action.disabled;
 
                 const content = (
                   <div
-                    className={`group rounded-[20px] border border-[#EEEEEE] bg-white p-6 shadow-[0_8px_24px_rgba(0,0,0,0.04)] transition-all duration-200 ${
+                    className={`group rounded-[20px] border border-[#EEEEEE] bg-white p-4 shadow-[0_8px_24px_rgba(0,0,0,0.04)] transition-all duration-200 md:p-6 ${
                       !isDisabled
                         ? "cursor-pointer hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)]"
                         : "cursor-not-allowed opacity-60"
@@ -539,13 +539,13 @@ export default async function DashboardPage() {
                   >
                     <div className="flex items-start justify-between">
                       <div
-                        className="flex h-12 w-12 items-center justify-center rounded-xl"
+                        className="flex h-10 w-10 items-center justify-center rounded-xl md:h-12 md:w-12"
                         style={{
                           backgroundColor: action.color + "15",
                         }}
                       >
                         <Icon
-                          className="h-6 w-6"
+                          className="h-5 w-5 md:h-6 md:w-6"
                           style={{ color: action.color }}
                         />
                       </div>
@@ -555,8 +555,8 @@ export default async function DashboardPage() {
                         </span>
                       )}
                     </div>
-                    <div className="mt-4">
-                      <h3 className="font-semibold text-[#1F1F1F]">
+                    <div className="mt-3 md:mt-4">
+                      <h3 className="text-sm font-semibold text-[#1F1F1F] md:text-base">
                         {action.title}
                       </h3>
                       <p className="mt-1 text-sm text-[#8C8C8C]">

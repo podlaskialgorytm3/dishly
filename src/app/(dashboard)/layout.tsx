@@ -5,34 +5,22 @@ import { signOut } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import {
-  LayoutDashboard,
-  FileText,
-  Users,
-  Store,
-  LogOut,
   ShieldCheck,
+  Store,
+  Users,
+  LogOut,
   UtensilsCrossed,
   Home,
-  CreditCard,
-  BookOpen,
-  Shield,
-  MapPin,
-  Users2,
-  Palette,
-  Eye,
-  ShoppingBag,
-  BarChart3,
-  ClipboardList,
-  Clock,
-  Monitor,
-  MessageSquare,
-  type LucideIcon,
+  Menu,
+  X,
 } from "lucide-react";
+import { MobileSidebar } from "@/components/dashboard/MobileSidebar";
+import { getIcon, type IconName } from "@/lib/icon-map";
 
 type MenuItem = {
   name: string;
   href: string;
-  icon: LucideIcon;
+  iconName: IconName;
   roles: string[];
   disabled?: boolean;
   panelKey?: string; // Klucz panelu dla kontroli widoczności
@@ -72,8 +60,8 @@ export default async function DashboardLayout({
       {
         name: "Dashboard",
         href: "/dashboard",
-        icon: LayoutDashboard,
-        roles: ["ADMIN", "OWNER", "CLIENT"],
+        iconName: "LayoutDashboard",
+        roles: ["ADMIN", "OWNER", "CLIENT", "MANAGER", "WORKER"],
       },
     ];
 
@@ -83,31 +71,31 @@ export default async function DashboardLayout({
         {
           name: "Zarządzanie treścią",
           href: "/dashboard/content-management",
-          icon: FileText,
+          iconName: "FileText",
           roles: ["ADMIN"],
         },
         {
           name: "Subskrypcje",
           href: "/dashboard/subscriptions",
-          icon: CreditCard,
+          iconName: "CreditCard",
           roles: ["ADMIN"],
         },
         {
           name: "Restauracje",
           href: "/dashboard/restaurants",
-          icon: Store,
+          iconName: "Store",
           roles: ["ADMIN"],
         },
         {
           name: "Słowniki",
           href: "/dashboard/dictionaries",
-          icon: BookOpen,
+          iconName: "BookOpen",
           roles: ["ADMIN"],
         },
         {
           name: "Moderacja",
           href: "/dashboard/moderation",
-          icon: Shield,
+          iconName: "Shield",
           roles: ["ADMIN"],
         },
       ];
@@ -257,8 +245,8 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
-      {/* Sidebar */}
-      <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-[#EEEEEE] bg-white">
+      {/* Desktop Sidebar - hidden on mobile */}
+      <aside className="fixed left-0 top-0 z-40 hidden h-screen w-64 border-r border-[#EEEEEE] bg-white md:block">
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className="flex h-20 items-center gap-3 border-b border-[#EEEEEE] px-6">
@@ -374,11 +362,33 @@ export default async function DashboardLayout({
         </div>
       </aside>
 
+      {/* Mobile Sidebar */}
+      <MobileSidebar menuItems={menuItems} session={session} />
+
       {/* Main content */}
-      <div className="ml-64">
-        {/* Top Header with Home Button */}
+      <div className="md:ml-64">
+        {/* Top Header with Home Button and Mobile Menu */}
         <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-[10px] border-b border-[#EEEEEE]">
-          <div className="px-8 h-[75px] flex items-center justify-end">
+          <div className="px-4 md:px-8 h-[60px] md:h-[75px] flex items-center justify-between md:justify-end">
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[#FAFAFA] transition-colors"
+              onClick={() => {
+                const event = new CustomEvent("toggleMobileSidebar");
+                window.dispatchEvent(event);
+              }}
+            >
+              <Menu className="h-6 w-6 text-[#1F1F1F]" />
+            </button>
+
+            {/* Mobile Logo */}
+            <div className="md:hidden flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#FF4D4F] to-[#FF3B30] shadow-md">
+                <UtensilsCrossed className="h-4 w-4 text-white" />
+              </div>
+              <h1 className="text-base font-bold text-[#1F1F1F]">DISHLY</h1>
+            </div>
+
             <Link href="/">
               <Button
                 variant="ghost"
