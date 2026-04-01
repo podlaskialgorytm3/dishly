@@ -17,6 +17,9 @@ import {
   RefreshCw,
   ChevronLeft,
   ChevronRight,
+  BarChart3,
+  Award,
+  DollarSign,
 } from "lucide-react";
 import { getIcon, type IconName } from "@/lib/icon-map";
 import { Button } from "@/components/ui/button";
