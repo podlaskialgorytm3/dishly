@@ -1,9 +1,14 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import type { ComponentProps } from "react";
 import { MainHeader } from "@/components/layout/MainHeader";
 import { Footer } from "@/components/layout/Footer";
 import { StorefrontClient } from "@/components/storefront/StorefrontClient";
-import { getRestaurantMapData, getStorefrontData, type RestaurantMapLocation } from "@/actions/storefront";
+import { getRestaurantMapData, getStorefrontData } from "@/actions/storefront";
+
+type StorefrontInitialData = ComponentProps<
+  typeof StorefrontClient
+>["initialData"];
 
 export default async function Home() {
   const session = await auth();
@@ -32,11 +37,14 @@ export default async function Home() {
   const storefrontResult = await getStorefrontData();
   const mapResult = await getRestaurantMapData();
 
-  const initialData =
+  const mapLocations: StorefrontInitialData["mapLocations"] =
+    mapResult.success && mapResult.data ? mapResult.data : [];
+
+  const initialData: StorefrontInitialData =
     storefrontResult.success && storefrontResult.data
       ? {
           ...storefrontResult.data,
-          mapLocations: mapResult.success ? (mapResult.data ?? []) : [],
+          mapLocations,
         }
       : {
           restaurants: [],
@@ -47,7 +55,7 @@ export default async function Home() {
           userAddresses: [],
           trendingMeals: [],
           searchMeals: [],
-          mapLocations: [] as RestaurantMapLocation[],
+          mapLocations: [],
           mode: "restaurants" as const,
           restaurantPagination: {
             page: 1,
