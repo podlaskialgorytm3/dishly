@@ -4,6 +4,23 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
-export const db = globalThis.prisma || new PrismaClient();
+let prismaClient: PrismaClient | undefined = globalThis.prisma;
 
-if (process.env.NODE_ENV !== "production") globalThis.prisma = db;
+function getPrismaClient(): PrismaClient {
+  if (!prismaClient) {
+    prismaClient = new PrismaClient();
+
+    if (process.env.NODE_ENV !== "production") {
+      globalThis.prisma = prismaClient;
+    }
+  }
+
+  return prismaClient;
+}
+
+export const db = new Proxy({} as PrismaClient, {
+  get(_target, property) {
+    const client = getPrismaClient();
+    return Reflect.get(client, property, client);
+  },
+});
