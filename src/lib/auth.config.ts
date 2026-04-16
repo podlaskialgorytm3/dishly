@@ -51,5 +51,6 @@ export const authConfig: NextAuthConfig = {
   session: {
     strategy: "jwt",
   },
-  secret: process.env.AUTH_SECRET,
+  // Support both env names to avoid runtime failures when only legacy key is set.
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
 };
