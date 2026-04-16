@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
-import { hash } from "bcryptjs";
-import { db } from "@/lib/db";
-import type { Prisma } from "@prisma/client";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
+    const [{ hash }, { db }] = await Promise.all([
+      import("bcryptjs"),
+      import("@/lib/db"),
+    ]);
+
     const body = await req.json();
     const {
       email,
@@ -82,45 +87,43 @@ export async function POST(req: Request) {
     const passwordHash = await hash(password, 12);
 
     // Utworzenie użytkownika OWNER i restauracji w transakcji
-    const result = await db.$transaction(
-      async (tx: Prisma.TransactionClient) => {
-        const user = await tx.user.create({
+    const result = await db.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email,
+          passwordHash,
+          firstName,
+          lastName,
+          phone,
+          role: "OWNER",
+          isApproved: false, // OWNER wymaga akceptacji admina
+        },
+      });
+
+      const restaurant = await tx.restaurant.create({
+        data: {
+          name: restaurantName,
+          slug,
+          bio: restaurantBio,
+          ownerId: user.id,
+          isActive: false, // Nieaktywna do czasu zatwierdzenia
+        },
+      });
+
+      // Jeśli plan wybrany - utwórz subskrypcję (nieaktywną do zatwierdzenia)
+      let subscription = null;
+      if (subscriptionPlan) {
+        subscription = await tx.subscription.create({
           data: {
-            email,
-            passwordHash,
-            firstName,
-            lastName,
-            phone,
-            role: "OWNER",
-            isApproved: false, // OWNER wymaga akceptacji admina
+            restaurantId: restaurant.id,
+            planId: subscriptionPlan.id,
+            isActive: false, // Aktywowana po zatwierdzeniu przez admina
           },
         });
+      }
 
-        const restaurant = await tx.restaurant.create({
-          data: {
-            name: restaurantName,
-            slug,
-            bio: restaurantBio,
-            ownerId: user.id,
-            isActive: false, // Nieaktywna do czasu zatwierdzenia
-          },
-        });
-
-        // Jeśli plan wybrany - utwórz subskrypcję (nieaktywną do zatwierdzenia)
-        let subscription = null;
-        if (subscriptionPlan) {
-          subscription = await tx.subscription.create({
-            data: {
-              restaurantId: restaurant.id,
-              planId: subscriptionPlan.id,
-              isActive: false, // Aktywowana po zatwierdzeniu przez admina
-            },
-          });
-        }
-
-        return { user, restaurant, subscription };
-      },
-    );
+      return { user, restaurant, subscription };
+    });
 
     return NextResponse.json(
       {
@@ -150,4 +153,3 @@ export async function POST(req: Request) {
     );
   }
 }
-
