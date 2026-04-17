@@ -22,7 +22,9 @@
 \title{%
     \textbf{DISHLY} \\
     \large Platforma SaaS do Zamawiania Jedzenia Online \\
-    \large Raport Projektu Indywidualnego 1DI1417
+    \large Raport Projektu Indywidualnego 1DI1417 \\
+    \vspace{0.5cm}
+    \small \href{https://github.com/podlaskialgorytm3/dishly}{GitHub} $|$ \href{https://dishly-ochre.vercel.app/}{Aplikacja Online}
 }
 \author{Michał Kozak}
 \date{}
@@ -163,20 +165,6 @@ Klienci mogą filtrować dania według:
 
 \section{Założenia Systemu}
 
-\subsection{Architektura Bazy Danych}
-
-System oparty jest na bazie danych PostgreSQL z następującymi głównymi encjami:
-
-\begin{itemize}
-    \item \textbf{User} --- przechowuje dane użytkowników z ich rolą
-    \item \textbf{Restaurant} --- restauracja z podstawowymi informacjami
-    \item \textbf{Location} --- lokalizacja konkretnej restauracji
-    \item \textbf{Meal} --- danie w menu restauracji z parametrami odżywczymi
-    \item \textbf{Order} --- zamówienie złożone przez klienta
-    \item \textbf{SubscriptionPlan} --- plan subskrypcyjny
-    \item \textbf{Subscription} --- subskrypcja restauracji do planu
-\end{itemize}
-
 \subsection{Technologia}
 
 Projekt zbudowany jest na następujących technologiach:
@@ -188,8 +176,6 @@ Projekt zbudowany jest na następujących technologiach:
     Frontend & React 19.2.3, Next.js 16.1.6, Tailwind CSS, Framer Motion \\
     \hline
     Backend & Next.js API Routes, Node.js \\
-    \hline
-    Baza Danych & PostgreSQL, Prisma ORM \\
     \hline
     Autentykacja & NextAuth.js 5.0 \\
     \hline
@@ -212,7 +198,6 @@ Projekt zbudowany jest na następujących technologiach:
 Poniżej znajduje się lista ukończonych funkcjonalności:
 
 \begin{enumerate}
-    \item ✅ Schema bazy danych (Prisma)
     \item ✅ System autentykacji (NextAuth.js)
     \item ✅ Logowanie i rejestracja klientów
     \item ✅ Rejestracja właścicieli restauracji (wymaga zatwierdzenia)
@@ -224,243 +209,516 @@ Poniżej znajduje się lista ukończonych funkcjonalności:
     \item ✅ Przeglądanie listy restauracji w systemie
     \item ✅ Responsywny interfejs użytkownika
     \item ✅ Integracja z mapami (Leaflet)
+
+
 \end{enumerate}
-
-\subsection{Struktury Danych}
-
-Główne modele w systemie:
-
-\subsubsection{Model User}
-
-\begin{verbatim}
-model User {
-  id              String
-  email           String  @unique
-  passwordHash    String
-  role            Role    @default(CLIENT)
-  firstName       String?
-  lastName        String?
-  phone           String?
-  isApproved      Boolean @default(false)
-  isActive        Boolean @default(true)
-  createdAt       DateTime
-  updatedAt       DateTime
-  // Relacje
-  addresses       Address[]
-  ownedRestaurants Restaurant[]
-  orders          Order[]
-  reviews         Review[]
-}
-\end{verbatim}
-
-\subsubsection{Model Restaurant}
-
-\begin{verbatim}
-model Restaurant {
-  id              String
-  name            String
-  slug            String  @unique
-  logoUrl         String?
-  coverImageUrl   String?
-  bio             String?
-  ownerId         String
-  status          RestaurantStatus
-  isActive        Boolean @default(true)
-  createdAt       DateTime
-  updatedAt       DateTime
-  // Relacje
-  locations       Location[]
-  meals           Meal[]
-  owner           User
-  subscriptions   Subscription[]
-}
-\end{verbatim}
-
-\subsubsection{Model Meal}
-
-\begin{verbatim}
-model Meal {
-  id              String
-  restaurantId    String
-  categoryId      String
-  name            String
-  description     String?
-  imageUrl        String?
-  basePrice       Decimal
-  preparationTime Int
-  // Informacje odżywcze
-  calories        Int?
-  protein         Decimal?
-  carbs           Decimal?
-  fat             Decimal?
-  // Metadane
-  isApproved      Boolean @default(false)
-  isActive        Boolean @default(true)
-  createdAt       DateTime
-}
-\end{verbatim}
-
-\subsubsection{Model Order}
-
-\begin{verbatim}
-model Order {
-  id              String
-  userId          String
-  restaurantId    String
-  locationId      String
-  addressId       String
-  totalPrice      Decimal
-  status          OrderStatus
-  paymentStatus   PaymentStatus
-  stripePaymentId String?
-  createdAt       DateTime
-  updatedAt       DateTime
-  // Relacje
-  items           OrderItem[]
-  statusLogs      OrderStatusLog[]
-}
-\end{verbatim}
 
 \newpage
 
 \section{Zrzuty Ekranu Interfejsu}
 
+Na rozdzielczości Full HD (1920x1080) poniżej znajdują się opisy oraz wizualizacje głównych części aplikacji DISHLY.
+
 \subsection{Panel Klienta}
 
-\subsubsection{Strona Główna}
+\subsubsection{Formularz Logowania}
 
-Strona główna platformy DISHLY prezentuje mapę interaktywną umożliwiającą klientom wyszukanie restauracji w wybranej lokalizacji. Interfejs zawiera:
+Formularz logowania umożliwia użytkownikowi zalogowanie się do systemu za pomocą emailu i hasła. Interfejs zawiera:
 
 \begin{itemize}
-    \item Logo i nazwę aplikacji
-    \item Selektor lokalizacji dostawy
-    \item Ikonę koszyka
-    \item Przycisk do rejestracji/logowania
-    \item Mapę z zaznaczonymi restauracjami
-    \item Wiadomość promującą aplikację
+    \item Logo aplikacji (czerwone kółko z widelcem)
+    \item Pole do wpisania emailu
+    \item Pole do wpisania hasła
+    \item Przycisk ``Zaloguj się''
+    \item Link ``Zarejestruj się'' dla nowych użytkowników
+    \item Link ``Zapomniałem hasła'' do resetowania hasła
+\end{itemize}
+
+Formularz zawiera walidację danych i wyświetla komunikaty błędów w razie problemu z logowaniem.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/2. Formularz Logowania.png}
+    \caption{Formularz Logowania --- interfejs logowania dla użytkowników}
+    \label{fig:login_form}
+\end{figure}
+
+\subsubsection{Rejestracja Klienta}
+
+Proces rejestracji klienta jest dwuetapowy. Klienci muszą podać swoje dane osobowe oraz adres dostawy.
+
+\textbf{Krok 1: Dane Osobowe}
+
+Na pierwszym etapie użytkownik podaje:
+\begin{itemize}
+    \item Imię
+    \item Nazwisko
+    \item Email
+    \item Hasło
+    \item Potwierdzenie hasła
 \end{itemize}
 
 \begin{figure}[H]
     \centering
-    \fbox{\parbox[c][4cm][c]{\textwidth}{\centering \textit{[Zrzut ekranu: Strona główna z mapą interaktywną]}}}
-    \caption{Strona główna DISHLY z mapą restauracji}
+    \includegraphics[width=0.95\textwidth]{screenshots/3. Rejestracja Klienta Krok 1.png}
+    \caption{Rejestracja Klienta Krok 1 --- podanie danych osobowych}
+    \label{fig:client_registration_1}
+\end{figure}
+
+\textbf{Krok 2: Adres Dostawy}
+
+Na drugim etapie użytkownik podaje adres dostawy:
+\begin{itemize}
+    \item Ulica i numer domu
+    \item Kod pocztowy
+    \item Miejscowość
+    \item Numer telefonu
+\end{itemize}
+
+Po wypełnieniu formularza użytkownik jest automatycznie zalogowany i redirygowany do panelu klienta.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/4. Rejestracja Klienta Krok 2.png}
+    \caption{Rejestracja Klienta Krok 2 --- podanie adresu dostawy}
+    \label{fig:client_registration_2}
+\end{figure}
+
+\subsubsection{Rejestracja Restauracji}
+
+Proces rejestracji restauracji jest czterostopniowy. Właściciel musi podać dane restauracji, adres, menu oraz ustawienia biznesowe.
+
+\textbf{Krok 1: Dane Restauracji}
+
+Na pierwszym etapie użytkownik podaje:
+\begin{itemize}
+    \item Nazwa restauracji
+    \item Kategoria (np. pizza, sushi, burger)
+    \item Email kontaktowy
+    \item Numer telefonu
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/5. Rejestracja Restauracji Krok 1.png}
+    \caption{Rejestracja Restauracji Krok 1 --- dane podstawowe restauracji}
+    \label{fig:restaurant_registration_1}
+\end{figure}
+
+\textbf{Krok 2: Adres i Lokalizacja}
+
+Na drugim etapie podawane są informacje o lokalizacji:
+\begin{itemize}
+    \item Ulica i numer domu
+    \item Kod pocztowy
+    \item Miejscowość
+    \item Lokalizacja na mapie (współrzędne)
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/6. Rejestracja Restauracji Krok 2.png}
+    \caption{Rejestracja Restauracji Krok 2 --- adres i lokalizacja}
+    \label{fig:restaurant_registration_2}
+\end{figure}
+
+\textbf{Krok 3: Kategorie Menu}
+
+Trzeci krok dotyczy wyboru kategorii dań dostępnych w restauracji:
+\begin{itemize}
+    \item Przystawki
+    \item Dania główne
+    \item Desery
+    \item Napoje
+    \item Sosy
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/7. Rejestracja Restauracji Krok 3.png}
+    \caption{Rejestracja Restauracji Krok 3 --- wybór kategorii menu}
+    \label{fig:restaurant_registration_3}
+\end{figure}
+
+\textbf{Krok 4: Podsumowanie}
+
+Na ostatnim kroku wyswietlone jest podsumowanie wprowadzonych danych. Użytkownik może sprawdzić wszystkie informacje przed ostatecznym wysłaniem formularza.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/8. Rejestracja Restauracji Krok 4.png}
+    \caption{Rejestracja Restauracji Krok 4 --- podsumowanie i potwierdzenie}
+    \label{fig:restaurant_registration_4}
+\end{figure}
+
+
+
+Strona główna platformy DISHLY prezentuje mapę interaktywną umożliwiającą klientom wyszukanie restauracji w wybranej lokalizacji. Interfejs zawiera:
+
+\begin{itemize}
+    \item Logo i nazwę aplikacji (czerwone kółko z widelcem)
+    \item Selektor lokalizacji dostawy: ``Dostawa do Wybierz lokalizację''
+    \item Ikonę koszyka z licznikiem pozycji (0)
+    \item Przycisk ``Zaloguj się'' i ``Zarejestruj się''
+    \item Mapę interaktywną (Leaflet) z zaznaczonymi restauracjami (czerwone punkty)
+    \item Wiadomość promującą: ``Zamów coś pysznego''
+    \item Informacja o liczbie dostępnych restauracji w wybranym obszarze
+\end{itemize}
+
+Strona główna wyświetla mapę Warszawy i okolic z zintegrowaną funkcją wyszukiwania restauracji. System pokazuje ``1 restauracji dostępnych teraz'' dla danej lokalizacji. Klienci mogą kliknąć na czerwone znaczniki, aby przejrzeć szczegóły restauracji.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/1. Ekran Glowny.png}
+    \caption{Ekran Główny --- interaktywna mapa restauracji z interfejsem nawigacyjnym}
     \label{fig:homepage}
-\end{figure}
-
-\subsection{Formularz Logowania}
-
-Formularz logowania umożliwia zalogowanie się istniejacego użytkownika. Zawiera pola na login i hasło oraz przycisk do przesłania formularza. Użytkownik może również przejść do rejestracji lub rejestracji restauracji.
-
-\begin{figure}[H]
-    \centering
-    \fbox{\parbox[c][4cm][c]{\textwidth}{\centering \textit{[Zrzut ekranu: Formularz logowania]}}}
-    \caption{Formularz logowania}
-    \label{fig:login}
-\end{figure}
-
-\subsection{Rejestracja Klienta}
-
-Formularz rejestracji klienta jest dwuetapowy. W pierwszym etapie użytkownik podaje dane osobowe (imię, nazwisko, telefon). System waliduje dane i przechodzi do drugiego etapu.
-
-\begin{figure}[H]
-    \centering
-    \fbox{\parbox[c][4cm][c]{\textwidth}{\centering \textit{[Zrzut ekranu: Formularz rejestracji klienta]}}}
-    \caption{Formularz rejestracji klienta}
-    \label{fig:registration}
-\end{figure}
-
-\subsection{Rejestracja Restauracji}
-
-Rejestracja restauracji jest procesem czterostopniowym. Właściciel restauracji musi podać:
-\begin{enumerate}
-    \item Dane osobowe (imię, nazwisko, email, telefon)
-    \item Dane restauracji (nazwa, NIP, lokalizacja)
-    \item Informacje o dostawie (obszar, opłata)
-    \item Godziny otwarcia i inne ustawienia
-\end{enumerate}
-
-Po złożeniu wniosku restauracja czeka na zatwierdzenie przez administratora.
-
-\begin{figure}[H]
-    \centering
-    \fbox{\parbox[c][4cm][c]{\textwidth}{\centering \textit{[Zrzut ekranu: Formularz rejestracji restauracji]}}}
-    \caption{Formularz rejestracji restauracji}
-    \label{fig:owner_registration}
 \end{figure}
 
 \subsection{Panel Administracyjny}
 
 \subsubsection{Dashboard Administratora}
 
-Dashboard administratora pokazuje statystyki platformy:
+Dashboard administratora (zalogowany użytkownik: admin, rola: Administrator) wyświetla kluczowe metryki platformy w postaci czterech kart informacyjnych:
 
 \begin{itemize}
-    \item Liczba opublikowanych stron
-    \item Liczba aktywnych użytkowników
-    \item Liczba restauracji
-    \item Liczba zamówień w danym dniu
-    \item Ostatnią aktywność w systemie
+    \item \textbf{Opublikowane strony}: 8 stron (trend +2 strony)
+    \item \textbf{Aktywni użytkownicy}: 156 użytkowników (trend +12\%)
+    \item \textbf{Restauracje}: 24 restauracje systemu (trend +3)
+    \item \textbf{Zamówienia (dziś)}: 89 zamówień (trend +18\%)
 \end{itemize}
 
-Administrator ma również dostęp do szybkich akcji takich jak:
+Dashboard zawiera również:
 \begin{itemize}
-    \item Zarządzanie treścią (CMS)
-    \item Zarządzanie użytkownikami
-    \item Zarządzanie restauracjami
+    \item Lewy panel nawigacyjny z menu (Dashboard, Zarządzanie treścią, Subskrypcje, Restauracje, Słowniki, Moderacja)
+    \item Sekcję ``Szybkie akcje'' z dostępnymi operacjami
+    \item Historię ostatniej aktywności (3 ostatnie zdarzenia w systemie)
+    \item Profil użytkownika w lewym dolnym rogu
 \end{itemize}
 
 \begin{figure}[H]
     \centering
-    \fbox{\parbox[c][4cm][c]{\textwidth}{\centering \textit{[Zrzut ekranu: Dashboard administracyjny]}}}
-    \caption{Dashboard panelu administracyjnego}
+    \includegraphics[width=0.95\textwidth]{screenshots/9. Dashboard Administatora.png}
+    \caption{Dashboard Administatora --- metryki i statystyki systemu}
     \label{fig:admin_dashboard}
 \end{figure}
 
 \subsubsection{Weryfikacja Restauracji}
 
-Moduł weryfikacji restauracji umożliwia administratorowi:
+Moduł weryfikacji restauracji umożliwia administratorowi zarządzanie wnioskami o rejestrację restauracji. Interfejs wyświetla:
 
 \begin{itemize}
-    \item Przeglądanie wniosków czekających na zatwierdzenie
-    \item Przeglądanie wszystkich restauracji
-    \item Zatwierdzenie lub odrzucenie restauracji
-    \item Zarządzanie statusem restauracji i ich subskrypcjami
+    \item \textbf{Oczekujące}: 0 restauracji czekających na zatwierdzenie
+    \item \textbf{Zatwierdzone}: 105 restauracji zaakceptowanych w systemie
+    \item \textbf{Odrzucone}: 1 restauracja (wnioski odrzucone)
 \end{itemize}
 
-Interfejs pokazuje:
+Funkcjonalności:
 \begin{itemize}
-    \item Liczbę restauracji oczekujących
-    \item Liczbę zatwierdzonych restauracji
-    \item Liczbę odrzuconych restauracji
-    \item Tabelę z listą restauracji i możliwością filtrowania
-
+    \item Dwie karty z tabulacją: ``Oczekujące (0)'' i ``Wszystkie (106)''
+    \item Pole wyszukiwania: ``Szukaj restauracji...''
+    \item Tabela z kolumnami: Restauracja, Właściciel, Data rejestracji, Status, Subskrypcja, Akcje
+    \item Paginacja: ``Strona 1 z 0'', liczba wierszy na stronę (10)
 \end{itemize}
 
 \begin{figure}[H]
     \centering
-    \fbox{\parbox[c][4cm][c]{\textwidth}{\centering \textit{[Zrzut ekranu: Weryfikacja restauracji]}}}
-    \caption{Moduł weryfikacji restauracji}
+    \includegraphics[width=0.95\textwidth]{screenshots/12. Zarzadzanie Restauracjami.png}
+    \caption{Zarządzanie Restauracjami --- weryfikacja i zarządzanie wnioskami rejestracyjnymi}
     \label{fig:restaurants_verification}
 \end{figure}
 
 \subsubsection{Zarządzanie Planami Subskrypcyjnymi}
 
-Moduł zarządzania planami subskrypcyjnymi umożliwia administratorowi:
+Moduł zarządzania planami subskrypcyjnymi zawiera:
 
 \begin{itemize}
-    \item Tworzenie nowych planów subskrypcyjnych
-    \item Definiowanie limitów dla każdego planu (liczba dań, lokalizacji, pracowników)
-    \item Ustalanie cen planów
-    \item Zarządzanie subskrypcjami restauracji
-    \item Obserwacja statystyk: liczba aktywnych planów i subskrypcji
+    \item Przycisk ``Dodaj plan'' (czerwony, w prawym górnym rogu)
+    \item Trzy karty statystyk:
+    \begin{itemize}
+        \item \textbf{Wszystkich planów}: 0
+        \item \textbf{Aktywnych planów}: 0
+        \item \textbf{Łącznie subskrypcji}: 0
+    \end{itemize}
+    \item Pole wyszukiwania: ``Szukaj planu...''
+    \item Tabela z kolumnami: NAZWA, CENA, LIMITY, SUBSKRYPCJE, STATUS, AKCJE
+    \item Stan: Brak danych (brak planów subskrypcyjnych w systemie)
+\end{itemize}
+
+Administrator może tutaj definiować pakiety subskrypcyjne dla restauracji z limitami liczby dań, lokalizacji i kont pracowników.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/11. Dodawanie planow subskrybcyjnych..png}
+    \caption{Dodawanie Planów Subskrypcyjnych --- definiowanie pakietów i limitów}
+    \label{fig:subscriptions}
+\end{figure}
+
+\subsubsection{Zarządzanie Treścią}
+
+Moduł zarządzania treścią (CMS) umożliwia administratorowi zarządzanie statycznymi stronami platformy:
+
+\begin{itemize}
+    \item Przycisk ``Dodaj nową stronę'' (czerwony)
+    \item Dwie główne sekcje zawartości:
+    \begin{itemize}
+        \item \textbf{Nawigacja}: 5 pozycji (Menu główne)
+        \item \textbf{Informacje}: 3 pozycje (Stopka)
+    \end{itemize}
+    \item Tabela z kolumnami: TYTUŁ, SLUG, KATEGORIA, STATUS
+\end{itemize}
+
+System pozwala na zarządzanie zawartością stron takich jak: Polityka prywatności, Regulamin, O nas, i inne.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/10. Zarzadzanie Trescia.png}
+    \caption{Zarządzanie Treścią --- CMS dla administratora}
+    \label{fig:content_management}
+\end{figure}
+
+\subsubsection{Zarządzanie Słownikami}
+
+Moduł zarządzania słownikami umożliwia administratorowi zarządzanie danymi referencyjnymi systemu:
+
+\begin{itemize}
+    \item Lista dostępnych słowników (kategorie, jednostki miar, poziomy ostrości, itd.)
+    \item Możliwość dodawania nowych wartości do słowników
+    \item Edycja i usuwanie istniejących wpisów
+    \item Aktywacja/deaktywacja pozycji słownika
 \end{itemize}
 
 \begin{figure}[H]
     \centering
-    \fbox{\parbox[c][4cm][c]{\textwidth}{\centering \textit{[Zrzut ekranu: Plany subskrypcyjne]}}}
-    \caption{Zarządzanie planami subskrypcyjnymi}
-    \label{fig:subscriptions}
+    \includegraphics[width=0.95\textwidth]{screenshots/13. Zarzadzanie slownikami.png}
+    \caption{Zarządzanie Słownikami --- zarządzanie danymi referencyjnymi}
+    \label{fig:dictionaries}
 \end{figure}
+
+\subsubsection{Moderacja}
+
+Moduł moderacji pozwala administratorowi przeglądać i zatwierdzać zawartość użytkowników:
+
+\begin{itemize}
+    \item Recenzje i opinie użytkowników
+    \item Zdjęcia dań i restauracji
+    \item Komentarze i opisy
+    \item Możliwość zatwierdzenia, edycji lub usunięcia treści
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/14. Moderacja.png}
+    \caption{Moderacja --- zarządzanie zawartością użytkowników}
+    \label{fig:moderation}
+\end{figure}
+
+\subsection{Panel Restauracji}
+
+\subsubsection{Dashboard Właściciela}
+
+Panel właściciela restauracji umożliwia zarządzanie wszystkimi aspektami restauracji:
+
+\begin{itemize}
+    \item Metryki sprzedaży i przychody
+    \item Liczba zamówień i śledzenie statusu
+    \item Zarządzanie lokalizacjami restauracji
+    \item Zarządzanie członkami zespołu
+    \item Statystyki popularności dań
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/15. Panel Wlasciciela Restauracji.png}
+    \caption{Panel Właściciela Restauracji --- dashboard zarządzania restauracją}
+    \label{fig:owner_dashboard}
+\end{figure}
+
+\subsubsection{Zarządzanie Menu}
+
+Moduł zarządzania menu pozwala na:
+
+\begin{itemize}
+    \item Dodawanie nowych dań z parametrami (cena, opis, kalorie, czas przyjgotowania)
+    \item Wgrywanie zdjęć dań
+    \item Edycję istniejących dań
+    \item Usuwanie dań z menu
+    \item Organizacja dań w kategoriach
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/26. Zarzadzanie MENU.png}
+    \caption{Zarządzanie MENU --- edycja i organizacja menu restauracji}
+    \label{fig:menu_management}
+\end{figure}
+
+\subsubsection{Statystyki i Raport}
+
+Panel statystyk pokazuje:
+
+\begin{itemize}
+    \item Przychody z danego okresu
+    \item Ilość zamówień dziennie/tygodniowo/miesięcznie
+    \item Popularne dania
+    \item Oceny i recenzje od klientów
+    \item Trend sprzedaży
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/27. Statystyki.png}
+    \caption{Statystyki --- przychody i metryki sprzedaży}
+    \label{fig:statistics}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/28. Statystyki cz. II.png}
+    \caption{Statystyki cz. II --- zaawansowane analizy}
+    \label{fig:statistics_2}
+\end{figure}
+
+\subsection{Panel Zamówień}
+
+\subsubsection{Zarządzanie Zamówieniami}
+
+Panel zarządzania zamówieniami umożliwia pracownikom restauracji obsługę zamówień:
+
+\begin{itemize}
+    \item Koszyk zamówień --- przegląd wszystkich bieżących zamówień
+    \item Status zamówienia --- śledzenie etapu przygotowania
+    \item Powiadomienia --- alerty o nowych zamówieniach
+    \item Oczekiwanie na zamówienie --- status gotowości
+    \item Zarządzanie odbiorami osobistymi vs. dostawą
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/16. Koszyk Zamowien.png}
+    \caption{Koszyk Zamówień --- przegląd zamówień do realizacji}
+    \label{fig:orders_cart}
+\end{figure}
+
+\subsubsection{Status Zamówienia}
+
+System obsługuje różne statusy zamówienia:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/17. Oczekiwanie na zamowienie.png}
+    \caption{Oczekiwanie na Zamówienie --- status przygotowania}
+    \label{fig:pending_order}
+\end{figure}
+
+\subsubsection{Ekran Kuchni}
+
+Ekran kuchni wyświetla instrukcje przygotowania dań:
+
+\begin{itemize}
+    \item Lista dań do przygotowania
+    \item Szczegóły składników i instrukcje
+    \item Możliwość oznaczenia dania jako gotowego
+    \item Powiadomienia o zmianach
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/18. Przygotowanie zamowienia i ekran kuchni.png}
+    \caption{Ekran Kuchni --- instrukcje przygotowania dań}
+    \label{fig:kitchen_display}
+\end{figure}
+
+\subsubsection{Etapy Realizacji Zamówienia}
+
+Kolejne etapy zamówienia:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/19. Kolejne Etapy Zamowienia.png}
+    \caption{Kolejne Etapy Zamówienia --- przepływ realizacji}
+    \label{fig:order_stages}
+\end{figure}
+
+\subsubsection{Odbiór Osobisty}
+
+System wspiera również odbiory osobiste:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/22. Przygotowanie posilku na odbior osobisty..png}
+    \caption{Przygotowanie Posiłku na Odbiór Osobisty --- wizualizacja gotowości}
+    \label{fig:pickup_preparation}
+\end{figure}
+
+\subsubsection{Ekran do Podglądu Zamówień (Telewizor)}
+
+Interaktywny ekran do wyświetlania numerów zamówień gotowych do odebrania:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/23. Interaktywny ekran do podgladu zamowien dla klientow w restauracji np. na telewizor..png}
+    \caption{Ekran do Podglądu Zamówień --- wyświetlanie numerów}
+    \label{fig:display_screen}
+\end{figure}
+
+\subsection{Panel Klienta - Dalsze Funkcjonalności}
+
+\subsubsection{Przeglądanie Mapy}
+
+Klienci mogą przeglądać restauracje na interaktywnej mapie:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/20. Podglad mapki.png}
+    \caption{Podgląd Mapy --- przeglądanie restauracji na mapie}
+    \label{fig:map_view}
+\end{figure}
+
+\subsubsection{Wystawianie Opinii}
+
+Sistema recenzji pozwala klientom oceniać restauracje i dania:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/21. Wystawianie opinii.png}
+    \caption{Wystawianie Opinii --- system recenzji}
+    \label{fig:reviews}
+\end{figure}
+
+\subsubsection{Podgląd Ocen}
+
+Przegląd wszystkich ocen i opinii dla restauracji:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/29. Podglad ocen.png}
+    \caption{Podgląd Ocen --- zestawienie recenzji}
+    \label{fig:ratings_view}
+\end{figure}
+
+\subsubsection{Podgląd Restauracji na Mapie}
+
+Szczegółowy widok restauracji z dodatkową informacją:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/30. Podglad restauracji na interaktywnej mapce.png}
+    \caption{Podgląd Restauracji na Interaktywnej Mapce --- szczegóły i lokalizacja}
+    \label{fig:restaurant_map_view}
+\end{figure}
+
+\subsubsection{Widoczność Paneli dla Różnych Typów Użytkowników}
+
+System dynamicznie wyświetla elementy interfejsu w zależności od roli użytkownika:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/25. Widocznosc paneli dla roznych typow uzytkownikow.png}
+    \caption{Widoczność Paneli --- personalizacja UI na podstawie roli}
+    \label{fig:rbac_visibility}
+\end{figure}
+
+\newpage
 
 \newpage
 
@@ -680,7 +938,7 @@ Typowy przepływ danych w aplikacji:
 W ramach projektu DISHLY udało się realizar:
 
 \begin{itemize}
-    \item ✅ \textbf{Kompletna Architektura Bazy Danych} --- 25+ modeli Prisma z pełnymi relacjami
+    \item ✅ \textbf{System Zarządzania Zamówieniami} --- Pełna obsuga lifecycle'u zamówienia
     \item ✅ \textbf{System Autentykacji} --- NextAuth.js z obsługą ról i uprawnień
     \item ✅ \textbf{Panel Administracyjny} --- Dashboard z metrykami i zarządzaniem restauracjami
     \item ✅ \textbf{Weryfikacja Restauracji} --- System zatwierdzania nowych restauracji
@@ -904,67 +1162,5 @@ Konto administratora:
 \end{itemize}
 
 \newpage
-
-\appendix
-
-\section{Załączniki - Zrzuty Ekranu}
-
-\subsection{Opis Zrzutów}
-
-Raport zawiera placeholdery dla następujących zrzutów ekranu aplikacji:
-
-\begin{enumerate}
-    \item \textbf{Strona Główna} --- Mapa interaktywna z restauracjami, nawigacja, koszyk
-    \item \textbf{Formularz Logowania} --- Panel logowania dla użytkowników
-    \item \textbf{Rejestracja Klienta} --- Dwuetapowy proces rejestracji
-    \item \textbf{Rejestracja Restauracji} --- Czterostopniowy proces rejestracji restauracji
-    \item \textbf{Dashboard Administracyjny} --- Statystyki platformy i szybkie akcje
-    \item \textbf{Weryfikacja Restauracji} --- Zarządzanie wnioskami restauracji
-    \item \textbf{Plany Subskrypcyjne} --- Zarządzanie pakietami i limitami
-\end{enumerate}
-
-\subsection{Dodawanie Zrzutów}
-
-Aby dodać rzeczywiste zrzuty ekranu do raportu PDF:
-
-\begin{enumerate}
-    \item Skopiuj plik obrazu (.png lub .jpg) do folderu \texttt{screenshots/}
-    \item Zmień linie w pliku \texttt{sprawozdanie.tex} z:
-    \begin{verbatim}
-    \fbox{\parbox[c][4cm][c]{\textwidth}{...}}
-    \end{verbatim}
-    na:
-    \begin{verbatim}
-    \includegraphics[width=0.9\textwidth]{screenshots/nazwa_pliku.jpg}
-    \end{verbatim}
-    \item Uruchom kompilację ponownie:
-    \begin{verbatim}
-    xelatex -interaction=nonstopmode sprawozdanie.tex
-    \end{verbatim}
-\end{enumerate}
-
-\subsection{Metryki Projektu}
-
-\begin{tabularx}{\textwidth}{|l|X|X|}
-    \hline
-    \textbf{Metryka} & \textbf{Wartość} & \textbf{Status} \\
-    \hline
-    Liczba linii kodu (Frontend) & ~5000+ & ✅ \\
-    \hline
-    Liczba linii kodu (Backend) & ~3000+ & ✅ \\
-    \hline
-    Liczba modeli Prisma & 25+ & ✅ \\
-    \hline
-    Liczba API endpoints & 30+ & ✅ \\
-    \hline
-    Liczba ścieżek routingu & 25+ & ✅ \\
-    \hline
-    Pokrycie testami & 40\% & 🟡 \\
-    \hline
-    Responsywność (mobile) & 100\% & ✅ \\
-    \hline
-    Czas ładowania strony & <2s & ✅ \\
-    \hline
-\end{tabularx}
 
 \end{document}
