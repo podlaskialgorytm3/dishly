@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999995 (MiKTeX 24.1) (preloaded format=xelatex 2026.4.17)  19 APR 2026 00:02
+This is XeTeX, Version 3.141592653-2.6-0.999995 (MiKTeX 24.1) (preloaded format=xelatex 2026.4.17)  19 APR 2026 00:30
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -356,89 +356,89 @@ LaTeX Warning: Unused global option(s):
 (sprawozdanie.aux)
 \openout1 = `sprawozdanie.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 36.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 39.
 LaTeX Font Info:    Trying to load font information for TS1+cmr on input line 3
-6.
+9.
 
 (C:\Users\micha\AppData\Local\Programs\MiKTeX\tex/latex/base\ts1cmr.fd
 File: ts1cmr.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 36.
-LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
 
 Package fontspec Info: Adjusting the maths setup (use [no-math] to avoid
 (fontspec)             this).
 
 \symlegacymaths=\mathgroup4
 LaTeX Font Info:    Overwriting symbol font `legacymaths' in version `bold'
-(Font)                  OT1/cmr/m/n --> OT1/cmr/bx/n on input line 36.
-LaTeX Font Info:    Redeclaring math accent \acute on input line 36.
-LaTeX Font Info:    Redeclaring math accent \grave on input line 36.
-LaTeX Font Info:    Redeclaring math accent \ddot on input line 36.
-LaTeX Font Info:    Redeclaring math accent \tilde on input line 36.
-LaTeX Font Info:    Redeclaring math accent \bar on input line 36.
-LaTeX Font Info:    Redeclaring math accent \breve on input line 36.
-LaTeX Font Info:    Redeclaring math accent \check on input line 36.
-LaTeX Font Info:    Redeclaring math accent \hat on input line 36.
-LaTeX Font Info:    Redeclaring math accent \dot on input line 36.
-LaTeX Font Info:    Redeclaring math accent \mathring on input line 36.
-LaTeX Font Info:    Redeclaring math symbol \colon on input line 36.
-LaTeX Font Info:    Redeclaring math symbol \Gamma on input line 36.
-LaTeX Font Info:    Redeclaring math symbol \Delta on input line 36.
-LaTeX Font Info:    Redeclaring math symbol \Theta on input line 36.
-LaTeX Font Info:    Redeclaring math symbol \Lambda on input line 36.
-LaTeX Font Info:    Redeclaring math symbol \Xi on input line 36.
-LaTeX Font Info:    Redeclaring math symbol \Pi on input line 36.
-LaTeX Font Info:    Redeclaring math symbol \Sigma on input line 36.
-LaTeX Font Info:    Redeclaring math symbol \Upsilon on input line 36.
-LaTeX Font Info:    Redeclaring math symbol \Phi on input line 36.
-LaTeX Font Info:    Redeclaring math symbol \Psi on input line 36.
-LaTeX Font Info:    Redeclaring math symbol \Omega on input line 36.
-LaTeX Font Info:    Redeclaring math symbol \mathdollar on input line 36.
-LaTeX Font Info:    Redeclaring symbol font `operators' on input line 36.
+(Font)                  OT1/cmr/m/n --> OT1/cmr/bx/n on input line 39.
+LaTeX Font Info:    Redeclaring math accent \acute on input line 39.
+LaTeX Font Info:    Redeclaring math accent \grave on input line 39.
+LaTeX Font Info:    Redeclaring math accent \ddot on input line 39.
+LaTeX Font Info:    Redeclaring math accent \tilde on input line 39.
+LaTeX Font Info:    Redeclaring math accent \bar on input line 39.
+LaTeX Font Info:    Redeclaring math accent \breve on input line 39.
+LaTeX Font Info:    Redeclaring math accent \check on input line 39.
+LaTeX Font Info:    Redeclaring math accent \hat on input line 39.
+LaTeX Font Info:    Redeclaring math accent \dot on input line 39.
+LaTeX Font Info:    Redeclaring math accent \mathring on input line 39.
+LaTeX Font Info:    Redeclaring math symbol \colon on input line 39.
+LaTeX Font Info:    Redeclaring math symbol \Gamma on input line 39.
+LaTeX Font Info:    Redeclaring math symbol \Delta on input line 39.
+LaTeX Font Info:    Redeclaring math symbol \Theta on input line 39.
+LaTeX Font Info:    Redeclaring math symbol \Lambda on input line 39.
+LaTeX Font Info:    Redeclaring math symbol \Xi on input line 39.
+LaTeX Font Info:    Redeclaring math symbol \Pi on input line 39.
+LaTeX Font Info:    Redeclaring math symbol \Sigma on input line 39.
+LaTeX Font Info:    Redeclaring math symbol \Upsilon on input line 39.
+LaTeX Font Info:    Redeclaring math symbol \Phi on input line 39.
+LaTeX Font Info:    Redeclaring math symbol \Psi on input line 39.
+LaTeX Font Info:    Redeclaring math symbol \Omega on input line 39.
+LaTeX Font Info:    Redeclaring math symbol \mathdollar on input line 39.
+LaTeX Font Info:    Redeclaring symbol font `operators' on input line 39.
 LaTeX Font Info:    Encoding `OT1' has changed to `TU' for symbol font
-(Font)              `operators' in the math version `normal' on input line 36.
+(Font)              `operators' in the math version `normal' on input line 39.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
-(Font)                  OT1/cmr/m/n --> TU/lmr/m/n on input line 36.
+(Font)                  OT1/cmr/m/n --> TU/lmr/m/n on input line 39.
 LaTeX Font Info:    Encoding `OT1' has changed to `TU' for symbol font
-(Font)              `operators' in the math version `bold' on input line 36.
+(Font)              `operators' in the math version `bold' on input line 39.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
-(Font)                  OT1/cmr/bx/n --> TU/lmr/m/n on input line 36.
+(Font)                  OT1/cmr/bx/n --> TU/lmr/m/n on input line 39.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
-(Font)                  TU/lmr/m/n --> TU/lmr/m/n on input line 36.
+(Font)                  TU/lmr/m/n --> TU/lmr/m/n on input line 39.
 LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
-(Font)                  OT1/cmr/m/it --> TU/lmr/m/it on input line 36.
+(Font)                  OT1/cmr/m/it --> TU/lmr/m/it on input line 39.
 LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `normal'
-(Font)                  OT1/cmr/bx/n --> TU/lmr/b/n on input line 36.
+(Font)                  OT1/cmr/bx/n --> TU/lmr/b/n on input line 39.
 LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `normal'
-(Font)                  OT1/cmss/m/n --> TU/lmss/m/n on input line 36.
+(Font)                  OT1/cmss/m/n --> TU/lmss/m/n on input line 39.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `normal'
-(Font)                  OT1/cmtt/m/n --> TU/lmtt/m/n on input line 36.
+(Font)                  OT1/cmtt/m/n --> TU/lmtt/m/n on input line 39.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
-(Font)                  TU/lmr/m/n --> TU/lmr/b/n on input line 36.
+(Font)                  TU/lmr/m/n --> TU/lmr/b/n on input line 39.
 LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
-(Font)                  OT1/cmr/bx/it --> TU/lmr/b/it on input line 36.
+(Font)                  OT1/cmr/bx/it --> TU/lmr/b/it on input line 39.
 LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `bold'
-(Font)                  OT1/cmss/bx/n --> TU/lmss/b/n on input line 36.
+(Font)                  OT1/cmss/bx/n --> TU/lmss/b/n on input line 39.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
-(Font)                  OT1/cmtt/m/n --> TU/lmtt/b/n on input line 36.
+(Font)                  OT1/cmtt/m/n --> TU/lmtt/b/n on input line 39.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: xetex
@@ -474,7 +474,7 @@ LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Package hyperref Info: Link coloring OFF on input line 36.
+Package hyperref Info: Link coloring OFF on input line 39.
 (sprawozdanie.out) (sprawozdanie.out)
 \@outlinefile=\write3
 \openout3 = `sprawozdanie.out'.
@@ -495,31 +495,31 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 \openout4 = `sprawozdanie.toc'.
 
  [3]
-Overfull \hbox (26.37085pt too wide) in paragraph at lines 82--83
+Overfull \hbox (26.37085pt too wide) in paragraph at lines 85--86
 \TU/lmr/m/n/12 Niniejsze sprawozdanie zawiera opis projektu indywidualnego DISH
 LY - platformy internetowej
  []
 
 
-Overfull \hbox (3.88414pt too wide) in paragraph at lines 90--91
+Overfull \hbox (3.88414pt too wide) in paragraph at lines 93--94
 []\TU/lmr/m/n/12 Wdrożeniu modelu biznesowego SaaS, gdzie restauracje opłacają 
 dostęp do platformy 
  []
 
 
-Overfull \hbox (11.97375pt too wide) in paragraph at lines 100--101
+Overfull \hbox (11.97375pt too wide) in paragraph at lines 103--104
 []\TU/lmr/bx/n/12 Panel Klienta \TU/lmr/m/n/12 - wyszukiwanie restauracji, zama
 wianie, płatność i śledzenie zamówień 
  []
 
 
-Overfull \hbox (21.11295pt too wide) in paragraph at lines 102--103
+Overfull \hbox (21.11295pt too wide) in paragraph at lines 105--106
 []\TU/lmr/bx/n/12 Narzędzia Administracyjne \TU/lmr/m/n/12 - weryfikacja restau
 racji, zarządzanie planami cenowymi 
  []
 
 [4] [5] [6] [7]
-Overfull \hbox (18.0pt too wide) in paragraph at lines 227--228
+Overfull \hbox (18.0pt too wide) in paragraph at lines 230--231
 [][] 
  []
 
@@ -532,7 +532,7 @@ File: screenshots/3. Rejestracja Klienta Krok 1.png Graphic file (type bmp)
 File: screenshots/4. Rejestracja Klienta Krok 2.png Graphic file (type bmp)
 <screenshots/4. Rejestracja Klienta Krok 2.png>
  [11]
-Overfull \hbox (1.30548pt too wide) in paragraph at lines 324--325
+Overfull \hbox (1.30548pt too wide) in paragraph at lines 327--328
 \TU/lmr/m/n/12 Proces rejestracji restauracji jest czterostopniowy. Właściciel 
 musi podać dane restauracji,
  []
@@ -545,7 +545,7 @@ File: screenshots/6. Rejestracja Restauracji Krok 2.png Graphic file (type bmp)
 
 <screenshots/6. Rejestracja Restauracji Krok 2.png>
  [13]
-Overfull \hbox (19.28813pt too wide) in paragraph at lines 362--363
+Overfull \hbox (19.28813pt too wide) in paragraph at lines 365--366
 []\TU/lmr/m/n/12 Trzeci krok dotyczy wyboru planu subskrypcyjnego restauracji (
 pakietu) odpowiadającego
  []
@@ -554,7 +554,7 @@ File: screenshots/7. Rejestracja Restauracji Krok 3.png Graphic file (type bmp)
 
 <screenshots/7. Rejestracja Restauracji Krok 3.png>
 
-Overfull \hbox (13.03745pt too wide) in paragraph at lines 373--374
+Overfull \hbox (13.03745pt too wide) in paragraph at lines 376--377
 []\TU/lmr/m/n/12 Na ostatnim kroku wyswietlone jest podsumowanie wprowadzonych 
 danych. Użytkownik
  []
@@ -563,13 +563,13 @@ File: screenshots/8. Rejestracja Restauracji Krok 4.png Graphic file (type bmp)
 
 <screenshots/8. Rejestracja Restauracji Krok 4.png>
 
-Overfull \hbox (14.54688pt too wide) in paragraph at lines 384--385
+Overfull \hbox (14.54688pt too wide) in paragraph at lines 387--388
 []\TU/lmr/m/n/12 Strona główna platformy DISHLY prezentuje mapę interaktywną um
 ożliwiającą klientom
  []
 
 [14]
-Overfull \hbox (3.00015pt too wide) in paragraph at lines 396--397
+Overfull \hbox (3.00015pt too wide) in paragraph at lines 399--400
 []\TU/lmr/m/n/12 Strona główna wyświetla mapę Warszawy i okolic z zintegrowaną 
 funkcją wyszukiwania
  []
@@ -577,7 +577,13 @@ funkcją wyszukiwania
 File: screenshots/1. Ekran Glowny.png Graphic file (type bmp)
 <screenshots/1. Ekran Glowny.png>
 
-Overfull \hbox (10.31694pt too wide) in paragraph at lines 409--410
+Underfull \hbox (badness 1484) in paragraph at lines 404--404
+[]\TU/lmr/m/n/12 Zrzut Ekranu 8: []Ekran Główny - interaktywna mapa restauracji
+ z interfejsem
+ []
+
+
+Overfull \hbox (10.31694pt too wide) in paragraph at lines 412--413
 \TU/lmr/m/n/12 Dashboard administratora (zalogowany użytkownik: admin, rola: Ad
 ministrator) wyświetla
  []
@@ -586,28 +592,21 @@ ministrator) wyświetla
 File: screenshots/9. Dashboard Administatora.png Graphic file (type bmp)
 <screenshots/9. Dashboard Administatora.png>
 
-Overfull \hbox (20.95615pt too wide) in paragraph at lines 435--436
+Overfull \hbox (20.95615pt too wide) in paragraph at lines 438--439
 \TU/lmr/m/n/12 Moduł weryfikacji restauracji umożliwia administratorowi zarządz
 anie wnioskami o rejestrację
  []
 
-
-Overfull \hbox (0.79535pt too wide) in paragraph at lines 447--448
+[16]
+Overfull \hbox (0.79535pt too wide) in paragraph at lines 450--451
 []\TU/lmr/m/n/12 Tabela z kolumnami: Restauracja, Właściciel, Data rejestracji,
  Status, Subskrypcja,
  []
 
-[16]
 File: screenshots/12. Zarzadzanie Restauracjami.png Graphic file (type bmp)
 <screenshots/12. Zarzadzanie Restauracjami.png>
 
-Underfull \hbox (badness 3792) in paragraph at lines 454--454
-[]\TU/lmr/m/n/12 Figure 10: []Zarządzanie Restauracjami - weryfikacja i zarządz
-anie wnioskami
- []
-
-
-Overfull \hbox (10.48016pt too wide) in paragraph at lines 471--472
+Overfull \hbox (10.48016pt too wide) in paragraph at lines 474--475
 []\TU/lmr/m/n/12 Tabela z kolumnami: NAZWA, CENA, LIMITY, SUBSKRYPCJE, STATUS, 
 AKCJE 
  []
@@ -619,7 +618,7 @@ bmp)
 File: screenshots/10. Zarzadzanie Trescia.png Graphic file (type bmp)
 <screenshots/10. Zarzadzanie Trescia.png>
  [18]
-Overfull \hbox (28.38016pt too wide) in paragraph at lines 509--510
+Overfull \hbox (28.38016pt too wide) in paragraph at lines 512--513
 \TU/lmr/m/n/12 Moduł zarządzania słownikami umożliwia administratorowi zarządza
 nie danymi referencyjnymi
  []
@@ -627,7 +626,7 @@ nie danymi referencyjnymi
 File: screenshots/13. Zarzadzanie slownikami.png Graphic file (type bmp)
 <screenshots/13. Zarzadzanie slownikami.png>
 [19]
-Overfull \hbox (22.81615pt too wide) in paragraph at lines 527--528
+Overfull \hbox (22.81615pt too wide) in paragraph at lines 530--531
 \TU/lmr/m/n/12 Moduł moderacji pozwala administratorowi przeglądać i zatwierdza
 ć zawartość użytkowników: 
  []
@@ -658,63 +657,68 @@ File: screenshots/18. Przygotowanie zamowienia i ekran kuchni.png Graphic file
 File: screenshots/19. Kolejne Etapy Zamowienia.png Graphic file (type bmp)
 <screenshots/19. Kolejne Etapy Zamowienia.png>
  [25]
+File: screenshots/21. Wystawianie opinii.png Graphic file (type bmp)
+<screenshots/21. Wystawianie opinii.png>
 File: screenshots/23. Interaktywny ekran do podgladu zamowien dla klientow w re
 stauracji np. na telewizor..png Graphic file (type bmp)
 <screenshots/23. Interaktywny ekran do podgladu zamowien dla klientow w restaur
 acji np. na telewizor..png>
+ [26]
 File: screenshots/24. Interaktywny ekran do podgladu zamowien dla klientow w re
 stauracji np. na telewizor. cz. II.png Graphic file (type bmp)
 <screenshots/24. Interaktywny ekran do podgladu zamowien dla klientow w restaur
 acji np. na telewizor. cz. II.png>
- [26]
 File: screenshots/21. Wystawianie opinii.png Graphic file (type bmp)
 <screenshots/21. Wystawianie opinii.png>
  [27]
 File: screenshots/30. Podglad restauracji na interaktywnej mapce.png Graphic fi
 le (type bmp)
 <screenshots/30. Podglad restauracji na interaktywnej mapce.png>
- [28] [29] [30] [31] [32]
-Overfull \hbox (9.41034pt too wide) in paragraph at lines 944--944
+File: screenshots/25. Widocznosc paneli dla roznych typow uzytkownikow.png Grap
+hic file (type bmp)
+<screenshots/25. Widocznosc paneli dla roznych typow uzytkownikow.png>
+ [28] [29] [30] [31] [32] [33]
+Overfull \hbox (9.41034pt too wide) in paragraph at lines 945--945
 []\TU/lmr/bx/n/17.28 Funkcjonalności Pozostające do Zaimplementowania 
  []
 
-[33] [34] [35]
-Overfull \hbox (22.36496pt too wide) in paragraph at lines 1048--1049
+[34] [35] [36]
+Overfull \hbox (22.36496pt too wide) in paragraph at lines 1049--1050
 \TU/lmr/bx/n/12 Wyzwanie\TU/lmr/m/n/12 : Restauracja ma wiele lokalizacji, każd
 a z pracownikami o różnych uprawnieniach. 
  []
 
-[36] [37]
-Overfull \hbox (30.19217pt too wide) in paragraph at lines 1117--1118
+[37] [38]
+Overfull \hbox (30.19217pt too wide) in paragraph at lines 1118--1119
 []\TU/lmtt/m/n/12 ownedRestaurants \TU/lmr/m/n/12 → Restaurant (jeden-do-wielu)
 : Restauracje należące do użytkownika 
  []
 
-[38] [39] [40] [41] [42] [43]
-Overfull \hbox (42.58812pt too wide) in paragraph at lines 1364--1365
+[39] [40] [41] [42] [43] [44]
+Overfull \hbox (42.58812pt too wide) in paragraph at lines 1365--1366
 []\TU/lmr/m/n/12 Meal: \TU/lmtt/m/n/12 @@index([restaurantId]), @@index([catego
 ryId]), @@index([isAvailable]) 
  []
 
-[44]
-Overfull \hbox (13.82495pt too wide) in paragraph at lines 1374--1375
+[45]
+Overfull \hbox (13.82495pt too wide) in paragraph at lines 1375--1376
 []\TU/lmr/bx/n/12 Kasada na usunięcie\TU/lmr/m/n/12 : Usunięcie restauracji kas
 uje jej lokalizacje, dania i zamówienia 
  []
 
-[45] [46] [47] [48]
-Underfull \hbox (badness 10000) in paragraph at lines 1471--1472
+[46] [47] [48] [49]
+Underfull \hbox (badness 10000) in paragraph at lines 1473--1474
 []\TU/lmr/m/n/12 TypeScript Handbook, []$[][][][][] [] [] [] [][][] [] [][][][]
 [][][][][][][][][][] [] [][][] [] [][][][][]$[], dostęp:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1472--1473
+Underfull \hbox (badness 10000) in paragraph at lines 1474--1475
 []\TU/lmr/m/n/12 Tailwind CSS Documentation, []$[][][][][] [] [] [] [][][][][][
 ][][][][][] [] [][][] [] [][][][]$[], dostęp:
  []
 
-[49] (sprawozdanie.aux)
+[50] (sprawozdanie.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-04>
@@ -723,12 +727,12 @@ Package rerunfilecheck Info: File `sprawozdanie.out' has not changed.
 (rerunfilecheck)             Checksum: FF9F73E69F0A946968EAF25070A60BD5;17219.
  ) 
 Here is how much of TeX's memory you used:
- 13366 strings out of 409617
- 266261 string characters out of 5774013
+ 13377 strings out of 409617
+ 266954 string characters out of 5774013
  1937191 words of memory out of 5000000
- 35309 multiletter control sequences out of 15000+600000
+ 35319 multiletter control sequences out of 15000+600000
  561253 words of font info for 57 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  79i,12n,93p,491b,493s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on sprawozdanie.pdf (50 pages).
+Output written on sprawozdanie.pdf (51 pages).

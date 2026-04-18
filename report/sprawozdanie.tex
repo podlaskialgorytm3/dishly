@@ -11,6 +11,9 @@
 \usepackage{tabularx}
 \usepackage{babel}
 
+\renewcommand{\figurename}{Zrzut Ekranu}
+\renewcommand{\contentsname}{Spis Treści}
+
 \geometry{margin=1in, top=1.5in, bottom=1.5in}
 
 \pagestyle{fancy}
@@ -39,7 +42,7 @@
     \centering
     \vspace*{2cm}
 
-    {\Huge \textbf{Aplikacja do Zamawiania jedzenia razem z Dishly}}
+    {\Huge \textbf{Aplikacja do Zamawiania jedzenia}}
     
     \vspace{0.8cm}
     
@@ -671,13 +674,12 @@ Kolejne etapy zamówienia:
 
 System wspiera również odbiory osobiste:
 
-% Obraz usunięty (placeholder)
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=0.95\textwidth]{screenshots/REMOVED-IMAGE-NUMBER-.png}
-%     \caption{Przygotowanie Posiłku na Odbiór Osobisty  -  wizualizacja gotowości}
-%     \label{fig:pickup_preparation}
-% \end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/21. Wystawianie opinii.png}
+    \caption{Odbiór Osobisty  -  wizualizacja procesu odbioru zamówienia}
+    \label{fig:pickup_preparation}
+\end{figure}
 
 \subsubsection{Ekran do Podglądu Zamówień (Telewizor)}
 
@@ -749,13 +751,12 @@ Szczegółowy widok restauracji z dodatkową informacją:
 
 System dynamicznie wyświetla elementy interfejsu w zależności od roli użytkownika:
 
-% Obraz usunięty (placeholder)
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=0.95\textwidth]{screenshots/REMOVED-IMAGE-NUMBER-.png}
-%     \caption{Widoczność Paneli  -  personalizacja UI na podstawie roli}
-%     \label{fig:rbac_visibility}
-% \end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/25. Widocznosc paneli dla roznych typow uzytkownikow.png}
+    \caption{Widoczność Paneli  -  personalizacja UI na podstawie roli}
+    \label{fig:rbac_visibility}
+\end{figure}
 
 \newpage
 
@@ -1465,15 +1466,16 @@ Konto administratora:
 
 \section{Bibliografia}
 
+\renewcommand{\refname}{}
 \begin{thebibliography}{99}
-    \bibitem{nextjs} Next.js Documentation, \url{https://nextjs.org/}, dostęp: 20.04.2026.
-    \bibitem{react} React Documentation, \url{https://react.dev/}, dostęp: 20.04.2026.
-    \bibitem{ts} TypeScript Handbook, \url{https://www.typescriptlang.org/docs/}, dostęp: 20.04.2026.
-    \bibitem{tailwind} Tailwind CSS Documentation, \url{https://tailwindcss.com/docs}, dostęp: 20.04.2026.
-    \bibitem{prisma} Prisma ORM Documentation, \url{https://www.prisma.io/docs}, dostęp: 20.04.2026.
-    \bibitem{nextauth} NextAuth.js Documentation, \url{https://authjs.dev/}, dostęp: 20.04.2026.
-    \bibitem{stripe} Stripe API Documentation, \url{https://stripe.com/docs/api}, dostęp: 20.04.2026.
-    \bibitem{leaflet} Leaflet Documentation, \url{https://leafletjs.com/}, dostęp: 20.04.2026.
+    \bibitem{nextjs} Next.js Documentation, \url{https://nextjs.org/}, dostęp: 25.02.2026.
+    \bibitem{react} React Documentation, \url{https://react.dev/}, dostęp: 26.02.2026.
+    \bibitem{ts} TypeScript Handbook, \url{https://www.typescriptlang.org/docs/}, dostęp: 27.02.2026.
+    \bibitem{tailwind} Tailwind CSS Documentation, \url{https://tailwindcss.com/docs}, dostęp: 28.02.2026.
+    \bibitem{prisma} Prisma ORM Documentation, \url{https://www.prisma.io/docs}, dostęp: 01.03.2026.
+    \bibitem{nextauth} NextAuth.js Documentation, \url{https://authjs.dev/}, dostęp: 02.03.2026.
+    \bibitem{stripe} Stripe API Documentation, \url{https://stripe.com/docs/api}, dostęp: 03.03.2026.
+    \bibitem{leaflet} Leaflet Documentation, \url{https://leafletjs.com/}, dostęp: 03.03.2026.
 \end{thebibliography}
 
 \newpage
