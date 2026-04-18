@@ -23,7 +23,7 @@
 \title{%
     \textbf{DISHLY} \\
     \large Aplikacja do Zamawiania Jedzenia Online \\
-    \large Raport Projektu Indywidualnego 1DI1417 \\
+    \large Raport Projektu Indywidualnego \\
     \vspace{0.3cm}
     \normalsize Michał Kozak \\
     \small Politechnika Warszawska \\
@@ -38,17 +38,18 @@
 \begin{titlepage}
     \centering
     \vspace*{2cm}
+
+    {\Huge \textbf{Aplikacja do Zamawiania jedzenia razem z Dishly}}
     
-    {\LARGE \textbf{DISHLY}}
+    \vspace{0.8cm}
+    
+    {\Large \textbf{DISHLY}}
     
     \vspace{0.5cm}
     
-    {\large Aplikacja do Zamawiania Jedzenia}
-    
     \vspace{2cm}
     
-    {\Large Raport Projektu Indywidualnego} \\
-    {\normalsize 1DI1417}
+    {\Large Raport Projektu Indywidualnego}
     
     \vspace{3cm}
     
@@ -57,7 +58,7 @@
     \vspace{2cm}
     
     {\large Politechnika Warszawska} \\
-    {\normalsize Wydział Elektroniki i Technik Informacyjnych}
+    {\normalsize Wydział Elektryczny}
     
     \vspace{3cm}
     
@@ -67,7 +68,7 @@
     
     \vfill
     
-    {\normalsize Warszawa, \today}
+    {\normalsize Warszawa, 20.04.2026}
     
 \end{titlepage}
 
@@ -223,8 +224,6 @@ Projekt zbudowany jest na następujących technologiach:
     \hline
     Wykresy & Recharts \\
     \hline
-    PWA & @ducanh2912/next-pwa \\
-    \hline
 \end{tabularx}
 
 \newpage
@@ -236,17 +235,17 @@ Projekt zbudowany jest na następujących technologiach:
 Poniżej znajduje się lista ukończonych funkcjonalności:
 
 \begin{enumerate}
-    \item ✅ System autentykacji (NextAuth.js)
-    \item ✅ Logowanie i rejestracja klientów
-    \item ✅ Rejestracja właścicieli restauracji (wymaga zatwierdzenia)
-    \item ✅ Konto administratora
-    \item ✅ Middleware ochrony tras (RBAC)
-    \item ✅ Podstawowy Dashboard
-    \item ✅ Moduł zarządzania restauracjami
-    \item ✅ Moduł zarządzania subskrypcjami
-    \item ✅ Przeglądanie listy restauracji w systemie
-    \item ✅ Responsywny interfejs użytkownika
-    \item ✅ Integracja z mapami (Leaflet)
+    \item [OK] System autentykacji (NextAuth.js)
+    \item [OK] Logowanie i rejestracja klientów
+    \item [OK] Rejestracja właścicieli restauracji (wymaga zatwierdzenia)
+    \item [OK] Konto administratora
+    \item [OK] Middleware ochrony tras (RBAC)
+    \item [OK] Podstawowy Dashboard
+    \item [OK] Moduł zarządzania restauracjami
+    \item [OK] Moduł zarządzania subskrypcjami
+    \item [OK] Przeglądanie listy restauracji w systemie
+    \item [OK] Responsywny interfejs użytkownika
+    \item [OK] Integracja z mapami (Leaflet)
 
 
 \end{enumerate}
@@ -254,8 +253,6 @@ Poniżej znajduje się lista ukończonych funkcjonalności:
 \newpage
 
 \section{Zrzuty Ekranu Interfejsu}
-
-Na rozdzielczości Full HD (1920x1080) poniżej znajdują się opisy oraz wizualizacje głównych części aplikacji DISHLY.
 
 \subsection{Panel Klienta}
 
@@ -360,21 +357,14 @@ Na drugim etapie podawane są informacje o lokalizacji:
     \label{fig:restaurant_registration_2}
 \end{figure}
 
-\textbf{Krok 3: Kategorie Menu}
+\textbf{Krok 3: Wybór Subskrypcji}
 
-Trzeci krok dotyczy wyboru kategorii dań dostępnych w restauracji:
-\begin{itemize}
-    \item Przystawki
-    \item Dania główne
-    \item Desery
-    \item Napoje
-    \item Sosy
-\end{itemize}
+Trzeci krok dotyczy wyboru planu subskrypcyjnego restauracji (pakietu) odpowiadającego potrzebom biznesowym.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/7. Rejestracja Restauracji Krok 3.png}
-    \caption{Rejestracja Restauracji Krok 3  -  wybór kategorii menu}
+    \caption{Rejestracja Restauracji Krok 3  -  wybór planu subskrypcyjnego}
     \label{fig:restaurant_registration_3}
 \end{figure}
 
@@ -419,10 +409,10 @@ Strona główna wyświetla mapę Warszawy i okolic z zintegrowaną funkcją wysz
 Dashboard administratora (zalogowany użytkownik: admin, rola: Administrator) wyświetla kluczowe metryki platformy w postaci czterech kart informacyjnych:
 
 \begin{itemize}
-    \item \textbf{Opublikowane strony}: 8 stron (trend +2 strony)
-    \item \textbf{Aktywni użytkownicy}: 156 użytkowników (trend +12\%)
-    \item \textbf{Restauracje}: 24 restauracje systemu (trend +3)
-    \item \textbf{Zamówienia (dziś)}: 89 zamówień (trend +18\%)
+    \item \textbf{Opublikowane strony}
+    \item \textbf{Aktywni użytkownicy}
+    \item \textbf{Restauracje}
+    \item \textbf{Zamówienia (dziś)}
 \end{itemize}
 
 Dashboard zawiera również:
@@ -445,9 +435,9 @@ Dashboard zawiera również:
 Moduł weryfikacji restauracji umożliwia administratorowi zarządzanie wnioskami o rejestrację restauracji. Interfejs wyświetla:
 
 \begin{itemize}
-    \item \textbf{Oczekujące}: 0 restauracji czekających na zatwierdzenie
-    \item \textbf{Zatwierdzone}: 105 restauracji zaakceptowanych w systemie
-    \item \textbf{Odrzucone}: 1 restauracja (wnioski odrzucone)
+    \item \textbf{Oczekujące}
+    \item \textbf{Zatwierdzone}
+    \item \textbf{Odrzucone}
 \end{itemize}
 
 Funkcjonalności:
@@ -677,17 +667,76 @@ Kolejne etapy zamówienia:
     \label{fig:order_stages}
 \end{figure}
 
-\subsubsection{Odbiór Osobisty i Ekran Telewizora}
+\subsubsection{Odbiór Osobisty}
 
-System wspiera również odbiory osobiste i wyświetlanie numerów zamówień na ekranach telewizorów w restauracji.
+System wspiera również odbiory osobiste:
 
-\subsubsection{Przeglądanie Mapy i Wystawianie Opinii}
+% Obraz usunięty (placeholder)
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.95\textwidth]{screenshots/REMOVED-IMAGE-NUMBER-.png}
+%     \caption{Przygotowanie Posiłku na Odbiór Osobisty  -  wizualizacja gotowości}
+%     \label{fig:pickup_preparation}
+% \end{figure}
 
-Klienci mogą przeglądać restauracje na interaktywnej mapie i oceniać je w systemie recenzji.
+\subsubsection{Ekran do Podglądu Zamówień (Telewizor)}
+
+Interaktywny ekran do wyświetlania numerów zamówień gotowych do odebrania:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/23. Interaktywny ekran do podgladu zamowien dla klientow w restauracji np. na telewizor..png}
+    \caption{Ekran do Podglądu Zamówień (Telewizor)  -  widok listy numerów zamówień}
+    \label{fig:tv_screen_1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/24. Interaktywny ekran do podgladu zamowien dla klientow w restauracji np. na telewizor. cz. II.png}
+    \caption{Ekran do Podglądu Zamówień (Telewizor)  -  widok szczegółowy (cz. II)}
+    \label{fig:tv_screen_2}
+\end{figure}
+
+\subsection{Panel Klienta - Dalsze Funkcjonalności}
+
+\subsubsection{Przeglądanie Mapy}
+
+Klienci mogą przeglądać restauracje na interaktywnej mapie:
+
+% Obraz usunięty (placeholder)
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.95\textwidth]{screenshots/REMOVED-IMAGE-NUMBER-.png}
+%     \caption{Podgląd Mapy  -  przeglądanie restauracji na mapie}
+%     \label{fig:map_view}
+% \end{figure}
+
+\subsubsection{Wystawianie Opinii}
+
+Sistema recenzji pozwala klientom oceniać restauracje i dania:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{screenshots/21. Wystawianie opinii.png}
+    \caption{Wystawianie Opinii  -  formularz recenzji i oceny}
+    \label{fig:reviews}
+\end{figure}
+
+\subsubsection{Podgląd Ocen}
+
+Przegląd wszystkich ocen i opinii dla restauracji:
+
+% Obraz usunięty (placeholder)
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.95\textwidth]{screenshots/REMOVED-IMAGE-NUMBER-.png}
+%     \caption{Podgląd Ocen  -  zestawienie recenzji}
+%     \label{fig:ratings_view}
+% \end{figure}
 
 \subsubsection{Podgląd Restauracji na Mapie}
 
-Szczegółowy widok restauracji z dodatkową informacją o lokalizacji, godzinach otwarcia i opiniach klientów.
+Szczegółowy widok restauracji z dodatkową informacją:
 
 \begin{figure}[H]
     \centering
@@ -696,9 +745,17 @@ Szczegółowy widok restauracji z dodatkową informacją o lokalizacji, godzinac
     \label{fig:restaurant_map_view}
 \end{figure}
 
-\subsubsection{System Uprawnień i Personalizacja Interfejsu}
+\subsubsection{Widoczność Paneli dla Różnych Typów Użytkowników}
 
-System dynamicznie wyświetla elementy interfejsu w zależności od roli użytkownika, zapewniając personalizowane doświadczenie dla każdego typu użytkownika zgodnie z opisanym wcześniej modelem RBAC.
+System dynamicznie wyświetla elementy interfejsu w zależności od roli użytkownika:
+
+% Obraz usunięty (placeholder)
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.95\textwidth]{screenshots/REMOVED-IMAGE-NUMBER-.png}
+%     \caption{Widoczność Paneli  -  personalizacja UI na podstawie roli}
+%     \label{fig:rbac_visibility}
+% \end{figure}
 
 \newpage
 
@@ -712,41 +769,41 @@ Projekt zorganizowany jest w następujący sposób:
 
 \begin{verbatim}
 dishly/
-├── src/
-│   ├── app/                 # Next.js App Router
-│   │   ├── layout.tsx
-│   │   ├── page.tsx         # Strona główna
-│   │   ├── (auth)/          # Autentykacja
-│   │   ├── (client)/        # Panel klienta
-│   │   ├── (dashboard)/     # Panel administracyjny
-│   │   ├── api/             # API endpoints
-│   │   └── ...
-│   ├── components/          # Komponenty React
-│   │   ├── dashboard/       # Komponenty dashboarda
-│   │   ├── forms/           # Formularze
-│   │   ├── layout/          # Komponenty układu
-│   │   ├── shared/          # Komponenty wspólne
-│   │   └── ui/              # Komponenty UI
-│   ├── actions/             # Server actions
-│   ├── hooks/               # Hooki React
-│   ├── lib/                 # Funkcje pomocnicze
-│   │   ├── auth.ts
-│   │   ├── db.ts
-│   │   ├── stripe.ts
-│   │   └── utils.ts
-│   ├── stores/              # Zustand stores
-│   ├── types/               # Definicje typów TypeScript
-│   └── constants/           # Stałe aplikacji
-├── prisma/
-│   ├── schema.prisma        # Schema bazy danych
-│   ├── seed.ts              # Seed bazy danych
-│   └── ...                  # Migracje
-├── public/                  # Pliki statyczne
-├── docs/                    # Dokumentacja
-├── scripts/                 # Skrypty pomocnicze
-├── package.json
-├── tsconfig.json
-└── next.config.ts
+|-- src/
+|   |-- app/                 # Next.js App Router
+|   |   |-- layout.tsx
+|   |   |-- page.tsx         # Strona główna
+|   |   |-- (auth)/          # Autentykacja
+|   |   |-- (client)/        # Panel klienta
+|   |   |-- (dashboard)/     # Panel administracyjny
+|   |   |-- api/             # API endpoints
+|   |   |-- ...
+|   |-- components/          # Komponenty React
+|   |   |-- dashboard/       # Komponenty dashboarda
+|   |   |-- forms/           # Formularze
+|   |   |-- layout/          # Komponenty układu
+|   |   |-- shared/          # Komponenty wspólne
+|   |   |-- ui/              # Komponenty UI
+|   |-- actions/             # Server actions
+|   |-- hooks/               # Hooki React
+|   |-- lib/                 # Funkcje pomocnicze
+|   |   |-- auth.ts
+|   |   |-- db.ts
+|   |   |-- stripe.ts
+|   |   |-- utils.ts
+|   |-- stores/              # Zustand stores
+|   |-- types/               # Definicje typów TypeScript
+|   |-- constants/           # Stałe aplikacji
+|-- prisma/
+|   |-- schema.prisma        # Schema bazy danych
+|   |-- seed.ts              # Seed bazy danych
+|   |-- ...                  # Migracje
+|-- public/                  # Pliki statyczne
+|-- docs/                    # Dokumentacja
+|-- scripts/                 # Skrypty pomocnicze
+|-- package.json
+|-- tsconfig.json
+|-- next.config.ts
 \end{verbatim}
 
 \newpage
@@ -758,33 +815,33 @@ dishly/
 Aplikacja DISHLY następuje architekturę wielowarstwową:
 
 \begin{verbatim}
-┌─────────────────────────────────────────┐
-│        Frontend Layer (React/Next.js)    │
-│  - UI Components (Tailwind CSS)         │
-│  - State Management (Zustand)           │
-│  - Client-side Routing                  │
-└────────────────────┬────────────────────┘
-                     │
-┌────────────────────▼────────────────────┐
-│    Application Layer (Next.js API)      │
-│  - Server Actions                       │
-│  - API Routes (/api/*)                  │
-│  - Middleware (Authentication)          │
-│  - Business Logic                       │
-└────────────────────┬────────────────────┘
-                     │
-┌────────────────────▼────────────────────┐
-│    Data Layer (Prisma ORM)              │
-│  - Database Abstraction                 │
-│  - Schema Definition                    │
-│  - Query Optimization                   │
-└────────────────────┬────────────────────┘
-                     │
-┌────────────────────▼────────────────────┐
-│   Database Layer (PostgreSQL)           │
-│  - Data Persistence                     │
-│  - ACID Transactions                    │
-└─────────────────────────────────────────┘
++-----------------------------------------+
+|        Frontend Layer (React/Next.js)    |
+|  - UI Components (Tailwind CSS)         |
+|  - State Management (Zustand)           |
+|  - Client-side Routing                  |
+|--------------------+--------------------+
+                     |
++--------------------v--------------------+
+|    Application Layer (Next.js API)      |
+|  - Server Actions                       |
+|  - API Routes (/api/*)                  |
+|  - Middleware (Authentication)          |
+|  - Business Logic                       |
+|--------------------+--------------------+
+                     |
++--------------------v--------------------+
+|    Data Layer (Prisma ORM)              |
+|  - Database Abstraction                 |
+|  - Schema Definition                    |
+|  - Query Optimization                   |
+|--------------------+--------------------+
+                     |
++--------------------v--------------------+
+|   Database Layer (PostgreSQL)           |
+|  - Data Persistence                     |
+|  - ACID Transactions                    |
+|-----------------------------------------+
 \end{verbatim}
 
 \subsection{Komponenty Systemu}
@@ -828,22 +885,6 @@ Struktura API:
     \item \texttt{/api/orders/}  -  Zarządzanie zamówieniami
 \end{itemize}
 
-\subsubsection{Baza Danych}
-
-Baza danych PostgreSQL zawiera ~25 modeli Prisma:
-
-\begin{itemize}
-    \item \textbf{Users}  -  Użytkownicy systemu
-    \item \textbf{Restaurants}  -  Restauracje
-    \item \textbf{Locations}  -  Lokalizacje restauracji
-    \item \textbf{Meals}  -  Dania w menu
-    \item \textbf{Orders}  -  Zamówienia
-    \item \textbf{SubscriptionPlans}  -  Plany subskrypcji
-    \item \textbf{Subscriptions}  -  Subskrypcje restauracji
-    \item \textbf{Reviews}  -  Recenzje
-    \item \textbf{i inne...}
-\end{itemize}
-
 \subsection{Przepływ Danych}
 
 Typowy przepływ danych w aplikacji:
@@ -864,22 +905,22 @@ Typowy przepływ danych w aplikacji:
 \subsection{Autentykacja i Autoryzacja}
 
 \begin{itemize}
-    \item ✅ System logowania i rejestracji za pomocą NextAuth.js
-    \item ✅ Bezpieczne przechowywanie haseł z użyciem bcryptjs
-    \item ✅ Kontrola dostępu oparta na rolach (RBAC)
-    \item ✅ Middleware ochrony tras
-    \item ✅ Tokeny sesji
+    \item [OK] System logowania i rejestracji za pomocą NextAuth.js
+    \item [OK] Bezpieczne przechowywanie haseł z użyciem bcryptjs
+    \item [OK] Kontrola dostępu oparta na rolach (RBAC)
+    \item [OK] Middleware ochrony tras
+    \item [OK] Tokeny sesji
 \end{itemize}
 
 \subsection{Panel Administracyjny}
 
 \begin{itemize}
-    \item ✅ Dashboard z metryka systemu
-    \item ✅ Weryfikacja restauracji
-    \item ✅ Zarządzanie planami subskrypcyjnymi
-    \item ✅ Zarządzanie treścią (CMS)
-    \item ✅ Słowniki do zarządzania danymi referencyjnymi
-    \item ✅ Moderacja zawartości
+    \item [OK] Dashboard z metryka systemu
+    \item [OK] Weryfikacja restauracji
+    \item [OK] Zarządzanie planami subskrypcyjnymi
+    \item [OK] Zarządzanie treścią (CMS)
+    \item [OK] Słowniki do zarządzania danymi referencyjnymi
+    \item [OK] Moderacja zawartości
 \end{itemize}
 
 \subsection{Panel Restauracji}
@@ -893,9 +934,9 @@ Typowy przepływ danych w aplikacji:
 \subsection{Panel Klienta}
 
 \begin{itemize}
-    \item ✅ Przeglądanie restauracji na mapie
-    \item ✅ Rejestracja i logowanie
-    \item ✅ Ulubione restauracje (przechowywane lokalnie)
+    \item [OK] Przeglądanie restauracji na mapie
+    \item [OK] Rejestracja i logowanie
+    \item [OK] Ulubione restauracje (przechowywane lokalnie)
     \item Wyszukiwanie i filtrowanie (w planach)
     \item Koszyk i zamówienia (w planach)
 \end{itemize}
@@ -903,13 +944,6 @@ Typowy przepływ danych w aplikacji:
 \section{Funkcjonalności Pozostające do Zaimplementowania}
 
 \begin{enumerate}
-    \item \textbf{Panel Restauracji Właściciela}  -  pełny interfejs do zarządzania menu i lokalizacjami
-    \item \textbf{Obsługa Zamówień}  -  system statusów, powiadomień i śledzenia
-    \item \textbf{Filtrowanie Dań}  -  zaawansowane filtry po parametrach odżywczych
-    \item \textbf{Integracja Stripe}  -  pełna obsługa płatności online
-    \item \textbf{Powiadomienia}  -  system notyfikacji dla klientów i restauracji
-    \item \textbf{Recenzje i Oceny}  -  system oceny restauracji i dań
-    \item \textbf{Raport Analityczne}  -  statystyki dla właścicieli restauracji
     \item \textbf{Aplikacja Mobilna}  -  wersja PWA lub natywna
     \item \textbf{Obsługa Wielu Języków}  -  internationalizacja (i18n)
     \item \textbf{API dla Integracji Externe}  -  możliwość integracji z zewnętrznymi systemami
@@ -920,30 +954,17 @@ Typowy przepływ danych w aplikacji:
 W ramach projektu DISHLY udało się realizar:
 
 \begin{itemize}
-    \item ✅ \textbf{System Zarządzania Zamówieniami}  -  Pełna obsuga lifecycle'u zamówienia
-    \item ✅ \textbf{System Autentykacji}  -  NextAuth.js z obsługą ról i uprawnień
-    \item ✅ \textbf{Panel Administracyjny}  -  Dashboard z metrykami i zarządzaniem restauracjami
-    \item ✅ \textbf{Weryfikacja Restauracji}  -  System zatwierdzania nowych restauracji
-    \item ✅ \textbf{Plany Subskrypcyjne}  -  Model SaaS z limitami
-    \item ✅ \textbf{Interfejs Responsywny}  -  Obsługa urządzeń mobilnych
-    \item ✅ \textbf{Mapa Interaktywna}  -  Wyszukanie restauracji na mapie
-    \item ✅ \textbf{System Uprawnień}  -  RBAC dla 5 ról użytkowników
-    \item ✅ \textbf{TypeScript}  -  Pełna typizacja aplikacji
-    \item ✅ \textbf{Deployment}  -  Gotowość do wdrożenia na Vercel
+    \item [OK] \textbf{System Zarządzania Zamówieniami}  -  Pełna obsuga lifecycle'u zamówienia
+    \item [OK] \textbf{System Autentykacji}  -  NextAuth.js z obsługą ról i uprawnień
+    \item [OK] \textbf{Panel Administracyjny}  -  Dashboard z metrykami i zarządzaniem restauracjami
+    \item [OK] \textbf{Weryfikacja Restauracji}  -  System zatwierdzania nowych restauracji
+    \item [OK] \textbf{Plany Subskrypcyjne}  -  Model SaaS z limitami
+    \item [OK] \textbf{Interfejs Responsywny}  -  Obsługa urządzeń mobilnych
+    \item [OK] \textbf{Mapa Interaktywna}  -  Wyszukanie restauracji na mapie
+    \item [OK] \textbf{System Uprawnień}  -  RBAC dla 5 ról użytkowników
+    \item [OK] \textbf{TypeScript}  -  Pełna typizacja aplikacji
+    \item [OK] \textbf{Deployment}  -  Gotowość do wdrożenia na Vercel
 \end{itemize}
-
-\section{Co Pozostało do Zrobienia}
-
-\begin{itemize}
-    \item ⏳ \textbf{Panel Restauracji}  -  Interface do zarządzania menu i lokalizacjami
-    \item ⏳ \textbf{System Zamówień}  -  Pełna obsługa lifecycle'u zamówienia
-    \item ⏳ \textbf{Płatności Stripe}  -  Integracja pełna z płatnościami online
-    \item ⏳ \textbf{Powiadomienia}  -  System notyfikacji w real-time
-    \item ⏳ \textbf{Recenzje i Oceny}  -  System oceny restauracji
-    \item ⏳ \textbf{Raport Analityczne}  -  Statystyki dla właścicieli
-\end{itemize}
-
-\newpage
 
 \subsection{Scenariusz 1: Rejestracja Klienta}
 
@@ -955,7 +976,7 @@ W ramach projektu DISHLY udało się realizar:
     \item Weryfikacja: Użytkownik zostaje zalogowany i redirygowany do panelu
 \end{enumerate}
 
-\textbf{Status}: ✅ Działające
+\textbf{Status}: [OK] Działające
 
 \subsection{Scenariusz 2: Rejestracja Restauracji}
 
@@ -967,7 +988,7 @@ W ramach projektu DISHLY udało się realizar:
     \item Weryfikacja: Wniosek o rejestrację pojawia się w panelu administratora
 \end{enumerate}
 
-\textbf{Status}: ✅ Działające
+\textbf{Status}: [OK] Działające
 
 \subsection{Scenariusz 3: Logowanie Administratora}
 
@@ -979,7 +1000,7 @@ W ramach projektu DISHLY udało się realizar:
     \item Weryfikacja: Użytkownik zostaje zalogowany i redirygowany do ``/dashboard''
 \end{enumerate}
 
-\textbf{Status}: ✅ Działające
+\textbf{Status}: [OK] Działające
 
 \subsection{Scenariusz 4: Przeglądanie Restauracji (Administrator)}
 
@@ -990,7 +1011,7 @@ W ramach projektu DISHLY udało się realizar:
     \item Funkcje: Filtrowanie, sortowanie, akcje (zatwierdzenie/odrzucenie)
 \end{enumerate}
 
-\textbf{Status}: ✅ Działające
+\textbf{Status}: [OK] Działające
 
 \subsection{Scenariusz 5: Zarządzanie Planami Subskrypcyjnymi}
 
@@ -1001,7 +1022,7 @@ W ramach projektu DISHLY udało się realizar:
     \item Próba: Dodaj nowy plan (przycisk ``Dodaj plan'')
 \end{enumerate}
 
-\textbf{Status}: ✅ Interfejs gotowy, funkcjonalność planów w toku
+\textbf{Status}: [OK] Interfejs gotowy, funkcjonalność planów w toku
 
 \newpage
 
@@ -1256,31 +1277,31 @@ Baza danych DISHLY zbudowana jest na PostgreSQL i zarządzana za pośrednictwem 
 
 \begin{verbatim}
 User (Właściciel)
-  └─→ Restaurant
-      └─→ Location
-          ├─→ Order (Zamówienia)
-          │   ├─→ OrderItem
-          │   │   ├─→ Meal
-          │   │   ├─→ MealVariant
-          │   │   └─→ MealAddon
-          │   └─→ OrderStatusLog
-          └─→ MealLocation
-              └─→ Meal
+  |-→ Restaurant
+      |-→ Location
+          |-→ Order (Zamówienia)
+          |   |-→ OrderItem
+          |   |   |-→ Meal
+          |   |   |-→ MealVariant
+          |   |   |-→ MealAddon
+          |   |-→ OrderStatusLog
+          |-→ MealLocation
+              |-→ Meal
 
 User (Klient)
-  ├─→ Address (Adresy dostawy)
-  ├─→ Order (Złożone zamówienia)
-  ├─→ Review (Wystawione recenzje)
-  └─→ FavoriteRestaurant (Ulubione restauracje)
+  |-→ Address (Adresy dostawy)
+  |-→ Order (Złożone zamówienia)
+  |-→ Review (Wystawione recenzje)
+  |-→ FavoriteRestaurant (Ulubione restauracje)
 
 Restaurant
-  ├─→ SubscriptionPlan (Aktualny plan)
-  ├─→ RestaurantTag (Amenities)
-  ├─→ CuisineType (Typ kuchni)
-  └─→ Meal
-      ├─→ Category
-      ├─→ MealAddon
-      └─→ MealVariant
+  |-→ SubscriptionPlan (Aktualny plan)
+  |-→ RestaurantTag (Amenities)
+  |-→ CuisineType (Typ kuchni)
+  |-→ Meal
+      |-→ Category
+      |-→ MealAddon
+      |-→ MealVariant
 \end{verbatim}
 
 \subsection{Wyliczenia (Enums)}
@@ -1442,5 +1463,21 @@ Konto administratora:
 
 \newpage
 
+\section{Bibliografia}
+
+\begin{thebibliography}{99}
+    \bibitem{nextjs} Next.js Documentation, \url{https://nextjs.org/}, dostęp: 20.04.2026.
+    \bibitem{react} React Documentation, \url{https://react.dev/}, dostęp: 20.04.2026.
+    \bibitem{ts} TypeScript Handbook, \url{https://www.typescriptlang.org/docs/}, dostęp: 20.04.2026.
+    \bibitem{tailwind} Tailwind CSS Documentation, \url{https://tailwindcss.com/docs}, dostęp: 20.04.2026.
+    \bibitem{prisma} Prisma ORM Documentation, \url{https://www.prisma.io/docs}, dostęp: 20.04.2026.
+    \bibitem{nextauth} NextAuth.js Documentation, \url{https://authjs.dev/}, dostęp: 20.04.2026.
+    \bibitem{stripe} Stripe API Documentation, \url{https://stripe.com/docs/api}, dostęp: 20.04.2026.
+    \bibitem{leaflet} Leaflet Documentation, \url{https://leafletjs.com/}, dostęp: 20.04.2026.
+\end{thebibliography}
+
+\newpage
+
 \end{document}
+
 

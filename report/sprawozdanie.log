@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999995 (MiKTeX 24.1) (preloaded format=xelatex 2026.4.17)  18 APR 2026 22:58
+This is XeTeX, Version 3.141592653-2.6-0.999995 (MiKTeX 24.1) (preloaded format=xelatex 2026.4.17)  19 APR 2026 00:02
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -495,61 +495,44 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 \openout4 = `sprawozdanie.toc'.
 
  [3]
-Overfull \hbox (26.37085pt too wide) in paragraph at lines 81--82
+Overfull \hbox (26.37085pt too wide) in paragraph at lines 82--83
 \TU/lmr/m/n/12 Niniejsze sprawozdanie zawiera opis projektu indywidualnego DISH
 LY - platformy internetowej
  []
 
 
-Overfull \hbox (3.88414pt too wide) in paragraph at lines 89--90
+Overfull \hbox (3.88414pt too wide) in paragraph at lines 90--91
 []\TU/lmr/m/n/12 Wdrożeniu modelu biznesowego SaaS, gdzie restauracje opłacają 
 dostęp do platformy 
  []
 
 
-Overfull \hbox (11.97375pt too wide) in paragraph at lines 99--100
+Overfull \hbox (11.97375pt too wide) in paragraph at lines 100--101
 []\TU/lmr/bx/n/12 Panel Klienta \TU/lmr/m/n/12 - wyszukiwanie restauracji, zama
 wianie, płatność i śledzenie zamówień 
  []
 
 
-Overfull \hbox (21.11295pt too wide) in paragraph at lines 101--102
+Overfull \hbox (21.11295pt too wide) in paragraph at lines 102--103
 []\TU/lmr/bx/n/12 Narzędzia Administracyjne \TU/lmr/m/n/12 - weryfikacja restau
 racji, zarządzanie planami cenowymi 
  []
 
 [4] [5] [6] [7]
-Overfull \hbox (18.0pt too wide) in paragraph at lines 228--229
+Overfull \hbox (18.0pt too wide) in paragraph at lines 227--228
 [][] 
  []
 
-[8]
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-[9]
-Overfull \hbox (9.44682pt too wide) in paragraph at lines 258--259
-\TU/lmr/m/n/12 Na rozdzielczości Full HD (1920x1080) poniżej znajdują się opisy
- oraz wizualizacje głównych
- []
-
+[8] [9]
 File: screenshots/2. Formularz Logowania.png Graphic file (type bmp)
 <screenshots/2. Formularz Logowania.png>
-[10]
+ [10]
 File: screenshots/3. Rejestracja Klienta Krok 1.png Graphic file (type bmp)
 <screenshots/3. Rejestracja Klienta Krok 1.png>
 File: screenshots/4. Rejestracja Klienta Krok 2.png Graphic file (type bmp)
 <screenshots/4. Rejestracja Klienta Krok 2.png>
  [11]
-Overfull \hbox (1.30548pt too wide) in paragraph at lines 327--328
+Overfull \hbox (1.30548pt too wide) in paragraph at lines 324--325
 \TU/lmr/m/n/12 Proces rejestracji restauracji jest czterostopniowy. Właściciel 
 musi podać dane restauracji,
  []
@@ -562,11 +545,16 @@ File: screenshots/6. Rejestracja Restauracji Krok 2.png Graphic file (type bmp)
 
 <screenshots/6. Rejestracja Restauracji Krok 2.png>
  [13]
+Overfull \hbox (19.28813pt too wide) in paragraph at lines 362--363
+[]\TU/lmr/m/n/12 Trzeci krok dotyczy wyboru planu subskrypcyjnego restauracji (
+pakietu) odpowiadającego
+ []
+
 File: screenshots/7. Rejestracja Restauracji Krok 3.png Graphic file (type bmp)
 
 <screenshots/7. Rejestracja Restauracji Krok 3.png>
 
-Overfull \hbox (13.03745pt too wide) in paragraph at lines 383--384
+Overfull \hbox (13.03745pt too wide) in paragraph at lines 373--374
 []\TU/lmr/m/n/12 Na ostatnim kroku wyswietlone jest podsumowanie wprowadzonych 
 danych. Użytkownik
  []
@@ -574,50 +562,52 @@ danych. Użytkownik
 File: screenshots/8. Rejestracja Restauracji Krok 4.png Graphic file (type bmp)
 
 <screenshots/8. Rejestracja Restauracji Krok 4.png>
-[14]
-Overfull \hbox (14.54688pt too wide) in paragraph at lines 394--395
+
+Overfull \hbox (14.54688pt too wide) in paragraph at lines 384--385
 []\TU/lmr/m/n/12 Strona główna platformy DISHLY prezentuje mapę interaktywną um
 ożliwiającą klientom
  []
 
-
-Overfull \hbox (3.00015pt too wide) in paragraph at lines 406--407
+[14]
+Overfull \hbox (3.00015pt too wide) in paragraph at lines 396--397
 []\TU/lmr/m/n/12 Strona główna wyświetla mapę Warszawy i okolic z zintegrowaną 
 funkcją wyszukiwania
  []
 
 File: screenshots/1. Ekran Glowny.png Graphic file (type bmp)
 <screenshots/1. Ekran Glowny.png>
-[15]
-Overfull \hbox (10.31694pt too wide) in paragraph at lines 419--420
+
+Overfull \hbox (10.31694pt too wide) in paragraph at lines 409--410
 \TU/lmr/m/n/12 Dashboard administratora (zalogowany użytkownik: admin, rola: Ad
 ministrator) wyświetla
  []
 
+[15]
 File: screenshots/9. Dashboard Administatora.png Graphic file (type bmp)
 <screenshots/9. Dashboard Administatora.png>
-[16]
-Overfull \hbox (20.95615pt too wide) in paragraph at lines 445--446
+
+Overfull \hbox (20.95615pt too wide) in paragraph at lines 435--436
 \TU/lmr/m/n/12 Moduł weryfikacji restauracji umożliwia administratorowi zarządz
 anie wnioskami o rejestrację
  []
 
 
-Overfull \hbox (0.79535pt too wide) in paragraph at lines 457--458
+Overfull \hbox (0.79535pt too wide) in paragraph at lines 447--448
 []\TU/lmr/m/n/12 Tabela z kolumnami: Restauracja, Właściciel, Data rejestracji,
  Status, Subskrypcja,
  []
 
+[16]
 File: screenshots/12. Zarzadzanie Restauracjami.png Graphic file (type bmp)
 <screenshots/12. Zarzadzanie Restauracjami.png>
 
-Underfull \hbox (badness 3792) in paragraph at lines 464--464
+Underfull \hbox (badness 3792) in paragraph at lines 454--454
 []\TU/lmr/m/n/12 Figure 10: []Zarządzanie Restauracjami - weryfikacja i zarządz
 anie wnioskami
  []
 
-[17]
-Overfull \hbox (10.48016pt too wide) in paragraph at lines 481--482
+
+Overfull \hbox (10.48016pt too wide) in paragraph at lines 471--472
 []\TU/lmr/m/n/12 Tabela z kolumnami: NAZWA, CENA, LIMITY, SUBSKRYPCJE, STATUS, 
 AKCJE 
  []
@@ -625,727 +615,120 @@ AKCJE
 File: screenshots/11. Dodawanie planow subskrybcyjnych..png Graphic file (type 
 bmp)
 <screenshots/11. Dodawanie planow subskrybcyjnych..png>
-[18]
+[17]
 File: screenshots/10. Zarzadzanie Trescia.png Graphic file (type bmp)
 <screenshots/10. Zarzadzanie Trescia.png>
- [19]
-Overfull \hbox (28.38016pt too wide) in paragraph at lines 519--520
+ [18]
+Overfull \hbox (28.38016pt too wide) in paragraph at lines 509--510
 \TU/lmr/m/n/12 Moduł zarządzania słownikami umożliwia administratorowi zarządza
 nie danymi referencyjnymi
  []
 
 File: screenshots/13. Zarzadzanie slownikami.png Graphic file (type bmp)
 <screenshots/13. Zarzadzanie slownikami.png>
-[20]
-Overfull \hbox (22.81615pt too wide) in paragraph at lines 537--538
+[19]
+Overfull \hbox (22.81615pt too wide) in paragraph at lines 527--528
 \TU/lmr/m/n/12 Moduł moderacji pozwala administratorowi przeglądać i zatwierdza
 ć zawartość użytkowników: 
  []
 
 File: screenshots/14. Moderacja.png Graphic file (type bmp)
 <screenshots/14. Moderacja.png>
-[21]
+[20]
 File: screenshots/15. Panel Wlasciciela Restauracji.png Graphic file (type bmp)
 
 <screenshots/15. Panel Wlasciciela Restauracji.png>
 File: screenshots/26. Zarzadzanie MENU.png Graphic file (type bmp)
 <screenshots/26. Zarzadzanie MENU.png>
- [22]
+ [21]
 File: screenshots/27. Statystyki.png Graphic file (type bmp)
 <screenshots/27. Statystyki.png>
- [23]
+ [22]
 File: screenshots/28. Statystyki cz. II.png Graphic file (type bmp)
 <screenshots/28. Statystyki cz. II.png>
- [24]
+ [23]
 File: screenshots/16. Koszyk Zamowien.png Graphic file (type bmp)
 <screenshots/16. Koszyk Zamowien.png>
 File: screenshots/17. Oczekiwanie na zamowienie.png Graphic file (type bmp)
 <screenshots/17. Oczekiwanie na zamowienie.png>
- [25]
+ [24]
 File: screenshots/18. Przygotowanie zamowienia i ekran kuchni.png Graphic file 
 (type bmp)
 <screenshots/18. Przygotowanie zamowienia i ekran kuchni.png>
 File: screenshots/19. Kolejne Etapy Zamowienia.png Graphic file (type bmp)
 <screenshots/19. Kolejne Etapy Zamowienia.png>
+ [25]
+File: screenshots/23. Interaktywny ekran do podgladu zamowien dla klientow w re
+stauracji np. na telewizor..png Graphic file (type bmp)
+<screenshots/23. Interaktywny ekran do podgladu zamowien dla klientow w restaur
+acji np. na telewizor..png>
+File: screenshots/24. Interaktywny ekran do podgladu zamowien dla klientow w re
+stauracji np. na telewizor. cz. II.png Graphic file (type bmp)
+<screenshots/24. Interaktywny ekran do podgladu zamowien dla klientow w restaur
+acji np. na telewizor. cz. II.png>
  [26]
+File: screenshots/21. Wystawianie opinii.png Graphic file (type bmp)
+<screenshots/21. Wystawianie opinii.png>
+ [27]
 File: screenshots/30. Podglad restauracji na interaktywnej mapce.png Graphic fi
 le (type bmp)
 <screenshots/30. Podglad restauracji na interaktywnej mapce.png>
- [27] [28]
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-[29]
-Missing character: There is no ┌ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ┐ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ┬ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ┘ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ┌ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ▼ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ┐ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ┬ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ┘ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ┌ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ▼ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ┐ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ┬ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ┘ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ┌ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ▼ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ┐ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ┘ in font [lmmono12-regular]:!
-[30] [31] [32]
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-
-Overfull \hbox (9.41034pt too wide) in paragraph at lines 903--903
+ [28] [29] [30] [31] [32]
+Overfull \hbox (9.41034pt too wide) in paragraph at lines 944--944
 []\TU/lmr/bx/n/17.28 Funkcjonalności Pozostające do Zaimplementowania 
  []
 
-
-Overfull \hbox (13.21614pt too wide) in paragraph at lines 906--907
-[]\TU/lmr/bx/n/12 Panel Restauracji Właściciela \TU/lmr/m/n/12 - pełny interfej
-s do zarządzania menu i lokalizacjami 
- []
-
-[33]
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ⏳ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ⏳ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ⏳ in font [lmroman12-regular]:mapping=tex-text;!
-[34]
-Missing character: There is no ⏳ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ⏳ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ⏳ in font [lmroman12-regular]:mapping=tex-text;!
-[35]
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-[36]
-Missing character: There is no ✅ in font [lmroman12-regular]:mapping=tex-text;!
-[37]
-Overfull \hbox (22.36496pt too wide) in paragraph at lines 1027--1028
+[33] [34] [35]
+Overfull \hbox (22.36496pt too wide) in paragraph at lines 1048--1049
 \TU/lmr/bx/n/12 Wyzwanie\TU/lmr/m/n/12 : Restauracja ma wiele lokalizacji, każd
 a z pracownikami o różnych uprawnieniach. 
  []
 
-[38] [39]
-Overfull \hbox (30.19217pt too wide) in paragraph at lines 1096--1097
+[36] [37]
+Overfull \hbox (30.19217pt too wide) in paragraph at lines 1117--1118
 []\TU/lmtt/m/n/12 ownedRestaurants \TU/lmr/m/n/12 → Restaurant (jeden-do-wielu)
 : Restauracje należące do użytkownika 
  []
 
-[40] [41] [42] [43]
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-[44]
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no │ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no ├ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-Missing character: There is no └ in font [lmmono12-regular]:!
-Missing character: There is no ─ in font [lmmono12-regular]:!
-[45]
-Overfull \hbox (42.58812pt too wide) in paragraph at lines 1343--1344
+[38] [39] [40] [41] [42] [43]
+Overfull \hbox (42.58812pt too wide) in paragraph at lines 1364--1365
 []\TU/lmr/m/n/12 Meal: \TU/lmtt/m/n/12 @@index([restaurantId]), @@index([catego
 ryId]), @@index([isAvailable]) 
  []
 
-[46]
-Overfull \hbox (13.82495pt too wide) in paragraph at lines 1353--1354
+[44]
+Overfull \hbox (13.82495pt too wide) in paragraph at lines 1374--1375
 []\TU/lmr/bx/n/12 Kasada na usunięcie\TU/lmr/m/n/12 : Usunięcie restauracji kas
 uje jej lokalizacje, dania i zamówienia 
  []
 
-[47] [48] [49] [50] (sprawozdanie.aux)
+[45] [46] [47] [48]
+Underfull \hbox (badness 10000) in paragraph at lines 1471--1472
+[]\TU/lmr/m/n/12 TypeScript Handbook, []$[][][][][] [] [] [] [][][] [] [][][][]
+[][][][][][][][][][] [] [][][] [] [][][][][]$[], dostęp:
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1472--1473
+[]\TU/lmr/m/n/12 Tailwind CSS Documentation, []$[][][][][] [] [] [] [][][][][][
+][][][][][] [] [][][] [] [][][][]$[], dostęp:
+ []
+
+[49] (sprawozdanie.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-04>
  ***********
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
 Package rerunfilecheck Info: File `sprawozdanie.out' has not changed.
-(rerunfilecheck)             Checksum: 4331DFAFC9D2A3D833F25FF39A311841;16766.
+(rerunfilecheck)             Checksum: FF9F73E69F0A946968EAF25070A60BD5;17219.
  ) 
 Here is how much of TeX's memory you used:
- 13328 strings out of 409617
- 263705 string characters out of 5774013
- 1933191 words of memory out of 5000000
- 35274 multiletter control sequences out of 15000+600000
+ 13366 strings out of 409617
+ 266261 string characters out of 5774013
+ 1937191 words of memory out of 5000000
+ 35309 multiletter control sequences out of 15000+600000
  561253 words of font info for 57 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  79i,12n,93p,491b,493s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on sprawozdanie.pdf (51 pages).
+Output written on sprawozdanie.pdf (50 pages).
