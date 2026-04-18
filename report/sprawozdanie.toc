@@ -36,46 +36,62 @@
 \contentsline {subsubsection}{\numberline {5.4.2}Status Zamówienia}{25}{subsubsection.5.4.2}%
 \contentsline {subsubsection}{\numberline {5.4.3}Ekran Kuchni}{26}{subsubsection.5.4.3}%
 \contentsline {subsubsection}{\numberline {5.4.4}Etapy Realizacji Zamówienia}{26}{subsubsection.5.4.4}%
-\contentsline {subsubsection}{\numberline {5.4.5}Odbiór Osobisty}{27}{subsubsection.5.4.5}%
-\contentsline {subsubsection}{\numberline {5.4.6}Ekran do Podglądu Zamówień (Telewizor)}{27}{subsubsection.5.4.6}%
-\contentsline {subsection}{\numberline {5.5}Panel Klienta - Dalsze Funkcjonalności}{28}{subsection.5.5}%
-\contentsline {subsubsection}{\numberline {5.5.1}Przeglądanie Mapy}{28}{subsubsection.5.5.1}%
-\contentsline {subsubsection}{\numberline {5.5.2}Wystawianie Opinii}{29}{subsubsection.5.5.2}%
-\contentsline {subsubsection}{\numberline {5.5.3}Podgląd Ocen}{30}{subsubsection.5.5.3}%
-\contentsline {subsubsection}{\numberline {5.5.4}Podgląd Restauracji na Mapie}{30}{subsubsection.5.5.4}%
-\contentsline {subsubsection}{\numberline {5.5.5}Widoczność Paneli dla Różnych Typów Użytkowników}{31}{subsubsection.5.5.5}%
-\contentsline {section}{\numberline {6}Struktura Projektu}{32}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Organizacja Katalogów}{32}{subsection.6.1}%
-\contentsline {section}{\numberline {7}Architektura Aplikacji}{33}{section.7}%
-\contentsline {subsection}{\numberline {7.1}Architektura Ogólna}{33}{subsection.7.1}%
-\contentsline {subsection}{\numberline {7.2}Komponenty Systemu}{33}{subsection.7.2}%
-\contentsline {subsubsection}{\numberline {7.2.1}Frontend}{33}{subsubsection.7.2.1}%
-\contentsline {subsubsection}{\numberline {7.2.2}Backend}{34}{subsubsection.7.2.2}%
-\contentsline {subsubsection}{\numberline {7.2.3}Baza Danych}{34}{subsubsection.7.2.3}%
-\contentsline {subsection}{\numberline {7.3}Przepływ Danych}{35}{subsection.7.3}%
-\contentsline {subsection}{\numberline {7.4}Autentykacja i Autoryzacja}{36}{subsection.7.4}%
-\contentsline {subsection}{\numberline {7.5}Panel Administracyjny}{36}{subsection.7.5}%
-\contentsline {subsection}{\numberline {7.6}Panel Restauracji}{36}{subsection.7.6}%
-\contentsline {subsection}{\numberline {7.7}Panel Klienta}{36}{subsection.7.7}%
-\contentsline {section}{\numberline {8}Funkcjonalności Pozostające do Zaimplementowania}{37}{section.8}%
-\contentsline {section}{\numberline {9}Co Się Udało Zrobić}{37}{section.9}%
-\contentsline {section}{\numberline {10}Co Pozostało do Zrobienia}{38}{section.10}%
-\contentsline {subsection}{\numberline {10.1}Scenariusz 1: Rejestracja Klienta}{39}{subsection.10.1}%
-\contentsline {subsection}{\numberline {10.2}Scenariusz 2: Rejestracja Restauracji}{39}{subsection.10.2}%
-\contentsline {subsection}{\numberline {10.3}Scenariusz 3: Logowanie Administratora}{39}{subsection.10.3}%
-\contentsline {subsection}{\numberline {10.4}Scenariusz 4: Przeglądanie Restauracji (Administrator)}{39}{subsection.10.4}%
-\contentsline {subsection}{\numberline {10.5}Scenariusz 5: Zarządzanie Planami Subskrypcyjnymi}{40}{subsection.10.5}%
-\contentsline {section}{\numberline {11}Podsumowanie i Wnioski}{41}{section.11}%
-\contentsline {subsection}{\numberline {11.1}Osiągnięcia}{41}{subsection.11.1}%
-\contentsline {subsection}{\numberline {11.2}Problemy i Rozwiązania}{41}{subsection.11.2}%
-\contentsline {subsubsection}{\numberline {11.2.1}Problem: Wielopoziomowa Struktura Uprawnień}{41}{subsubsection.11.2.1}%
-\contentsline {subsubsection}{\numberline {11.2.2}Problem: Walidacja Danych Formularzach}{41}{subsubsection.11.2.2}%
-\contentsline {subsection}{\numberline {11.3}Plany Przyszłości}{41}{subsection.11.3}%
-\contentsline {subsection}{\numberline {11.4}Spostrzeżenia Techniczne}{42}{subsection.11.4}%
-\contentsline {section}{\numberline {12}Zasoby i Literatura}{43}{section.12}%
-\contentsline {subsection}{\numberline {12.1}Dokumentacja}{43}{subsection.12.1}%
-\contentsline {subsection}{\numberline {12.2}Narzędzia Używane}{43}{subsection.12.2}%
-\contentsline {section}{\numberline {13}Dodatek: Instrukcja Instalacji}{44}{section.13}%
-\contentsline {subsection}{\numberline {13.1}Wymagania}{44}{subsection.13.1}%
-\contentsline {subsection}{\numberline {13.2}Kroki}{44}{subsection.13.2}%
-\contentsline {subsection}{\numberline {13.3}Domyślne Konta}{45}{subsection.13.3}%
+\contentsline {subsubsection}{\numberline {5.4.5}Odbiór Osobisty i Ekran Telewizora}{27}{subsubsection.5.4.5}%
+\contentsline {subsubsection}{\numberline {5.4.6}Przeglądanie Mapy i Wystawianie Opinii}{27}{subsubsection.5.4.6}%
+\contentsline {subsubsection}{\numberline {5.4.7}Podgląd Restauracji na Mapie}{27}{subsubsection.5.4.7}%
+\contentsline {subsubsection}{\numberline {5.4.8}System Uprawnień i Personalizacja Interfejsu}{28}{subsubsection.5.4.8}%
+\contentsline {section}{\numberline {6}Struktura Projektu}{29}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Organizacja Katalogów}{29}{subsection.6.1}%
+\contentsline {section}{\numberline {7}Architektura Aplikacji}{30}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Architektura Ogólna}{30}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Komponenty Systemu}{30}{subsection.7.2}%
+\contentsline {subsubsection}{\numberline {7.2.1}Frontend}{30}{subsubsection.7.2.1}%
+\contentsline {subsubsection}{\numberline {7.2.2}Backend}{31}{subsubsection.7.2.2}%
+\contentsline {subsubsection}{\numberline {7.2.3}Baza Danych}{31}{subsubsection.7.2.3}%
+\contentsline {subsection}{\numberline {7.3}Przepływ Danych}{32}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}Autentykacja i Autoryzacja}{33}{subsection.7.4}%
+\contentsline {subsection}{\numberline {7.5}Panel Administracyjny}{33}{subsection.7.5}%
+\contentsline {subsection}{\numberline {7.6}Panel Restauracji}{33}{subsection.7.6}%
+\contentsline {subsection}{\numberline {7.7}Panel Klienta}{33}{subsection.7.7}%
+\contentsline {section}{\numberline {8}Funkcjonalności Pozostające do Zaimplementowania}{34}{section.8}%
+\contentsline {section}{\numberline {9}Co Się Udało Zrobić}{34}{section.9}%
+\contentsline {section}{\numberline {10}Co Pozostało do Zrobienia}{35}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Scenariusz 1: Rejestracja Klienta}{36}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}Scenariusz 2: Rejestracja Restauracji}{36}{subsection.10.2}%
+\contentsline {subsection}{\numberline {10.3}Scenariusz 3: Logowanie Administratora}{36}{subsection.10.3}%
+\contentsline {subsection}{\numberline {10.4}Scenariusz 4: Przeglądanie Restauracji (Administrator)}{36}{subsection.10.4}%
+\contentsline {subsection}{\numberline {10.5}Scenariusz 5: Zarządzanie Planami Subskrypcyjnymi}{37}{subsection.10.5}%
+\contentsline {section}{\numberline {11}Podsumowanie i Wnioski}{38}{section.11}%
+\contentsline {subsection}{\numberline {11.1}Osiągnięcia}{38}{subsection.11.1}%
+\contentsline {subsection}{\numberline {11.2}Problemy i Rozwiązania}{38}{subsection.11.2}%
+\contentsline {subsubsection}{\numberline {11.2.1}Problem: Wielopoziomowa Struktura Uprawnień}{38}{subsubsection.11.2.1}%
+\contentsline {subsubsection}{\numberline {11.2.2}Problem: Walidacja Danych Formularzach}{38}{subsubsection.11.2.2}%
+\contentsline {subsection}{\numberline {11.3}Plany Przyszłości}{38}{subsection.11.3}%
+\contentsline {subsection}{\numberline {11.4}Spostrzeżenia Techniczne}{39}{subsection.11.4}%
+\contentsline {section}{\numberline {12}Struktura Bazy Danych}{40}{section.12}%
+\contentsline {subsection}{\numberline {12.1}Przegląd Ogólny}{40}{subsection.12.1}%
+\contentsline {subsection}{\numberline {12.2}Główne Byty i Ich Relacje}{40}{subsection.12.2}%
+\contentsline {subsubsection}{\numberline {12.2.1}Użytkownicy (User)}{40}{subsubsection.12.2.1}%
+\contentsline {subsubsection}{\numberline {12.2.2}Restauracje (Restaurant)}{41}{subsubsection.12.2.2}%
+\contentsline {subsubsection}{\numberline {12.2.3}Lokalizacje (Location)}{41}{subsubsection.12.2.3}%
+\contentsline {subsubsection}{\numberline {12.2.4}Dania (Meal)}{42}{subsubsection.12.2.4}%
+\contentsline {subsubsection}{\numberline {12.2.5}Zamówienia (Order)}{43}{subsubsection.12.2.5}%
+\contentsline {subsubsection}{\numberline {12.2.6}Subskrypcje (Subscription)}{43}{subsubsection.12.2.6}%
+\contentsline {subsubsection}{\numberline {12.2.7}Kategorie (Category)}{44}{subsubsection.12.2.7}%
+\contentsline {subsubsection}{\numberline {12.2.8}Recenzje (Review)}{44}{subsubsection.12.2.8}%
+\contentsline {subsection}{\numberline {12.3}Diagramy Relacji}{45}{subsection.12.3}%
+\contentsline {subsubsection}{\numberline {12.3.1}Główny Przepływ Danych}{45}{subsubsection.12.3.1}%
+\contentsline {subsection}{\numberline {12.4}Wyliczenia (Enums)}{45}{subsection.12.4}%
+\contentsline {subsubsection}{\numberline {12.4.1}Role Użytkownika}{45}{subsubsection.12.4.1}%
+\contentsline {subsubsection}{\numberline {12.4.2}Statusy Zamówienia}{46}{subsubsection.12.4.2}%
+\contentsline {subsubsection}{\numberline {12.4.3}Status Restauracji}{46}{subsubsection.12.4.3}%
+\contentsline {subsubsection}{\numberline {12.4.4}Status Płatności}{46}{subsubsection.12.4.4}%
+\contentsline {subsection}{\numberline {12.5}Indeksy i Optymalizacja}{46}{subsection.12.5}%
+\contentsline {subsection}{\numberline {12.6}Constraints i Business Rules}{47}{subsection.12.6}%
+\contentsline {section}{\numberline {13}Zasoby i Literatura}{48}{section.13}%
+\contentsline {subsection}{\numberline {13.1}Dokumentacja}{48}{subsection.13.1}%
+\contentsline {subsection}{\numberline {13.2}Narzędzia Używane}{48}{subsection.13.2}%
+\contentsline {section}{\numberline {14}Dodatek: Instrukcja Instalacji}{49}{section.14}%
+\contentsline {subsection}{\numberline {14.1}Wymagania}{49}{subsection.14.1}%
+\contentsline {subsection}{\numberline {14.2}Kroki}{49}{subsection.14.2}%
+\contentsline {subsection}{\numberline {14.3}Domyślne Konta}{50}{subsection.14.3}%
