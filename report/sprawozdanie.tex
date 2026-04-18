@@ -15,32 +15,70 @@
 
 \pagestyle{fancy}
 \fancyhf{}
+\setlength{\headheight}{15pt}
 \rhead{\thepage}
 \lhead{DISHLY - Raport Projektu Indywidualnego}
 \renewcommand{\headrulewidth}{0.5pt}
 
 \title{%
     \textbf{DISHLY} \\
-    \large Platforma SaaS do Zamawiania Jedzenia Online \\
+    \large Aplikacja do Zamawiania Jedzenia Online \\
     \large Raport Projektu Indywidualnego 1DI1417 \\
+    \vspace{0.3cm}
+    \normalsize Michał Kozak \\
+    \small Politechnika Warszawska \\
     \vspace{0.5cm}
-    \small \href{https://github.com/podlaskialgorytm3/dishly}{GitHub} $|$ \href{https://dishly-ochre.vercel.app/}{Aplikacja Online}
+    \tiny \href{https://github.com/podlaskialgorytm3/dishly}{GitHub} $|$ \href{https://dishly-ochre.vercel.app/}{Aplikacja Online}
 }
-\author{Michał Kozak}
+\author{Michał Kozak \\ Politechnika Warszawska}
 \date{}
 
 \begin{document}
 
-\maketitle
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\LARGE \textbf{DISHLY}}
+    
+    \vspace{0.5cm}
+    
+    {\large Aplikacja do Zamawiania Jedzenia}
+    
+    \vspace{2cm}
+    
+    {\Large Raport Projektu Indywidualnego} \\
+    {\normalsize 1DI1417}
+    
+    \vspace{3cm}
+    
+    {\Large \textbf{Michał Kozak}}
+    
+    \vspace{2cm}
+    
+    {\large Politechnika Warszawska} \\
+    {\normalsize Wydział Elektroniki i Technik Informacyjnych}
+    
+    \vspace{3cm}
+    
+    {\normalsize \textbf{Linki Projektu}} \\
+    \href{https://github.com/podlaskialgorytm3/dishly}{GitHub Repository} \\
+    \href{https://dishly-ochre.vercel.app/}{Aplikacja Online}
+    
+    \vfill
+    
+    {\normalsize Warszawa, \today}
+    
+\end{titlepage}
 
-\begin{abstract}
-Niniejsze sprawozdanie zawiera opis projektu indywidualnego DISHLY --- platformy internetowej do usprawniania obsługi zamówień w restauracjach. Projekt jest aplikacją typu SaaS (Software as a Service), która umożliwia restauracjom przyjmowanie zamówień online, a klientom zamawianie jedzenia z dostawą. Raport zawiera szczegółowy opis wymagań, założeń systemu, zakresu pracy, zaimplementowanych funkcjonalności oraz zrzuty ekranu interfejsu użytkownika.
-\end{abstract}
+\cleardoublepage
 
 \tableofcontents
 \newpage
 
 \section{Wstęp}
+
+Niniejsze sprawozdanie zawiera opis projektu indywidualnego DISHLY - platformy internetowej do usprawniania obsługi zamówień w restauracjach. Projekt jest aplikacją typu SaaS (Software as a Service), która umożliwia restauracjom przyjmowanie zamówień online, a klientom zamawianie jedzenia z dostawą. Raport zawiera szczegółowy opis wymagań, założeń systemu, zakresu pracy, zaimplementowanych funkcjonalności oraz zrzuty ekranu interfejsu użytkownika.
 
 \subsection{Cel Projektu}
 
@@ -57,11 +95,11 @@ Celem projektu DISHLY jest zaprojektowanie i implementacja aplikacji usprawniaj�
 
 Projekt obejmuje:
 \begin{enumerate}
-    \item \textbf{Zaprojektowanie systemu} --- baza danych i logika biznesowa z obsługą wielu ról użytkowników
-    \item \textbf{Panel Klienta} --- wyszukiwanie restauracji, zamawianie, płatność i śledzenie zamówień
-    \item \textbf{Panel Restauracji} --- zarządzanie menu, statusami zamówień i powiadomieniami
-    \item \textbf{Narzędzia Administracyjne} --- weryfikacja restauracji, zarządzanie planami cenowymi
-    \item \textbf{Personalizacja UI} --- dynamiczne wyświetlanie elementów interfejsu na podstawie uprawnień
+    \item \textbf{Zaprojektowanie systemu} - baza danych i logika biznesowa z obsługą wielu ról użytkowników
+    \item \textbf{Panel Klienta} - wyszukiwanie restauracji, zamawianie, płatność i śledzenie zamówień
+    \item \textbf{Panel Restauracji} - zarządzanie menu, statusami zamówień i powiadomieniami
+    \item \textbf{Narzędzia Administracyjne} - weryfikacja restauracji, zarządzanie planami cenowymi
+    \item \textbf{Personalizacja UI} - dynamiczne wyświetlanie elementów interfejsu na podstawie uprawnień
 \end{enumerate}
 
 \newpage
@@ -74,11 +112,11 @@ Projekt obejmuje:
 
 System obsługuje pięć typów użytkowników:
 \begin{itemize}
-    \item \textbf{Klient (CLIENT)} --- zamawiający jedzenie z restauracji
-    \item \textbf{Pracownik (WORKER)} --- obsługuje zamówienia w konkretnym punkcie
-    \item \textbf{Menadżer (MANAGER)} --- zarządza danymi konkretnego punktu
-    \item \textbf{Właściciel (OWNER)} --- zarządza całą restauracją i wszystkimi punktami
-    \item \textbf{Administrator (ADMIN)} --- administruje całą platformą
+    \item \textbf{Klient (CLIENT)} - zamawiający jedzenie z restauracji
+    \item \textbf{Pracownik (WORKER)} - obsługuje zamówienia w konkretnym punkcie
+    \item \textbf{Menadżer (MANAGER)} - zarządza danymi konkretnego punktu
+    \item \textbf{Właściciel (OWNER)} - zarządza całą restauracją i wszystkimi punktami
+    \item \textbf{Administrator (ADMIN)} - administruje całą platformą
 \end{itemize}
 
 Każda rola ma dostęp do dedykowanego interfejsu z odpowiednimi funkcjonalizaciami.
@@ -143,22 +181,22 @@ Klienci mogą filtrować dania według:
 \subsubsection{System Uprawnień (RBAC)}
 
 \begin{itemize}
-    \item Właściciel --- pełny dostęp do restauracji i wszystkich punktów
-    \item Menadżer --- dostęp do statystyk i menu konkretnego punktu
-    \item Pracownik --- dostęp tylko do obsługi zamówień w konkretnym punkcie
-    \item Klient --- dostęp do przeglądania menu i składania zamówień
-    \item Administrator --- dostęp do zarządzania całą platformą
+    \item Właściciel - pełny dostęp do restauracji i wszystkich punktów
+    \item Menadżer - dostęp do statystyk i menu konkretnego punktu
+    \item Pracownik - dostęp tylko do obsługi zamówień w konkretnym punkcie
+    \item Klient - dostęp do przeglądania menu i składania zamówień
+    \item Administrator - dostęp do zarządzania całą platformą
 \end{itemize}
 
 \subsection{Wymagania Niefunkcjonalne}
 
 \begin{itemize}
-    \item \textbf{Skalowalność} --- aplikacja powinna obsługiwać tysiące restauracji i zakupów
-    \item \textbf{Bezpieczeństwo} --- bezpieczne przechowywanie haseł (bcryptjs), HTTPS
-    \item \textbf{Wydajność} --- szybkie wyszukiwanie i filtrowanie dań
-    \item \textbf{Dostępność} --- aplikacja dostępna 24/7
-    \item \textbf{Responsywność} --- interfejs dostosowany do urządzeń mobilnych
-    \item \textbf{Integracja z płatnościami} --- obsługa Stripe
+    \item \textbf{Skalowalność} - aplikacja powinna obsługiwać tysiące restauracji i zakupów
+    \item \textbf{Bezpieczeństwo} - bezpieczne przechowywanie haseł (bcryptjs), HTTPS
+    \item \textbf{Wydajność} - szybkie wyszukiwanie i filtrowanie dań
+    \item \textbf{Dostępność} - aplikacja dostępna 24/7
+    \item \textbf{Responsywność} - interfejs dostosowany do urządzeń mobilnych
+    \item \textbf{Integracja z płatnościami}  -  obsługa Stripe
 \end{itemize}
 
 \newpage
@@ -239,7 +277,7 @@ Formularz zawiera walidację danych i wyświetla komunikaty błędów w razie pr
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/2. Formularz Logowania.png}
-    \caption{Formularz Logowania --- interfejs logowania dla użytkowników}
+    \caption{Formularz Logowania  -  interfejs logowania dla użytkowników}
     \label{fig:login_form}
 \end{figure}
 
@@ -261,7 +299,7 @@ Na pierwszym etapie użytkownik podaje:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/3. Rejestracja Klienta Krok 1.png}
-    \caption{Rejestracja Klienta Krok 1 --- podanie danych osobowych}
+    \caption{Rejestracja Klienta Krok 1  -  podanie danych osobowych}
     \label{fig:client_registration_1}
 \end{figure}
 
@@ -280,7 +318,7 @@ Po wypełnieniu formularza użytkownik jest automatycznie zalogowany i redirygow
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/4. Rejestracja Klienta Krok 2.png}
-    \caption{Rejestracja Klienta Krok 2 --- podanie adresu dostawy}
+    \caption{Rejestracja Klienta Krok 2  -  podanie adresu dostawy}
     \label{fig:client_registration_2}
 \end{figure}
 
@@ -301,7 +339,7 @@ Na pierwszym etapie użytkownik podaje:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/5. Rejestracja Restauracji Krok 1.png}
-    \caption{Rejestracja Restauracji Krok 1 --- dane podstawowe restauracji}
+    \caption{Rejestracja Restauracji Krok 1  -  dane podstawowe restauracji}
     \label{fig:restaurant_registration_1}
 \end{figure}
 
@@ -318,7 +356,7 @@ Na drugim etapie podawane są informacje o lokalizacji:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/6. Rejestracja Restauracji Krok 2.png}
-    \caption{Rejestracja Restauracji Krok 2 --- adres i lokalizacja}
+    \caption{Rejestracja Restauracji Krok 2  -  adres i lokalizacja}
     \label{fig:restaurant_registration_2}
 \end{figure}
 
@@ -336,7 +374,7 @@ Trzeci krok dotyczy wyboru kategorii dań dostępnych w restauracji:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/7. Rejestracja Restauracji Krok 3.png}
-    \caption{Rejestracja Restauracji Krok 3 --- wybór kategorii menu}
+    \caption{Rejestracja Restauracji Krok 3  -  wybór kategorii menu}
     \label{fig:restaurant_registration_3}
 \end{figure}
 
@@ -347,7 +385,7 @@ Na ostatnim kroku wyswietlone jest podsumowanie wprowadzonych danych. Użytkowni
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/8. Rejestracja Restauracji Krok 4.png}
-    \caption{Rejestracja Restauracji Krok 4 --- podsumowanie i potwierdzenie}
+    \caption{Rejestracja Restauracji Krok 4  -  podsumowanie i potwierdzenie}
     \label{fig:restaurant_registration_4}
 \end{figure}
 
@@ -370,7 +408,7 @@ Strona główna wyświetla mapę Warszawy i okolic z zintegrowaną funkcją wysz
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/1. Ekran Glowny.png}
-    \caption{Ekran Główny --- interaktywna mapa restauracji z interfejsem nawigacyjnym}
+    \caption{Ekran Główny  -  interaktywna mapa restauracji z interfejsem nawigacyjnym}
     \label{fig:homepage}
 \end{figure}
 
@@ -398,7 +436,7 @@ Dashboard zawiera również:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/9. Dashboard Administatora.png}
-    \caption{Dashboard Administatora --- metryki i statystyki systemu}
+    \caption{Dashboard Administatora  -  metryki i statystyki systemu}
     \label{fig:admin_dashboard}
 \end{figure}
 
@@ -423,7 +461,7 @@ Funkcjonalności:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/12. Zarzadzanie Restauracjami.png}
-    \caption{Zarządzanie Restauracjami --- weryfikacja i zarządzanie wnioskami rejestracyjnymi}
+    \caption{Zarządzanie Restauracjami  -  weryfikacja i zarządzanie wnioskami rejestracyjnymi}
     \label{fig:restaurants_verification}
 \end{figure}
 
@@ -449,7 +487,7 @@ Administrator może tutaj definiować pakiety subskrypcyjne dla restauracji z li
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/11. Dodawanie planow subskrybcyjnych..png}
-    \caption{Dodawanie Planów Subskrypcyjnych --- definiowanie pakietów i limitów}
+    \caption{Dodawanie Planów Subskrypcyjnych  -  definiowanie pakietów i limitów}
     \label{fig:subscriptions}
 \end{figure}
 
@@ -472,7 +510,7 @@ System pozwala na zarządzanie zawartością stron takich jak: Polityka prywatno
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/10. Zarzadzanie Trescia.png}
-    \caption{Zarządzanie Treścią --- CMS dla administratora}
+    \caption{Zarządzanie Treścią  -  CMS dla administratora}
     \label{fig:content_management}
 \end{figure}
 
@@ -490,7 +528,7 @@ Moduł zarządzania słownikami umożliwia administratorowi zarządzanie danymi 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/13. Zarzadzanie slownikami.png}
-    \caption{Zarządzanie Słownikami --- zarządzanie danymi referencyjnymi}
+    \caption{Zarządzanie Słownikami  -  zarządzanie danymi referencyjnymi}
     \label{fig:dictionaries}
 \end{figure}
 
@@ -508,7 +546,7 @@ Moduł moderacji pozwala administratorowi przeglądać i zatwierdzać zawartoś�
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/14. Moderacja.png}
-    \caption{Moderacja --- zarządzanie zawartością użytkowników}
+    \caption{Moderacja  -  zarządzanie zawartością użytkowników}
     \label{fig:moderation}
 \end{figure}
 
@@ -529,7 +567,7 @@ Panel właściciela restauracji umożliwia zarządzanie wszystkimi aspektami res
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/15. Panel Wlasciciela Restauracji.png}
-    \caption{Panel Właściciela Restauracji --- dashboard zarządzania restauracją}
+    \caption{Panel Właściciela Restauracji  -  dashboard zarządzania restauracją}
     \label{fig:owner_dashboard}
 \end{figure}
 
@@ -548,7 +586,7 @@ Moduł zarządzania menu pozwala na:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/26. Zarzadzanie MENU.png}
-    \caption{Zarządzanie MENU --- edycja i organizacja menu restauracji}
+    \caption{Zarządzanie MENU  -  edycja i organizacja menu restauracji}
     \label{fig:menu_management}
 \end{figure}
 
@@ -567,14 +605,14 @@ Panel statystyk pokazuje:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/27. Statystyki.png}
-    \caption{Statystyki --- przychody i metryki sprzedaży}
+    \caption{Statystyki  -  przychody i metryki sprzedaży}
     \label{fig:statistics}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/28. Statystyki cz. II.png}
-    \caption{Statystyki cz. II --- zaawansowane analizy}
+    \caption{Statystyki cz. II  -  zaawansowane analizy}
     \label{fig:statistics_2}
 \end{figure}
 
@@ -585,17 +623,17 @@ Panel statystyk pokazuje:
 Panel zarządzania zamówieniami umożliwia pracownikom restauracji obsługę zamówień:
 
 \begin{itemize}
-    \item Koszyk zamówień --- przegląd wszystkich bieżących zamówień
-    \item Status zamówienia --- śledzenie etapu przygotowania
-    \item Powiadomienia --- alerty o nowych zamówieniach
-    \item Oczekiwanie na zamówienie --- status gotowości
+    \item Koszyk zamówień  -  przegląd wszystkich bieżących zamówień
+    \item Status zamówienia  -  śledzenie etapu przygotowania
+    \item Powiadomienia  -  alerty o nowych zamówieniach
+    \item Oczekiwanie na zamówienie  -  status gotowości
     \item Zarządzanie odbiorami osobistymi vs. dostawą
 \end{itemize}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/16. Koszyk Zamowien.png}
-    \caption{Koszyk Zamówień --- przegląd zamówień do realizacji}
+    \caption{Koszyk Zamówień  -  przegląd zamówień do realizacji}
     \label{fig:orders_cart}
 \end{figure}
 
@@ -606,7 +644,7 @@ System obsługuje różne statusy zamówienia:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/17. Oczekiwanie na zamowienie.png}
-    \caption{Oczekiwanie na Zamówienie --- status przygotowania}
+    \caption{Oczekiwanie na Zamówienie  -  status przygotowania}
     \label{fig:pending_order}
 \end{figure}
 
@@ -624,7 +662,7 @@ Ekran kuchni wyświetla instrukcje przygotowania dań:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/18. Przygotowanie zamowienia i ekran kuchni.png}
-    \caption{Ekran Kuchni --- instrukcje przygotowania dań}
+    \caption{Ekran Kuchni  -  instrukcje przygotowania dań}
     \label{fig:kitchen_display}
 \end{figure}
 
@@ -635,7 +673,7 @@ Kolejne etapy zamówienia:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/19. Kolejne Etapy Zamowienia.png}
-    \caption{Kolejne Etapy Zamówienia --- przepływ realizacji}
+    \caption{Kolejne Etapy Zamówienia  -  przepływ realizacji}
     \label{fig:order_stages}
 \end{figure}
 
@@ -646,7 +684,7 @@ System wspiera również odbiory osobiste:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/22. Przygotowanie posilku na odbior osobisty..png}
-    \caption{Przygotowanie Posiłku na Odbiór Osobisty --- wizualizacja gotowości}
+    \caption{Przygotowanie Posiłku na Odbiór Osobisty  -  wizualizacja gotowości}
     \label{fig:pickup_preparation}
 \end{figure}
 
@@ -657,7 +695,7 @@ Interaktywny ekran do wyświetlania numerów zamówień gotowych do odebrania:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/23. Interaktywny ekran do podgladu zamowien dla klientow w restauracji np. na telewizor..png}
-    \caption{Ekran do Podglądu Zamówień --- wyświetlanie numerów}
+    \caption{Ekran do Podglądu Zamówień  -  wyświetlanie numerów}
     \label{fig:display_screen}
 \end{figure}
 
@@ -670,7 +708,7 @@ Klienci mogą przeglądać restauracje na interaktywnej mapie:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/20. Podglad mapki.png}
-    \caption{Podgląd Mapy --- przeglądanie restauracji na mapie}
+    \caption{Podgląd Mapy  -  przeglądanie restauracji na mapie}
     \label{fig:map_view}
 \end{figure}
 
@@ -681,7 +719,7 @@ Sistema recenzji pozwala klientom oceniać restauracje i dania:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/21. Wystawianie opinii.png}
-    \caption{Wystawianie Opinii --- system recenzji}
+    \caption{Wystawianie Opinii  -  system recenzji}
     \label{fig:reviews}
 \end{figure}
 
@@ -692,7 +730,7 @@ Przegląd wszystkich ocen i opinii dla restauracji:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/29. Podglad ocen.png}
-    \caption{Podgląd Ocen --- zestawienie recenzji}
+    \caption{Podgląd Ocen  -  zestawienie recenzji}
     \label{fig:ratings_view}
 \end{figure}
 
@@ -703,7 +741,7 @@ Szczegółowy widok restauracji z dodatkową informacją:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/30. Podglad restauracji na interaktywnej mapce.png}
-    \caption{Podgląd Restauracji na Interaktywnej Mapce --- szczegóły i lokalizacja}
+    \caption{Podgląd Restauracji na Interaktywnej Mapce  -  szczegóły i lokalizacja}
     \label{fig:restaurant_map_view}
 \end{figure}
 
@@ -714,7 +752,7 @@ System dynamicznie wyświetla elementy interfejsu w zależności od roli użytko
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{screenshots/25. Widocznosc paneli dla roznych typow uzytkownikow.png}
-    \caption{Widoczność Paneli --- personalizacja UI na podstawie roli}
+    \caption{Widoczność Paneli  -  personalizacja UI na podstawie roli}
     \label{fig:rbac_visibility}
 \end{figure}
 
@@ -811,39 +849,39 @@ Aplikacja DISHLY następuje architekturę wielowarstwową:
 
 Warstwa Front-end budowana jest z użyciem:
 \begin{itemize}
-    \item \textbf{React 19.2.3} --- Biblioteka do budowy UI
-    \item \textbf{Next.js 16.1.6} --- Framework do aplikacji full-stack
-    \item \textbf{Tailwind CSS} --- Utility-first CSS framework
-    \item \textbf{Framer Motion} --- Animacje i interakcje
-    \item \textbf{TypeScript} --- Typowanie statyczne
+    \item \textbf{React 19.2.3}  -  Biblioteka do budowy UI
+    \item \textbf{Next.js 16.1.6}  -  Framework do aplikacji full-stack
+    \item \textbf{Tailwind CSS}  -  Utility-first CSS framework
+    \item \textbf{Framer Motion}  -  Animacje i interakcje
+    \item \textbf{TypeScript}  -  Typowanie statyczne
 \end{itemize}
 
 Komponenty są organizowane w następujący sposób:
 \begin{itemize}
-    \item \texttt{components/dashboard/} --- Elementy panelu administracyjnego
-    \item \texttt{components/forms/} --- Formularze aplikacji
-    \item \texttt{components/layout/} --- Komponenty rozmieszczeń
-    \item \texttt{components/shared/} --- Komponenty wspólne dla całej aplikacji
-    \item \texttt{components/ui/} --- Komponenty UI (przyciski, input, etc.)
+    \item \texttt{components/dashboard/}  -  Elementy panelu administracyjnego
+    \item \texttt{components/forms/}  -  Formularze aplikacji
+    \item \texttt{components/layout/}  -  Komponenty rozmieszczeń
+    \item \texttt{components/shared/}  -  Komponenty wspólne dla całej aplikacji
+    \item \texttt{components/ui/}  -  Komponenty UI (przyciski, input, etc.)
 \end{itemize}
 
 \subsubsection{Backend}
 
 Warstwa Backend-u:
 \begin{itemize}
-    \item \textbf{Next.js API Routes} --- RESTful endpoints
-    \item \textbf{Server Actions} --- Komunikacja klient-serwer
-    \item \textbf{NextAuth.js} --- Autentykacja i zarządzanie sesją
-    \item \textbf{Middleware} --- Logika dostępu i autoryzacji
+    \item \textbf{Next.js API Routes}  -  RESTful endpoints
+    \item \textbf{Server Actions}  -  Komunikacja klient-serwer
+    \item \textbf{NextAuth.js}  -  Autentykacja i zarządzanie sesją
+    \item \textbf{Middleware}  -  Logika dostępu i autoryzacji
 \end{itemize}
 
 Struktura API:
 \begin{itemize}
-    \item \texttt{/api/auth/} --- Endpointy autentykacji
-    \item \texttt{/api/admin/} --- Endpointy administracyjne
-    \item \texttt{/api/restaurants/} --- Zarządzanie restauracjami
-    \item \texttt{/api/meals/} --- Zarządzanie daniami
-    \item \texttt{/api/orders/} --- Zarządzanie zamówieniami
+    \item \texttt{/api/auth/}  -  Endpointy autentykacji
+    \item \texttt{/api/admin/}  -  Endpointy administracyjne
+    \item \texttt{/api/restaurants/}  -  Zarządzanie restauracjami
+    \item \texttt{/api/meals/}  -  Zarządzanie daniami
+    \item \texttt{/api/orders/}  -  Zarządzanie zamówieniami
 \end{itemize}
 
 \subsubsection{Baza Danych}
@@ -851,14 +889,14 @@ Struktura API:
 Baza danych PostgreSQL zawiera ~25 modeli Prisma:
 
 \begin{itemize}
-    \item \textbf{Users} --- Użytkownicy systemu
-    \item \textbf{Restaurants} --- Restauracje
-    \item \textbf{Locations} --- Lokalizacje restauracji
-    \item \textbf{Meals} --- Dania w menu
-    \item \textbf{Orders} --- Zamówienia
-    \item \textbf{SubscriptionPlans} --- Plany subskrypcji
-    \item \textbf{Subscriptions} --- Subskrypcje restauracji
-    \item \textbf{Reviews} --- Recenzje
+    \item \textbf{Users}  -  Użytkownicy systemu
+    \item \textbf{Restaurants}  -  Restauracje
+    \item \textbf{Locations}  -  Lokalizacje restauracji
+    \item \textbf{Meals}  -  Dania w menu
+    \item \textbf{Orders}  -  Zamówienia
+    \item \textbf{SubscriptionPlans}  -  Plany subskrypcji
+    \item \textbf{Subscriptions}  -  Subskrypcje restauracji
+    \item \textbf{Reviews}  -  Recenzje
     \item \textbf{i inne...}
 \end{itemize}
 
@@ -921,16 +959,16 @@ Typowy przepływ danych w aplikacji:
 \section{Funkcjonalności Pozostające do Zaimplementowania}
 
 \begin{enumerate}
-    \item \textbf{Panel Restauracji Właściciela} --- pełny interfejs do zarządzania menu i lokalizacjami
-    \item \textbf{Obsługa Zamówień} --- system statusów, powiadomień i śledzenia
-    \item \textbf{Filtrowanie Dań} --- zaawansowane filtry po parametrach odżywczych
-    \item \textbf{Integracja Stripe} --- pełna obsługa płatności online
-    \item \textbf{Powiadomienia} --- system notyfikacji dla klientów i restauracji
-    \item \textbf{Recenzje i Oceny} --- system oceny restauracji i dań
-    \item \textbf{Raport Analityczne} --- statystyki dla właścicieli restauracji
-    \item \textbf{Aplikacja Mobilna} --- wersja PWA lub natywna
-    \item \textbf{Obsługa Wielu Języków} --- internationalizacja (i18n)
-    \item \textbf{API dla Integracji Externe} --- możliwość integracji z zewnętrznymi systemami
+    \item \textbf{Panel Restauracji Właściciela}  -  pełny interfejs do zarządzania menu i lokalizacjami
+    \item \textbf{Obsługa Zamówień}  -  system statusów, powiadomień i śledzenia
+    \item \textbf{Filtrowanie Dań}  -  zaawansowane filtry po parametrach odżywczych
+    \item \textbf{Integracja Stripe}  -  pełna obsługa płatności online
+    \item \textbf{Powiadomienia}  -  system notyfikacji dla klientów i restauracji
+    \item \textbf{Recenzje i Oceny}  -  system oceny restauracji i dań
+    \item \textbf{Raport Analityczne}  -  statystyki dla właścicieli restauracji
+    \item \textbf{Aplikacja Mobilna}  -  wersja PWA lub natywna
+    \item \textbf{Obsługa Wielu Języków}  -  internationalizacja (i18n)
+    \item \textbf{API dla Integracji Externe}  -  możliwość integracji z zewnętrznymi systemami
 \end{enumerate}
 
 \section{Co Się Udało Zrobić}
@@ -938,29 +976,27 @@ Typowy przepływ danych w aplikacji:
 W ramach projektu DISHLY udało się realizar:
 
 \begin{itemize}
-    \item ✅ \textbf{System Zarządzania Zamówieniami} --- Pełna obsuga lifecycle'u zamówienia
-    \item ✅ \textbf{System Autentykacji} --- NextAuth.js z obsługą ról i uprawnień
-    \item ✅ \textbf{Panel Administracyjny} --- Dashboard z metrykami i zarządzaniem restauracjami
-    \item ✅ \textbf{Weryfikacja Restauracji} --- System zatwierdzania nowych restauracji
-    \item ✅ \textbf{Plany Subskrypcyjne} --- Model SaaS z limitami
-    \item ✅ \textbf{Interfejs Responsywny} --- Obsługa urządzeń mobilnych
-    \item ✅ \textbf{Mapa Interaktywna} --- Wyszukanie restauracji na mapie
-    \item ✅ \textbf{System Uprawnień} --- RBAC dla 5 ról użytkowników
-    \item ✅ \textbf{TypeScript} --- Pełna typizacja aplikacji
-    \item ✅ \textbf{Deployment} --- Gotowość do wdrożenia na Vercel
+    \item ✅ \textbf{System Zarządzania Zamówieniami}  -  Pełna obsuga lifecycle'u zamówienia
+    \item ✅ \textbf{System Autentykacji}  -  NextAuth.js z obsługą ról i uprawnień
+    \item ✅ \textbf{Panel Administracyjny}  -  Dashboard z metrykami i zarządzaniem restauracjami
+    \item ✅ \textbf{Weryfikacja Restauracji}  -  System zatwierdzania nowych restauracji
+    \item ✅ \textbf{Plany Subskrypcyjne}  -  Model SaaS z limitami
+    \item ✅ \textbf{Interfejs Responsywny}  -  Obsługa urządzeń mobilnych
+    \item ✅ \textbf{Mapa Interaktywna}  -  Wyszukanie restauracji na mapie
+    \item ✅ \textbf{System Uprawnień}  -  RBAC dla 5 ról użytkowników
+    \item ✅ \textbf{TypeScript}  -  Pełna typizacja aplikacji
+    \item ✅ \textbf{Deployment}  -  Gotowość do wdrożenia na Vercel
 \end{itemize}
 
 \section{Co Pozostało do Zrobienia}
 
 \begin{itemize}
-    \item ⏳ \textbf{Panel Restauracji} --- Interface do zarządzania menu i lokalizacjami
-    \item ⏳ \textbf{System Zamówień} --- Pełna obsługa lifecycle'u zamówienia
-    \item ⏳ \textbf{Płatności Stripe} --- Integracja pełna z płatnościami online
-    \item ⏳ \textbf{Powiadomienia} --- System notyfikacji w real-time
-    \item ⏳ \textbf{Recenzje i Oceny} --- System oceny restauracji
-    \item ⏳ \textbf{Raport Analityczne} --- Statystyki dla właścicieli
-    \item ⏳ \textbf{Testy Automatyczne} --- Pokrycie testami jednostkowymi i integracyjnymi
-    \item ⏳ \textbf{Optymalizacja} --- SEO i wydajność
+    \item ⏳ \textbf{Panel Restauracji}  -  Interface do zarządzania menu i lokalizacjami
+    \item ⏳ \textbf{System Zamówień}  -  Pełna obsługa lifecycle'u zamówienia
+    \item ⏳ \textbf{Płatności Stripe}  -  Integracja pełna z płatnościami online
+    \item ⏳ \textbf{Powiadomienia}  -  System notyfikacji w real-time
+    \item ⏳ \textbf{Recenzje i Oceny}  -  System oceny restauracji
+    \item ⏳ \textbf{Raport Analityczne}  -  Statystyki dla właścicieli
 \end{itemize}
 
 \newpage
@@ -1060,8 +1096,6 @@ Dalsze kroki do ukończenia projektu:
     \item Implementacja pełnego panelu restauracji
     \item Wdrożenie systemu zarządzania zamówienia
     \item Integracja płatności Stripe
-    \item Testy automatyczne (jednostkowe, integracyjne)
-    \item Wdrażanie na produkcję (Vercel)
     \item Optymalizacja wydajności i SEO
     \item Wsparcie dla aplikacji mobilnej (PWA)
 \end{enumerate}
@@ -1069,11 +1103,312 @@ Dalsze kroki do ukończenia projektu:
 \subsection{Spostrzeżenia Techniczne}
 
 \begin{itemize}
-    \item \textbf{Next.js} --- idealna wola dla aplikacji full-stack
-    \item \textbf{Prisma} --- ułatwia pracę z bazą danych
-    \item \textbf{TypeScript} --- zapewnia bezpieczeństwo typów
-    \item \textbf{Tailwind CSS} --- szybkie stylowanie interfejsu
-    \item \textbf{NextAuth.js} --- gotowe rozwiązanie dla autentykacji
+    \item \textbf{Next.js}  -  idealna wola dla aplikacji full-stack
+    \item \textbf{Prisma}  -  ułatwia pracę z bazą danych
+    \item \textbf{TypeScript}  -  zapewnia bezpieczeństwo typów
+    \item \textbf{Tailwind CSS}  -  szybkie stylowanie interfejsu
+    \item \textbf{NextAuth.js}  -  gotowe rozwiązanie dla autentykacji
+\end{itemize}
+
+\newpage
+
+\section{Struktura Bazy Danych}
+
+\subsection{Przegląd Ogólny}
+
+Baza danych DISHLY zbudowana jest na PostgreSQL i zarządzana za pośrednictwem ORM Prisma. System zawiera 25 modeli danych, które reprezentują główne byty systemu:
+
+\begin{itemize}
+    \item Zarządzanie Użytkownikami i Autentykacją
+    \item Zarządzanie Restauracjami i Lokalizacjami
+    \item Katalog Dań i Menu
+    \item System Zamówień
+    \item Subskypcje i Płatności
+    \item Recenzje i Oceny
+    \item Zarządzanie Treścią
+\end{itemize}
+
+\subsection{Główne Byty i Ich Relacje}
+
+\subsubsection{Użytkownicy (User)}
+
+\textbf{Opis}: Model reprezentujący wszystkich użytkowników systemu z różnymi rolami.
+
+\textbf{Pola}:
+\begin{itemize}
+    \item \texttt{id} (String, PK) - Identyfikator unikalny (CUID)
+    \item \texttt{email} (String, UNIQUE) - Email użytkownika
+    \item \texttt{passwordHash} (String) - Zahashowane hasło
+    \item \texttt{role} (Role enum) - Rola: ADMIN, OWNER, MANAGER, WORKER, CLIENT
+    \item \texttt{firstName, lastName, phone} (String) - Dane personalne
+    \item \texttt{isApproved} (Boolean) - Status zatwierdzenia konta
+    \item \texttt{isActive} (Boolean) - Status aktywności
+    \item \texttt{createdAt, updatedAt} (DateTime) - Sygnatury czasowe
+\end{itemize}
+
+\textbf{Relacje}:
+\begin{itemize}
+    \item \texttt{addresses} → Address (jeden-do-wielu): Adresy dostawy użytkownika
+    \item \texttt{ownedRestaurants} → Restaurant (jeden-do-wielu): Restauracje należące do użytkownika
+    \item \texttt{orders} → Order (jeden-do-wielu): Zamówienia złożone przez użytkownika
+    \item \texttt{reviews} → Review (jeden-do-wielu): Recenzje wystawione przez użytkownika
+\end{itemize}
+
+\subsubsection{Restauracje (Restaurant)}
+
+\textbf{Opis}: Model przedstawiający restauracje w systemie.
+
+\textbf{Pola}:
+\begin{itemize}
+    \item \texttt{id} (String, PK) - Identyfikator unikalny
+    \item \texttt{name} (String) - Nazwa restauracji
+    \item \texttt{slug} (String, UNIQUE) - Slug dla URL
+    \item \texttt{logoUrl, coverImageUrl} (String) - Zdjęcia
+    \item \texttt{ownerId} (String, FK) - Właściciel restauracji
+    \item \texttt{status} (RestaurantStatus enum) - PENDING, APPROVED, REJECTED
+    \item \texttt{isActive} (Boolean) - Aktywność restauracji
+    \item \texttt{nip} (String) - Numer identyfikacji podatkowej
+\end{itemize}
+
+\textbf{Relacje}:
+\begin{itemize}
+    \item \texttt{owner} → User: Właściciel restauracji
+    \item \texttt{locations} → Location (jeden-do-wielu): Lokalizacje restauracji
+    \item \texttt{meals} → Meal (jeden-do-wielu): Menu dań
+    \item \texttt{subscriptions} → Subscription (jeden-do-wielu): Subskrypcje restauracji
+    \item \texttt{reviews} → Review (jeden-do-wielu): Recenzje restauracji
+    \item \texttt{tags} → RestaurantTag (wiele-do-wielu): Tagi (amenities)
+    \item \texttt{cuisineTypes} → CuisineType (wiele-do-wielu): Typy kuchni
+\end{itemize}
+
+\subsubsection{Lokalizacje (Location)}
+
+\textbf{Opis}: Konkretne punkty obsługi restauracji.
+
+\textbf{Pola}:
+\begin{itemize}
+    \item \texttt{id} (String, PK) - Identyfikator unikalny
+    \item \texttt{restaurantId} (String, FK) - Restauracja
+    \item \texttt{name, address, city, postalCode, phone} (String) - Dane lokalizacji
+    \item \texttt{latitude, longitude} (Float) - Współrzędne GPS
+    \item \texttt{deliveryRadius} (Int) - Promień dostawy w km
+    \item \texttt{deliveryFee, minOrderValue} (Decimal) - Parametry finansowe
+    \item \texttt{openingHours} (JSON) - Godziny otwarcia
+    \item \texttt{isAllDay} (Boolean) - Otwarte 24/7
+\end{itemize}
+
+\textbf{Relacje}:
+\begin{itemize}
+    \item \texttt{restaurant} → Restaurant: Restauracja rodzic
+    \item \texttt{orders} → Order (jeden-do-wielu): Zamówienia dla tej lokalizacji
+    \item \texttt{mealLocations} → MealLocation (jeden-do-wielu): Dostępne dania
+    \item \texttt{workers} → User (jeden-do-wielu): Pracownicy tej lokalizacji
+\end{itemize}
+
+\subsubsection{Dania (Meal)}
+
+\textbf{Opis}: Pozycje menu dostępne u restauracji.
+
+\textbf{Pola}:
+\begin{itemize}
+    \item \texttt{id} (String, PK) - Identyfikator unikalny
+    \item \texttt{restaurantId} (String, FK) - Restauracja
+    \item \texttt{categoryId} (String, FK) - Kategoria dania
+    \item \texttt{name, slug, description, imageUrl} (String) - Dane dania
+    \item \texttt{basePrice} (Decimal) - Cena bazowa
+    \item \texttt{preparationTime} (Int) - Czas przygotowania w minutach
+    \item \texttt{calories, protein, carbs, fat, weight} (Int/Decimal) - Wartości odżywcze
+    \item \texttt{spiceLevel} (Int) - Level ostrości (0-5)
+    \item \texttt{isVegetarian, isVegan, isGlutenFree} (Boolean) - Atrybuty dietetyczne
+    \item \texttt{approvalStatus} (MealApprovalStatus) - PENDING, APPROVED, REJECTED
+\end{itemize}
+
+\textbf{Relacje}:
+\begin{itemize}
+    \item \texttt{restaurant} → Restaurant: Restauracja
+    \item \texttt{category} → Category: Kategoria
+    \item \texttt{addons} → MealAddon (jeden-do-wielu): Dodatki do dania
+    \item \texttt{variants} → MealVariant (jeden-do-wielu): Warianty (rozmiary, etc.)
+    \item \texttt{locations} → MealLocation (jeden-do-wielu): Dostępność w lokalizacjach
+\end{itemize}
+
+\subsubsection{Zamówienia (Order)}
+
+\textbf{Opis}: Zamówienia złożone przez klientów.
+
+\textbf{Pola}:
+\begin{itemize}
+    \item \texttt{id} (String, PK) - Identyfikator unikalny
+    \item \texttt{orderNumber} (String, UNIQUE) - Numer zamówienia wyświetlany klientowi
+    \item \texttt{userId} (String, FK) - Klient (nullable dla gościa)
+    \item \texttt{locationId} (String, FK) - Lokalizacja restauracji
+    \item \texttt{type} (OrderType enum) - DELIVERY lub PICKUP
+    \item \texttt{status} (OrderStatus enum) - PENDING, ACCEPTED, PREPARING, READY, IN\_DELIVERY, DELIVERED, CANCELLED
+    \item \texttt{paymentStatus} (PaymentStatus) - PENDING, PAID, FAILED, REFUNDED
+    \item \texttt{subtotal, deliveryFee, totalPrice} (Decimal) - Kwoty
+    \item \texttt{estimatedDeliveryAt} (DateTime) - Oczekiwany czas dostawy
+    \item \texttt{guestName, guestEmail, guestPhone} (String) - Dane gościa (jeśli brak konta)
+\end{itemize}
+
+\textbf{Relacje}:
+\begin{itemize}
+    \item \texttt{user} → User: Klient (nullable)
+    \item \texttt{location} → Location: Lokalizacja restauracji
+    \item \texttt{items} → OrderItem (jeden-do-wielu): Pozycje zamówienia
+    \item \texttt{statusLogs} → OrderStatusLog (jeden-do-wielu): Historia zmian statusu
+\end{itemize}
+
+\subsubsection{Subskrypcje (Subscription)}
+
+\textbf{Opis}: Plany subskrypcji dla restauracji (model SaaS).
+
+\textbf{Tabela Plan Subskrypcji (SubscriptionPlan)}:
+\begin{itemize}
+    \item \texttt{id} (String, PK)
+    \item \texttt{name} (String, UNIQUE) - Nazwa planu (np. ``Starter'', ``Professional'')
+    \item \texttt{price} (Decimal) - Miesięczna cena
+    \item \texttt{interval} (SubscriptionInterval) - MONTHLY / YEARLY
+    \item \texttt{maxMeals} (Int) - Limitowana liczba dań
+    \item \texttt{maxLocations} (Int) - Limitowana liczba lokalizacji
+    \item \texttt{maxStaffAccounts} (Int) - Limitowana liczba kont pracowników
+\end{itemize}
+
+\textbf{Tabela Subskrypcji (Subscription)}:
+\begin{itemize}
+    \item \texttt{restaurantId} (String, FK) - Restauracja
+    \item \texttt{planId} (String, FK) - Wybrany plan
+    \item \texttt{startDate, endDate} (DateTime) - Okres subskrypcji
+    \item \texttt{stripeSubscriptionId} (String) - ID subskrypcji Stripe
+    \item \texttt{isActive} (Boolean) - Status aktywizacji
+\end{itemize}
+
+\subsubsection{Kategorie (Category)}
+
+\textbf{Opis}: Kategorie dań (Przystawki, Dania główne, Desery, Napoje, etc.)
+
+\textbf{Pola}:
+\begin{itemize}
+    \item \texttt{id} (String, PK)
+    \item \texttt{name, slug} (String)
+    \item \texttt{imageUrl} (String) - Zdjęcie kategorii
+    \item \texttt{sortOrder} (Int) - Kolejność wyświetlania
+\end{itemize}
+
+\subsubsection{Recenzje (Review)}
+
+\textbf{Opis}: Opinie i oceny restauracji od klientów.
+
+\textbf{Pola}:
+\begin{itemize}
+    \item \texttt{restaurantId, userId} (String, FK) - Restauracja i użytkownik
+    \item \texttt{rating} (Int) - Ocena 1-5
+    \item \texttt{content} (String) - Tekst opinii
+    \item \texttt{isVisible} (Boolean) - Widoczność dla innych
+\end{itemize}
+
+\subsection{Diagramy Relacji}
+
+\subsubsection{Główny Przepływ Danych}
+
+\begin{verbatim}
+User (Właściciel)
+  └─→ Restaurant
+      └─→ Location
+          ├─→ Order (Zamówienia)
+          │   ├─→ OrderItem
+          │   │   ├─→ Meal
+          │   │   ├─→ MealVariant
+          │   │   └─→ MealAddon
+          │   └─→ OrderStatusLog
+          └─→ MealLocation
+              └─→ Meal
+
+User (Klient)
+  ├─→ Address (Adresy dostawy)
+  ├─→ Order (Złożone zamówienia)
+  ├─→ Review (Wystawione recenzje)
+  └─→ FavoriteRestaurant (Ulubione restauracje)
+
+Restaurant
+  ├─→ SubscriptionPlan (Aktualny plan)
+  ├─→ RestaurantTag (Amenities)
+  ├─→ CuisineType (Typ kuchni)
+  └─→ Meal
+      ├─→ Category
+      ├─→ MealAddon
+      └─→ MealVariant
+\end{verbatim}
+
+\subsection{Wyliczenia (Enums)}
+
+\subsubsection{Role Użytkownika}
+
+\begin{verbatim}
+enum Role {
+  ADMIN       # Administrator systemu
+  OWNER       # Właściciel restauracji
+  MANAGER     # Menadżer konkretnego punktu
+  WORKER      # Pracownik obsługujący zamówienia
+  CLIENT      # Klient kupujący jedzenie
+}
+\end{verbatim}
+
+\subsubsection{Statusy Zamówienia}
+
+\begin{verbatim}
+enum OrderStatus {
+  PENDING         # Oczekuje na zaakceptowanie
+  ACCEPTED        # Przyjęte przez restaurację
+  PREPARING       # W przygotowaniu
+  READY           # Gotowe do odbioru/dostawy
+  IN_DELIVERY     # W dostawie (dla DELIVERY)
+  DELIVERED       # Dostarczone
+  CANCELLED       # Anulowane
+}
+\end{verbatim}
+
+\subsubsection{Status Restauracji}
+
+\begin{verbatim}
+enum RestaurantStatus {
+  PENDING         # Czeka na zatwierdzenie
+  APPROVED        # Zatwierdzona
+  REJECTED        # Odrzucona
+}
+\end{verbatim}
+
+\subsubsection{Status Płatności}
+
+\begin{verbatim}
+enum PaymentStatus {
+  PENDING         # Czeka na płatność
+  PAID            # Opłacone
+  FAILED          # Płatność nie powiodła się
+  REFUNDED        # Zwrot
+}
+\end{verbatim}
+
+\subsection{Indeksy i Optymalizacja}
+
+System zawiera indeksy na klucze obcych i pola wyszukiwane:
+
+\begin{itemize}
+    \item User: \texttt{@@index([email]), @@index([role])}
+    \item Order: \texttt{@@index([userId]), @@index([locationId]), @@index([status])}
+    \item Restaurant: \texttt{@@index([ownerId]), @@index([slug]), @@index([status])}
+    \item Meal: \texttt{@@index([restaurantId]), @@index([categoryId]), @@index([isAvailable])}
+    \item Review: \texttt{@@index([restaurantId]), @@index([userId]), @@index([rating])}
+\end{itemize}
+
+\subsection{Constraints i Business Rules}
+
+\begin{itemize}
+    \item \textbf{Unikalność maili}: Każdy email musi być unikalny w systemie
+    \item \textbf{Unikalność slugów}: Slugi restauracji i kategorii muszą być unikalne
+    \item \textbf{Relacja Meal-Location}: Każde danie może być dostępne w wielu lokalizacjach (MealLocation)
+    \item \textbf{Kasada na usunięcie}: Usunięcie restauracji kasuje jej lokalizacje, dania i zamówienia
+    \item \textbf{Status zamówienia}: Przepływ: PENDING → ACCEPTED → PREPARING → READY → IN\_DELIVERY/DELIVERED lub CANCELLED
+    \item \textbf{Subskrypcja}: Restauracja może mieć tylko jedną aktywną subskrypcję naraz
 \end{itemize}
 
 \newpage
@@ -1164,3 +1499,4 @@ Konto administratora:
 \newpage
 
 \end{document}
+
